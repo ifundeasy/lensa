@@ -1,5 +1,5 @@
 # BPM
-Bussiness Process Management p
+Bussiness Process Management
 
 ## Installation
 ```sh
