@@ -4,10 +4,10 @@ var info = {
     port : env.npm_package_port,
     name : env.npm_package_name,
     description : env.npm_package_description,
-    home : env.PWD + '/',
+    home : __dirname + '/',
     node : env.NODE,
     pid : process.pid,
-    ip : require(env.PWD + '/libs/getip')(),
+    ip : require(__dirname + '/libs/getip')(),
     mongo : require('./config/mongo'),
     maxAge : 15 * 60 * 1000 //15 munites session idle
 };
