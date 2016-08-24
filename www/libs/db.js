@@ -10,7 +10,7 @@ Db.prototype.open = function (config) {
         server : {poolSize : 5},
         promiseLibrary : require('q')
     };
-    if (config.dbname) url += config.dbname;
+    if (config.name) url += config.name;
     if (config.username) o.user = config.username;
     if (config.password) o.pass = config.password;
     //

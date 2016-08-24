@@ -8,7 +8,7 @@ var info = {
     node : env.NODE,
     pid : process.pid,
     ip : require(env.PWD + '/libs/getip')(),
-    dbConfig : require(env.PWD + '/config/mongo'),
+    mongo : require('./config/mongo'),
     maxAge : 15 * 60 * 1000 //15 munites session idle
 };
 var cluster = require('cluster');

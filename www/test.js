@@ -8,7 +8,7 @@ var info = {
     node : env.NODE,
     pid : process.pid,
     ip : require(env.PWD + '/libs/getip')(),
-    dbConfig : require('./config/mongo'),
+    mongo : require('./config/mongo'),
     maxAge : 15 * 60 * 1000 //15 munites session idle
 };
 var path = require('path'),
@@ -311,12 +311,8 @@ var main = function (err, db) {
     server.listen(port);
 };
 //
-new Db(info.dbConfig).open({
-    dbname : 'eok',
-    username : 'admin',
-    password : 'admin',
-    callback : function (err, con, db) {
-        if (!err) main.apply(main, arguments);
-        else console.log('> Error open connection', err)
-    }
-});
+info.mongo.database.callback = function (err, con, db) {
+    if (!err) main.apply(main, arguments);
+    else console.log('> Error open connection', err)
+};
+new Db(info.mongo.connection).open(info.mongo.database);
