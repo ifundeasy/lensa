@@ -1,0 +1,3 @@
+www/.idea/*
+www/node_modules/*
+www/public/bower/*

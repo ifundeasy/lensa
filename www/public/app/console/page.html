@@ -1,0 +1,98 @@
+<div class="portlet box blue-ebonyclay portlet-fullscreen">
+	<div class="portlet-title">
+		<div class="caption">
+			<h5 class="panel-title">Console</h5>
+		</div>
+		<div class="tools">
+			<a type="button" data-original-title="Close" title="Close" class="hide-portlet tooltips"></a>
+		</div>
+	</div>
+	<div class="portlet-body portlet-body p-h-10 p-t-10 p-b-0" style="overflow-y: auto; height: calc(100vh - 41px);">
+		<div class="row">
+			<div class="col-lg-12 col-md-12 col-sm-12 col-sx-12">
+				<div class="input-group input-icon right m-b-10">
+					<div class="input-group-btn">
+						<span id="method" type="button" class="btn btn-danger disabled" readonly>GET</span>
+					</div>
+					<input id="url"  class="form-control disabled" type="text" readonly>
+				</div>
+			</div>
+			<div class="col-lg-5 col-md-6 col-sm-12 col-sx-12">
+				<div class="portlet light panel panel-default p-0 m-b-10">
+					<div class="portlet-title tabbable-line panel-heading m-b-0 p-h-15 p-t-10" style="min-height: 30px; !important;">
+						<div class="caption p-t-0 p-b-0">
+							<h5 class="panel-title">Request</h5>
+						</div>
+						<ul class="nav nav-tabs">
+							<li class="">
+								<a href="#tab_header" class="p-h-10 p-t-0" data-toggle="tab" style="padding-bottom: 6px;">Headers</a>
+							</li>
+							<li class="active">
+								<a href="#tab_query" class="p-h-10 p-t-0"  data-toggle="tab" style="padding-bottom: 6px;">Queries</a>
+							</li>
+							<li class="">
+								<a href="#tab_payload" class="p-h-10 p-t-0"  data-toggle="tab" style="padding-bottom: 6px;">Payloads</a>
+							</li>
+						</ul>
+					</div>
+					<div class="portlet-body console-fit-h-max p-b-10 p-l-15 p-r-15" style="overflow-y: auto;">
+						<div class="tab-content">
+							<div class="tab-pane" id="tab_header">
+								<div class="row p-b-5">
+									<div class="col-lg-12 p-h-10">
+										<div class="col-lg-4 p-3">
+											<input type="text" class="form-control input-sm" placeholder="">
+										</div>
+										<div class="col-lg-8 p-3">
+											<input type="text" class="form-control input-sm" placeholder="">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane active" id="tab_query">
+								<div class="row p-b-5">
+									<div class="col-lg-12 p-h-10">
+										<div class="col-lg-4 p-3">
+											<input type="text" class="form-control input-sm" placeholder="">
+										</div>
+										<div class="col-lg-8 p-3">
+											<input type="text" class="form-control input-sm" placeholder="">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="tab_payload">
+								<div class="row p-b-5">
+									<div class="col-lg-12 p-h-10">
+										<div class="col-lg-4 p-3">
+											<input type="text" class="form-control input-sm" placeholder="">
+										</div>
+										<div class="col-lg-8 p-3">
+											<input type="text" class="form-control input-sm" placeholder="">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-7 col-md-6 col-sm-12 col-sx-12">
+				<div class="portlet box grey-gallery m-b-10">
+					<div class="portlet-title">
+						<div class="caption">
+							<h5 class="panel-title">Response</h5>
+						</div>
+						<div class="tools">
+							<a href="javascript:;" class="collapse"></a>
+						</div>
+					</div>
+					<div class="portlet-body tabs-below console-fit-h-static" style="overflow-y: auto;">
+						<pre id="response" class="bg-white bg-font-white no-border no-padding no-margin" style="overflow: hidden;"></pre>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="application/javascript" src="/app/console/script.js"></script>

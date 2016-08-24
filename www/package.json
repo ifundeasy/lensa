@@ -1,0 +1,49 @@
+{
+  "name": "BPM",
+  "description": "Bussiness Process Management",
+  "version": "0.0.1",
+  "private": true,
+  "port": 6200,
+  "author": "",
+  "contributors": [
+    {
+      "name": "Afa Rappresent",
+      "email": "mail.vudin@gmail.com"
+    },
+    {
+      "name": "Falih Mulyana",
+      "email": "?"
+    }
+  ],
+  "scripts": {
+    "!start": "p=`pwd` && pm2 start master.js --no-pmx --name 'BPM' -o $p/log/pm2.out -e $p/log/pm2.err",
+    "stop": "pm2 stop BPM",
+    "restart": "pm2 restart BPM --no-pmx",
+    "test": "node-dev test.js",
+    "start": "node-dev master.js"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "assert": "^1.4.1",
+    "bcrypt": "^0.8.7",
+    "body-parser": "^1.15.2",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.7.1",
+    "debug": "^2.2.0",
+    "ejs": "^2.5.1",
+    "express": "^4.14.0",
+    "mongoose": "^4.5.9",
+    "morgan": "^1.7.0",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.1",
+    "passport-google-oauth": "^1.0.0",
+    "passport-http-bearer": "^1.0.1",
+    "passport-local": "^1.0.0",
+    "q": "^1.4.1",
+    "rand-token": "^0.2.1",
+    "request": "^2.74.0"
+  },
+  "devDependencies": {},
+  "license": "ISC"
+}
