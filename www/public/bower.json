@@ -1,0 +1,22 @@
+{
+  "name": "bpm",
+  "homepage": "https://github.com/rappresent/bpm",
+  "authors": [
+    "Afa Rappresent <mail.vudin@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "bower",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.1.0"
+  }
+}
