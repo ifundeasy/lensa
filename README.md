@@ -1,7 +1,7 @@
-# bpm
+# BPM
 Bussiness Process Management
 
-## installation
+## Installation
 ```sh
 $ cd path-to-your/www
 $ npm install
@@ -22,19 +22,19 @@ module.exports = {
         port : 27017
     },
     database : {
-        name : "databasename"
+        name : "databasename",
         username : "database-username", //delete this line if your database haven't required username
         password : "database-password"  //delete this line if your database haven't required password
     }
 };
 ```
-
-## start (cluster)
+## Start
+for cluster
 ```sh
 $ cd path-to-your/www
 $ npm start
 ```
-## start (single thread)
+for single thread
 ```sh
 $ cd path-to-your/www
 $ npm test
