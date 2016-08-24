@@ -1,4 +1,4 @@
-module.exports = function (mongoose, connection) {
+module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
         username : String,
         password : String
