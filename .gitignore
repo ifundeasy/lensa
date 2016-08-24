@@ -1,3 +1,4 @@
 www/.idea/*
 www/node_modules/*
 www/public/bower/*
+www/config/mongo.js
