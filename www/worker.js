@@ -10,6 +10,7 @@ var path = require('path'),
     bcrypt = require('bcrypt'),
     connectMongo = require('connect-mongo'),
     token = require('rand-token');
+    fs = require('fs');
 //
 module.exports = function (info) {
     var pid = info.pid,
@@ -25,7 +26,17 @@ module.exports = function (info) {
     //
     var main = function (err, db) {
         var mongoose = db.mongoose;
-        var User = require(home + 'models/user')(mongoose);
+
+        // load models
+        var models = [];
+        var modellist = fs.readdirSync(home + 'models/');
+        for(var i in modellist) {
+            require(home + 'models/'+modellist[i])(mongoose);
+        }
+        // this is for reference only
+        var User = mongoose.models['user'];
+        // load models --end
+
         var genHash = function (str) {
             return bcrypt.hashSync(str, bcrypt.genSaltSync(7));
         };
@@ -224,6 +235,7 @@ module.exports = function (info) {
             app.msg = [];
             app.msgTxt = '';
         });
+
         app.get('/', function (req, res, next) {
             var message = {
                 name : info.name,
@@ -242,6 +254,8 @@ module.exports = function (info) {
                 }
             });
         });
+        app.use('/res', require(home + 'routes/api')(mongoose));
+        
         //
         app.use(function (req, res, next) {
             var err = new Error('Not Found');
