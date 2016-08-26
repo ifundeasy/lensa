@@ -1,0 +1,9 @@
+{
+	"id": "integer",
+	"username": "string",
+	"name": "string",
+	"role_id": "integer",
+	"password": "string",
+	"created_date": "datetime",
+	"last_login": "datetime"
+}

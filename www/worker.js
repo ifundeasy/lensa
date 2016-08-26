@@ -18,21 +18,25 @@ module.exports = function (info) {
         ip = info.ip,
         port = info.port,
         home = info.home,
+        libpath = home + 'libs/',
+        modelpath = home + 'models/',
         app = express(),
         locals = app.locals,
-        Db = require(home + 'libs/db'),
-        base64 = require(home + 'libs/base64'),
+        Db = require(libpath + 'db'),
+        base64 = require(libpath + 'base64'),
+        getUser = require(libpath + 'getuser'),
         server;
     //
     var main = function (err, db) {
         var mongoose = db.mongoose;
 
         // load models
-        var models = [];
-        var modellist = fs.readdirSync(home + 'models/');
-        for(var i in modellist) {
-            require(home + 'models/'+modellist[i])(mongoose);
+        info.modeltemplist = fs.readdirSync(modelpath);
+        for(var i in info.modeltemplist) {
+            require(modelpath+info.modeltemplist[i])(mongoose);
         }
+        // destroy temp object
+        delete info.modeltemplist;
         // this is for reference only
         var User = mongoose.models['user'];
         // load models --end
@@ -254,7 +258,7 @@ module.exports = function (info) {
                 }
             });
         });
-        app.use('/res', require(home + 'routes/api')(mongoose));
+        app.use('/res', require(home + 'routes/api')({name: info.name, home: info.home, mongoose: mongoose}));
         
         //
         app.use(function (req, res, next) {
