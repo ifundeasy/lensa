@@ -29,7 +29,7 @@ module.exports = function (info) {
     //
     var main = function (err, db) {
         var mongoose = db.mongoose;
-        //lalala
+        
         // load models
         info.modeltemplist = fs.readdirSync(modelpath);
         for(var i in info.modeltemplist) {
