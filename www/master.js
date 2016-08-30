@@ -1,6 +1,6 @@
 var env = process.env;
 
-var info = { // lalalalalalala tes push github
+var info = {
     version : env.npm_package_version,
     port : env.npm_package_port,
     name : env.npm_package_name,
