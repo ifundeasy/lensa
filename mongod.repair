@@ -1,0 +1,2 @@
+p=`pwd`
+mongod --bind_ip=$IP --dbpath=$p/data --repair --nojournal

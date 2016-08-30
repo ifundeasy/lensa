@@ -1,0 +1,3 @@
+p=`pwd`
+file="$p/mongod.log"
+mongod --bind_ip=$IP --dbpath=$p/data --nojournal --fork --logpath $file --rest "$@" --logappend --verbose
