@@ -3,10 +3,17 @@ module.exports = function (mongoose) {
 		id: Number,
 		username: String,
 		name: String,
+		phone: String,
+		email: String,
+		avatar: String,
+		gender: String,
 		role_id: Number,
+		company_id: Number,
 		password: String,
 		created_date: Date,
-		last_login: Date 
+		last_login: Date,
+		verified: Boolean,
+		active: Boolean 
     });
     return mongoose.model('user', schema);
 };

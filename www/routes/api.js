@@ -32,7 +32,7 @@ module.exports = function (cfg) {
 	    			case 'GET':
 	    				if(!req.params.rec){
 	    					console.log('without rec param');
-							Collection.find({ 'username': loggedUser }, function (err, kittens) {
+							Collection.find(function (err, kittens) {
 								if (err){
 									res.send({error: 'resource could not be loaded.'});
 								} else {
