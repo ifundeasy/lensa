@@ -2,7 +2,7 @@ var env = process.env;
 
 var info = {
     version : env.npm_package_version,
-    port : env.npm_package_port,
+    port : process.env.PORT || env.npm_package_port,
     name : env.npm_package_name,
     description : env.npm_package_description,
     home : __dirname + '/',
