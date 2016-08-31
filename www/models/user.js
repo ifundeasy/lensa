@@ -7,8 +7,6 @@ module.exports = function (mongoose) {
 		email: String,
 		avatar: String,
 		gender: String,
-		role_id: Number,
-		company_id: Number,
 		password: String,
 		created_date: Date,
 		last_login: Date,
