@@ -75,8 +75,6 @@ module.exports = function (info) {
         app.set('x-powered-by', false);
         app.set('views', path.join(home, 'views/'));
         app.set('view engine', 'ejs');
-        //app.set('env', 'production');
-        //
         app.use(cookieParser());
         app.use(express.static(path.join(home, 'public')));
         app.use(bodyParser.json());
@@ -208,57 +206,15 @@ module.exports = function (info) {
                 }
             }
         });
+
+        app.use(require(home + 'routes/pages')(app, info));
+        app.use('/res', require(home + 'routes/api')({name: info.name, home: info.home, mongoose: mongoose}));
         //app.use('/api', require(home + 'routes/api')({
         //    master : info,
         //    locals : locals,
         //    passport : passport
         //}));
-        app.get('/login', function (req, res, next) {
-            var message = {
-                error : {
-                    subject : app.msgTxt || "Logged out",
-                    value : app.msg.length ? app.msg : [{"Logged out" : 1}]
-                },
-                name : info.name,
-                description : info.description,
-                version : info.version
-            };
-            res.format({
-                html : function () {
-                    res.render('login', message);
-                },
-                json : function () {
-                    res.json(message);
-                },
-                text : function () {
-                    res.send(JSON.stringify(message));
-                }
-            });
-            //
-            console.log('> Login', JSON.stringify(message.error));
-            app.msg = [];
-            app.msgTxt = '';
-        });
 
-        app.get('/', function (req, res, next) {
-            var message = {
-                name : info.name,
-                description : info.description,
-                version : info.version
-            };
-            res.format({
-                html : function () {
-                    res.render('index', message);
-                },
-                json : function () {
-                    res.json(message);
-                },
-                text : function () {
-                    res.send(JSON.stringify(message));
-                }
-            });
-        });
-        app.use('/res', require(home + 'routes/api')({name: info.name, home: info.home, mongoose: mongoose}));
         
         //
         app.use(function (req, res, next) {

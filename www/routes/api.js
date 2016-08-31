@@ -1,9 +1,8 @@
 // includes
-var fs = require('fs');
 var express = require('express');
 var router = express.Router();
-var util = require('util');
 //
+
 module.exports = function (cfg) {
 
 	//rest apis
