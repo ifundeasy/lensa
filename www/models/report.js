@@ -6,7 +6,7 @@ module.exports = function (mongoose) {
 		description: String,
 		created_date: Date,
 		category_id: Number,
-		status_id: Number,
+		reportstatus_id: Number,
 		images: [String],
 		lat: String,
 		long: String,
