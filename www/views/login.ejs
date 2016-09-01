@@ -1,58 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-	<meta name="description" content="">
-	<meta name="author" content="">
-	<link rel="icon" href="/images/favicon/favicon.ico">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login Page">
+	<meta name="author" content="Afa, Falih">
 	<title>Login : <%- [locals.name, locals.version].join(" v"); %></title>
-	<!-- Bootstrap core CSS -->
-	<link href="/bower/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-	<link href="/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
-	<!-- Custom styles for this template -->
-	<link href="/styles/login.css" rel="stylesheet">
-	<!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-	<!--[if lt IE 9]>
-	<script type="application/javascript" src="/assets/js/ie8-responsive-file-warning.js"></script>
-	<![endif]-->
-	<script type="application/javascript" src="/assets/js/ie-emulation-modes-warning.js"></script>
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!--[if lt IE 9]>
-	<script type="application/javascript" src="/assets/js/html5shiv.min.js"></script>
-	<script type="application/javascript" src="/assets/js/respond.min.js"></script>
-	<![endif]-->
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
 </head>
-<body>
-<div class="container">
-	<form class="form-signin" method="POST" action="/auth">
-		<h2 class="form-signin-heading">Please sign in</h2>
-		<label for="username" class="sr-only">Username</label>
-		<input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
-		<label for="password" class="sr-only">Password</label>
-		<input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-		<i class="text-danger pull-right" style="margin-bottom: 5px;">
-			<% if (locals.error.subject) { %>
+
+<body class="gray-bg">
+
+    <div class="middle-box text-center loginscreen animated fadeInDown">
+        <div>
+            <div>
+
+                <h1 class="logo-name">IN+</h1>
+
+            </div>
+            <h3>Welcome to IN+</h3>
+            <p>Perfectly designed and precisely prepared admin theme with over 50 pages with extra new web app views.
+                <!--Continually expanded and constantly improved Inspinia Admin Them (IN+)-->
+            </p>
+            <p><% if (locals.error.subject) { %>
 			<%- locals.error.value.map(function (o) {
 				return Object.keys(o).join(', ')
 			}).join('. '); %>
 			<% } else { %>
 			&nbsp
-			<% } %>
-		</i>
-		<!--<div class="checkbox">
-			<label>
-				<input type="checkbox" value="remember-me"> Remember me
-			</label>
-		</div>-->
-		<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-	</form>
-</div>
-<!-- /container -->
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script type="application/javascript" src="/assets/js/ie10-viewport-bug-workaround.js"></script>
+			<% } %></p>
+            <form class="m-t" role="form" method="POST" action="/auth">
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Username" required="">
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required="">
+                </div>
+                <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+
+                <a href="#"><small>Forgot password?</small></a>
+                <p class="text-muted text-center"><small>Do not have an account?</small></p>
+                <a class="btn btn-sm btn-white btn-block" href="register.html">Create an account</a>
+            </form>
+            <p class="m-t"> <small>Inspinia we app framework base on Bootstrap 3 &copy; 2014</small> </p>
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
 </body>
+
 </html>
