@@ -207,7 +207,7 @@ module.exports = function (info) {
             }
         });
 
-        app.use(require(home + 'routes/pages')(app, info));
+        app.use(require(home + 'routes/pages')(app, info, mongoose));
         app.use('/res', require(home + 'routes/api')({name: info.name, home: info.home, mongoose: mongoose}));
         //app.use('/api', require(home + 'routes/api')({
         //    master : info,

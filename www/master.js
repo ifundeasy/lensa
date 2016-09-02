@@ -22,7 +22,7 @@ if (cluster.isMaster) {
         console.error('Died worker :', worker.process.pid.toString());
     });
     console.info('Starting :', info.description);
-    for (var i = 0; i < (require('os').cpus().length); i++) {
+    for (var i = 0; i < 2; i++) {
         var worker = cluster.fork();
         worker.send({for : "initialize", message : 'Hello world!'});
     }

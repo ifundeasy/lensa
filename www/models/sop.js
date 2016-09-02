@@ -3,8 +3,8 @@ module.exports = function (mongoose) {
 		id: Number,
 		name: String,
 		description: String,
-		company_id: Number,
+		category_id: Number,
 		active: Boolean
     });
-    return mongoose.model('reportstatus', schema);
+    return mongoose.model('sop', schema);
 };
