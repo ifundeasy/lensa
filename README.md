@@ -34,8 +34,3 @@ for cluster
 $ cd path-to-your/www
 $ npm start
 ```
-for single thread
-```sh
-$ cd path-to-your/www
-$ npm test
-```
