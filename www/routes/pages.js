@@ -7,6 +7,12 @@ module.exports = function (app, info, mongoose) {
 
     router.get('/', function(req, res, next){
         // route '/' gak ada, redirect ke '/timeline' apabila publik atau '/dashboard' apabila internal yang login.
+        res.render('index', {
+            name : info.name,
+            activePage: req.url,
+            description : info.description,
+            version : info.version
+        });
     });
     
     router.get('/timeline', function(req, res, next){
