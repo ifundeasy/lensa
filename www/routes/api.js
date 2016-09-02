@@ -15,6 +15,7 @@ module.exports = function (cfg) {
     		console.log(cfg.home + 'libs/getuser');
     		// check authorized user
     		var getuser = require(cfg.home + 'libs/getuser');
+    		// TO DO : ganti dgn pengecekan di collection INTERNAL
     		getuser(req.cookies[cfg.name], cfg.mongoose.models['user'], function(err, msg){
 				if(err){
 					var loggedUser = '';
