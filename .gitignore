@@ -1,5 +1,4 @@
 .idea
 data/
-ooo/
 www/node_modules/*
 www/config/mongo.js

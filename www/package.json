@@ -1,10 +1,15 @@
 {
   "name": "BPM",
   "description": "Bussiness Process Management",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "port": 6200,
-  "author": "",
+  "sessionAge": 900000,
+  "timeOut" : 300000,
+  "worker": 4,
+  "broker": 1,
+  "autoreboot": false,
+  "author": "Afa Rappresent",
   "contributors": [
     {
       "name": "Afa Rappresent",
@@ -22,25 +27,37 @@
     "test": "node-dev test.js",
     "start": "node-dev master.js"
   },
-  "main": "server.js",
+  "main": "master.js",
   "dependencies": {
-    "assert": "^1.4.1",
-    "bcrypt": "^0.8.7",
-    "body-parser": "^1.15.2",
-    "connect-mongo": "^1.3.2",
-    "cookie-parser": "^1.4.3",
-    "cors": "^2.7.1",
-    "debug": "^2.2.0",
-    "ejs": "^2.5.1",
-    "express": "^4.14.0",
-    "express-session": "^1.14.1",
-    "mongoose": "^4.5.9",
-    "morgan": "^1.7.0",
-    "node-dev": "^3.1.3",
-    "q": "^1.4.1",
-    "rand-token": "^0.2.1",
-    "request": "^2.74.0"
+    "assert": "",
+    "bcrypt": "",
+    "body-parser": "",
+    "connect-mongo": "",
+    "cookie-parser": "",
+    "cors": "",
+    "debug": "",
+    "ejs": "",
+    "express": "",
+    "express-session": "",
+    "mongoose": "",
+    "morgan": "",
+    "node-dev": "",
+    "q": "",
+    "rand-token": "",
+    "request": "",
+    "connect": "",
+    "minimist": "",
+    "serve-static": "",
+    "socketcluster": "",
+    "socketcluster-client": ""
   },
   "devDependencies": {},
-  "license": "ISC"
+  "keywords": [
+    "websocket",
+    "server",
+    "realtime",
+    "cluster",
+    "scalable"
+  ],
+  "readmeFilename": "README.md"
 }
