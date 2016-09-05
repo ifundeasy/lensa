@@ -196,6 +196,7 @@ domain = `http://belum-ada-domain/`
         username    : String
         name        : String
         email       : String
+        birthdate   : String
         gender      : String
         password    : String
     
@@ -232,6 +233,7 @@ domain = `http://belum-ada-domain/`
         name        : 'Joko Hariono',
         phone       : '012345678',
         email       : 'joko@gmail.com',
+        birthdate   : '1991-12-31',
         gender      : 'l',
         password    : 'lalala',
       },
