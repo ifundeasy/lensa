@@ -75,7 +75,8 @@ domain = `http://belum-ada-domain/`
 * **Error Response:**
     ```javascript
     {
-        error : true
+        error : true,
+        message : String
     }
     ```
 
