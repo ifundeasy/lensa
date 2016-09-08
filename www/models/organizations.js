@@ -6,10 +6,15 @@ module.exports = function (mongoose) {
 		phone: String,
 		avatar: String,
 		description: String,
-		created_date: Date,
+		address: String,
+		country: String,
+		state: String,
+		zipcode: String
+		createdDate: Date,
 		lat: String,
 		long: String,
+		notes: String,
 		active: Boolean
     });
-    return mongoose.model('company', schema);
+    return mongoose.model('organizations', schema);
 };

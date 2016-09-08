@@ -1,10 +1,11 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
 		id: Number,
+		organization_id: Number,
+		createdDate: Date,
 		name: String,
 		description: String,
-		company_id: Number,
-		active: Boolean
+		active: Boolean 
     });
-    return mongoose.model('reportstatus', schema);
+    return mongoose.model('organizationRoles', schema);
 };
