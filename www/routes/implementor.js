@@ -6,5 +6,13 @@ module.exports = function (args) {
     var account = args.account;
     var mongoose = args.mongoose;
     //
+    router.get('/', function (req, res, next) {
+        res.render('implementor/index', {
+            name : global.name,
+            activePage : req.url,
+            description : global.description,
+            version : global.version
+        });
+    });
     return router;
 };

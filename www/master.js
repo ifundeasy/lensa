@@ -16,7 +16,7 @@ var options = {
     workerController : env.SOCKETCLUSTER_WORKER_CONTROLLER || __dirname + '/worker.js',
     brokerController : env.SOCKETCLUSTER_BROKER_CONTROLLER || __dirname + '/broker.js',
     socketChannelLimit : Number(env.SOCKETCLUSTER_SOCKET_CHANNEL_LIMIT) || 1000,
-    crashWorkerOnError : (argv['autoreboot'] || env.npm_package_autoreboot) != false
+    crashWorkerOnError : (argv['autoreboot'] || env.npm_package_autoreboot) != false,
 };
 var SOCKETCLUSTER_OPTIONS;
 if (env.SOCKETCLUSTER_OPTIONS) SOCKETCLUSTER_OPTIONS = JSON.parse(env.SOCKETCLUSTER_OPTIONS);
