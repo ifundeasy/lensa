@@ -1,4 +1,4 @@
-# BPM
+# Lensa
 Bussiness Process Management
 
 ## Installation
@@ -11,8 +11,7 @@ $ cd path-to-your/www/public
 $ bower install
 ```
 
-create file mongo.js at path "www/config/"
-with value 
+create file mongo.js at "www/config/" path, with value
 ```js
 module.exports = {
     connection : {
