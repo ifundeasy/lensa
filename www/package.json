@@ -1,6 +1,6 @@
 {
-  "name": "BPM",
-  "description": "Bussiness Process Management",
+  "name": "Lensa",
+  "description": "Lensa - Bussiness Process Management",
   "version": "0.0.2",
   "private": true,
   "port": 6200,
