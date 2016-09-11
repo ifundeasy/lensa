@@ -1,21 +1,25 @@
 module.exports = function (mongoose) {
-    var procedureSteps = new mongoose.Schema({
-        id : Number,
-        createdDate : Date,
+    var Schema = mongoose.Schema;
+    var stepSchema = new Schema({
         name : String,
         description : String,
-        stepNumber : Number,
-        duration : Number,
-        active : Boolean
+        stepNumber : {type : Number, min : 1, default : 1},
+        duration : {type : Number, min : 0, default : 0},
+        notes : String,
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    var schema = new mongoose.Schema({
-        id : Number,
-        organizationCategory_id : Number,
-        createdDate : Date,
+    var procedureSchema = new Schema({
         name : String,
-        steps : [procedureSteps],
         description : String,
-        active : Boolean
+        steps : [stepSchema],
+        "organizationCategories._id" : {
+            ref : 'organizationCategory',
+            type : Schema.Types.ObjectId
+        },
+        notes : String,
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    return mongoose.model('procedures', schema);
+    return mongoose.model('procedure', procedureSchema);
 };

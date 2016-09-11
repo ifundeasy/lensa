@@ -1,11 +1,14 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
-        id : Number,
-        organization_id : Number,
-        createdDate : Date,
         name : String,
         description : String,
-        active : Boolean
+        "organizations._id" : {
+            ref : 'organization',
+            type : Schema.Types.ObjectId
+        },
+        notes : String,
+        createdAt : { type: Date, default: Date.now },
+        active : { type: Boolean, default: true }
     });
-    return mongoose.model('organizationCategories', schema);
+    return mongoose.model('organizationCategory', schema);
 };

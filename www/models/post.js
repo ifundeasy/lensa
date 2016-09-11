@@ -1,29 +1,49 @@
 module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
-    var comment = new Schema({
-        id : Number,
-        createdDate : Date,
-        user_id : Number,
+    var commentSchema = new Schema({
         text : String,
-        active : Boolean
+        "users._id" : {
+            ref : 'user',
+            type : Schema.Types.ObjectId
+        },
+        "medias._ids" : [
+            {
+                ref : 'media',
+                type : Schema.Types.ObjectId
+            }
+        ],
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    var status = new Schema({
-        id : Number,
-        createdDate : Date,
-        user_id : Number,
-        procedure_id : Number,
-        active : Boolean
+    var statusSchema = new Schema({
+        "users._id" : {
+            ref : 'user',
+            type : Schema.Types.ObjectId
+        },
+        "procedures._id" : {
+            ref : 'procedure',
+            type : Schema.Types.ObjectId
+        },
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    var schema = new Schema({
-        id : Number,
-        user_id : Number,
-        media_id : Number,
-        createdDate : Date,
+    var postSchema = new Schema({
         title : String,
         text : String,
-        statuses : [comment],
-        comments : [status],
-        active : Boolean
+        "users._id" : {
+            ref : 'user',
+            type : Schema.Types.ObjectId
+        },
+        "medias._ids" : [
+            {
+                ref : 'media',
+                type : Schema.Types.ObjectId
+            }
+        ],
+        statuses : [commentSchema],
+        comments : [statusSchema],
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    return mongoose.model('posts', schema);
+    return mongoose.model('post', postSchema);
 };

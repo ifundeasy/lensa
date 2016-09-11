@@ -1,11 +1,13 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
-        id : Number,
-        userRole_id : Number,
-        createdDate : Date,
         name : String,
+        "userRoles._id" : {
+            ref : 'userRole',
+            type : Schema.Types.ObjectId
+        },
         notes : String,
-        active : Boolean
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
     return mongoose.model('userTypes', schema);
 };

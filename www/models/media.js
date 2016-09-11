@@ -1,11 +1,11 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
-        id : Number,
-        createdDate : Date,
         type : String,
         directory : String,
         description : String,
-        active : Boolean
+        notes : String,
+        createdAt : { type: Date, default: Date.now },
+        active : { type: Boolean, default: true }
     });
-    return mongoose.model('medias', schema);
+    return mongoose.model('media', schema);
 };

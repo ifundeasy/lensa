@@ -1,20 +1,25 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
-        id : Number,
         name : String,
-        email : String,
-        phone : String,
-        avatar : String,
         description : String,
+        avatar : String,
+        email : {
+            value : String,
+            verified : { type: Boolean, default: false }
+        },
+        phone : {
+            value : String,
+            verified : { type: Boolean, default: false }
+        },
+        lat : String,
+        long : String,
         address : String,
         country : String,
         state : String,
         zipcode : String,
-        createdDate : Date,
-        lat : String,
-        long : String,
         notes : String,
-        active : Boolean
+        createdAt : { type: Date, default: Date.now },
+        active : { type: Boolean, default: true }
     });
-    return mongoose.model('organizations', schema);
+    return mongoose.model('organization', schema);
 };

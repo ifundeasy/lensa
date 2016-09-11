@@ -1,11 +1,18 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
-        id : Number,
-        createdDate : Date,
         name : String,
-        routes : [],
+        routes : [
+            {
+                create : {type : Boolean, default : true},
+                read : {type : Boolean, default : true},
+                update : {type : Boolean, default : true},
+                delete : {type : Boolean, default : false},
+                url : String,
+            }
+        ],
         notes : String,
-        active : Boolean
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    return mongoose.model('userRoles', schema);
+    return mongoose.model('userRole', schema);
 };

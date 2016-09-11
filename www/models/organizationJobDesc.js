@@ -1,12 +1,18 @@
 module.exports = function (mongoose) {
     var schema = new mongoose.Schema({
-        id : Number,
-        organizationRole_id : Number,
-        organizationCategory_id : Number,
-        createdDate : Date,
+        "organizationRoles._id" : {
+            ref : 'organizationRole',
+            type : Schema.Types.ObjectId
+        },
+        "organizationCategories._id" : {
+            ref : 'organizationCategory',
+            type : Schema.Types.ObjectId
+        },
         name : String,
         description : String,
-        active : Boolean
+        notes : String,
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    return mongoose.model('organizationJobDescs', schema);
+    return mongoose.model('organizationJobDesc', schema);
 };
