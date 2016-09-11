@@ -212,7 +212,7 @@ var main = function (db) {
             console.log(arguments)
         })
         */
-        Person.finder(null, function (err, docs) {
+        /*Person.finder(null, function (err, docs) {
             if (err) {
                 console.log(err)
             } else {
@@ -220,7 +220,29 @@ var main = function (db) {
                 console.log(print(rows))
             }
             process.exit()
+        })*/
+        Person
+        .finder(null)
+        .then(function (docs) {
+            var rows = normalize(docs);
+            console.log(print(rows))
+        })
+        .catch(function (err) {
+            console.log(err)
         })
     }
+    /*
+    putCountry(function(){
+        putJob(function(){
+            putPhoneType(function(){
+                putCompany(function(){
+                    putPerson(function(){
+                        getPerson()
+                    })
+                })
+            })
+        })
+    });
+    */
     getPerson()
 };

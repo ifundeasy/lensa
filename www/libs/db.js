@@ -17,6 +17,7 @@ Db.prototype.open = function (config) {
     console.log('   >> ' + process.pid + ' Connecting to :', url);
     //
     me.mongoose = require('mongoose');
+    me.mongoose.Promise = require('bluebird');
     me.mongoose.connect(url, o, function (err) {
         config.callback(err, me)
     });
