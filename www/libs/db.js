@@ -14,7 +14,7 @@ Db.prototype.open = function (config) {
     if (config.username) o.user = config.username;
     if (config.password) o.pass = config.password;
     //
-    console.log('   >> Connecting to :', url);
+    console.log('   >> ' + process.pid + ' Connecting to :', url);
     //
     me.mongoose = require('mongoose');
     me.mongoose.connect(url, o, function (err) {

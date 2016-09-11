@@ -1,19 +1,14 @@
 module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
-    var orgCatSchema = new Schema({
+    var urlSchema = new Schema({
         name : {
             type : String,
             required : true
         },
-        description : String,
-        "organizations._id" : {
-            ref : 'organization',
-            type : Schema.Types.ObjectId,
-            required : true
-        },
+        api : String,
         notes : String,
         createdAt : { type: Date, default: Date.now },
         active : { type: Boolean, default: true }
     });
-    return mongoose.model('organizationCategory', orgCatSchema);
+    return mongoose.model('url', urlSchema);
 };

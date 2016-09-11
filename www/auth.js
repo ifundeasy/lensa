@@ -1,25 +1,7 @@
-var bcrypt = require('bcrypt'),
-    token = require('rand-token');
+var token = require('rand-token');
 //
 module.exports = function (global, locals, user) {
     var base64 = require(global.libs + 'base64');
-    var genHash = function (str) {
-        return bcrypt.hashSync(str, bcrypt.genSaltSync(7));
-    };
-    var isValid = function (str, hash) {
-        return bcrypt.compareSync(str, hash);
-    };
-    /*
-    user.create({
-        username : 'afa',
-        password : genHash('afa'),
-    }, function (err, small) {
-        console.log('create', arguments)
-        user.find({}, function () {
-            console.log(arguments)
-        });
-    });
-    */
     return function (req, res, next) {
         var method = req.method;
         var body = req.body;
@@ -114,11 +96,7 @@ module.exports = function (global, locals, user) {
             if (method == 'POST' && path == '/auth') {
                 user.findOne({username : body.username}, function (err, user) {
                     if (!err) {
-                        if (user) {
-                            if (!isValid(body.password, user.password)) locals.loginMsg.push({'invalid password' : body.password});
-                        } else {
-                            locals.loginMsg.push({'invalid username' : body.username});
-                        }
+                        if (!user) locals.loginMsg.push({'invalid username' : body.username});
                     } else {
                         locals.loginMsg.push({'Error 004' : err});
                     }
@@ -127,16 +105,25 @@ module.exports = function (global, locals, user) {
                         locals.loginMsgTxt = 'Login fail';
                         res.redirect('/login');
                     } else {
-                        var id = token.generate(32) + '/' + base64.encode(body.username);
-                        store.set(id, session.cookie, function (err) {
-                            if (!err) res.cookie(global.name, id, session.cookie);
-                            else locals.loginMsg.push({'Error 005' : err});
-                            //
+                        user.pwdCheck(body.password, function(err, valid) {
+                            if (err) locals.loginMsg.push({'fail calculating work factor' : body.password})
+                            if (!valid) locals.loginMsg.push({'invalid password' : body.password})
                             if (locals.loginMsg.length) {
-                                locals.loginMsgTxt = 'Extend fail';
+                                locals.loginMsgTxt = 'Login fail';
                                 res.redirect('/login');
                             } else {
-                                res.redirect('/');
+                                var id = token.generate(32) + '/' + base64.encode(body.username);
+                                store.set(id, session.cookie, function (err) {
+                                    if (!err) res.cookie(global.name, id, session.cookie);
+                                    else locals.loginMsg.push({'Error 005' : err});
+                                    //
+                                    if (locals.loginMsg.length) {
+                                        locals.loginMsgTxt = 'Extend fail';
+                                        res.redirect('/login');
+                                    } else {
+                                        res.redirect('/');
+                                    }
+                                });
                             }
                         });
                     }

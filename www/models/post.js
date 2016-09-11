@@ -4,7 +4,8 @@ module.exports = function (mongoose) {
         text : String,
         "users._id" : {
             ref : 'user',
-            type : Schema.Types.ObjectId
+            type : Schema.Types.ObjectId,
+            required : true
         },
         "medias._ids" : [
             {
@@ -18,21 +19,27 @@ module.exports = function (mongoose) {
     var statusSchema = new Schema({
         "users._id" : {
             ref : 'user',
-            type : Schema.Types.ObjectId
+            type : Schema.Types.ObjectId,
+            required : true
         },
         "procedures._id" : {
             ref : 'procedure',
-            type : Schema.Types.ObjectId
+            type : Schema.Types.ObjectId,
+            required : true
         },
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
     });
     var postSchema = new Schema({
-        title : String,
+        title : {
+            type : String,
+            required : true
+        },
         text : String,
         "users._id" : {
             ref : 'user',
-            type : Schema.Types.ObjectId
+            type : Schema.Types.ObjectId,
+            required : true
         },
         "medias._ids" : [
             {

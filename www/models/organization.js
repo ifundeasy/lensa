@@ -1,25 +1,58 @@
-module.exports = function (mongoose) {
-    var schema = new mongoose.Schema({
-        name : String,
+module.exports = function (mongoose, regEx) {
+    var Schema = mongoose.Schema;
+    var orgSchema = new Schema({
+        name : {
+            type : String,
+            required : true
+        },
         description : String,
-        avatar : String,
+        "medias._id" : { //avatar
+            ref : 'media',
+            type : Schema.Types.ObjectId
+        },
         email : {
-            value : String,
-            verified : { type: Boolean, default: false }
+            value : {
+                type : String,
+                validate : {
+                    validator : function (v) {
+                        return regEx.email.test(v);
+                    },
+                    message : '{VALUE} is not a valid email address!'
+                },
+                unique : true,
+                required : true,
+            },
+            verified : {type : Boolean, default : false}
         },
         phone : {
-            value : String,
-            verified : { type: Boolean, default: false }
+            value : {
+                type : String,
+                validate : {
+                    validator : function (v) {
+                        return regEx.phone.test(v);
+                    },
+                    message : '{VALUE} is not a valid phone number!'
+                },
+                //unique : true,
+                //required : true,
+            },
+            verified : {type : Boolean, default : false}
         },
-        lat : String,
-        long : String,
+        lat : {
+            type : String,
+            required : true
+        },
+        long : {
+            type : String,
+            required : true
+        },
         address : String,
         country : String,
         state : String,
         zipcode : String,
         notes : String,
-        createdAt : { type: Date, default: Date.now },
-        active : { type: Boolean, default: true }
+        createdAt : {type : Date, default : Date.now},
+        active : {type : Boolean, default : true}
     });
-    return mongoose.model('organization', schema);
+    return mongoose.model('organization', orgSchema);
 };

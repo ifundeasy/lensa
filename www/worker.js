@@ -35,6 +35,7 @@ module.exports.run = function (worker) {
     var ngo = global.account.mongo;
     ngo.database.callback = function (err, db) {
         if (!err) {
+            console.log('   >> ' + process.pid + ' Connected to mongodb');
             require(global.home + 'server')(global, worker, db);
         } else console.log('> Error open connection', err)
     };
