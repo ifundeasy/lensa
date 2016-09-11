@@ -47,10 +47,198 @@ module.exports = function (mongoose) {
                 type : Schema.Types.ObjectId
             }
         ],
-        statuses : [commentSchema],
-        comments : [statusSchema],
+        statuses : [statusSchema],
+        comments : [commentSchema],
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
     });
+    var query = [
+        {
+            path : "medias._ids",
+            select : "type directory description",
+            match : {active : true}
+        },
+        {
+            path : "users._id",
+            select : "name username",
+            match : {active : true},
+            populate : [
+                {
+                    path : "medias._ids",
+                    select : "type directory description",
+                    match : {active : true}
+                },
+                {
+                    path : "userTypes._id",
+                    select : "name userRoles._id",
+                    match : {active : true},
+                    populate : {
+                        path : "userRoles._id",
+                        select : "name routes",
+                        match : {active : true},
+                        populate : {
+                            path : "routes.urls._id",
+                            select : "name api",
+                            match : {active : true}
+                        }
+                    }
+                },
+                {
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "medias._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
+                },
+                {
+                    path : "organizationRoles._id",
+                    select : "name description organizations._id",
+                    match : {active : true},
+                    populate : {
+                        path : "organizations._id",
+                        select : "name description",
+                        match : {active : true},
+                        populate : {
+                            path : "medias._id",
+                            select : "type directory description",
+                            match : {active : true}
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            path : "comments.users._id",
+            select : "name username",
+            match : {active : true},
+            populate : [
+                {
+                    path : "userTypes._id",
+                    select : "name userRoles._id",
+                    match : {active : true},
+                    populate : {
+                        path : "userRoles._id",
+                        select : "name routes",
+                        match : {active : true},
+                        populate : {
+                            path : "routes.urls._id",
+                            select : "name api",
+                            match : {active : true}
+                        }
+                    }
+                },
+                {
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "medias._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
+                },
+                {
+                    path : "organizationRoles._id",
+                    select : "name description organizations._id",
+                    match : {active : true},
+                    populate : {
+                        path : "organizations._id",
+                        select : "name description",
+                        match : {active : true},
+                        populate : {
+                            path : "medias._id",
+                            select : "type directory description",
+                            match : {active : true}
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            path : "comments.medias._ids",
+            select : "type directory description",
+            match : {active : true}
+        },
+        {
+            path : "statuses.users._id",
+            select : "name username",
+            match : {active : true},
+            populate : [
+                {
+                    path : "userTypes._id",
+                    select : "name userRoles._id",
+                    match : {active : true},
+                    populate : {
+                        path : "userRoles._id",
+                        select : "name routes",
+                        match : {active : true},
+                        populate : {
+                            path : "routes.urls._id",
+                            select : "name api",
+                            match : {active : true}
+                        }
+                    }
+                },
+                {
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "medias._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
+                },
+                {
+                    path : "organizationRoles._id",
+                    select : "name description organizations._id",
+                    match : {active : true},
+                    populate : {
+                        path : "organizations._id",
+                        select : "name description",
+                        match : {active : true},
+                        populate : {
+                            path : "medias._id",
+                            select : "type directory description",
+                            match : {active : true}
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            path : "statuses.procedure._id",
+            select : "name description steps organizationCategories._id",
+            match : {active : true},
+            populate : {
+                path : "organizationCategories._id",
+                select : "name description organizations._id",
+                match : {active : true},
+                populate : {
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "medias._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
+                }
+            }
+        }
+    ];
+    postSchema.statics.popFindOne = function (body, cb) {
+        body = body || {};
+        body.active = body.hasOwnProperty("active") ? body.active : true;
+        return this.findOne(body).populate(query).exec(cb);
+    };
+    postSchema.statics.popFind = function (body, cb) {
+        body = body || {};
+        body.active = body.hasOwnProperty("active") ? body.active : true;
+        return this.find(body).populate(query).exec(cb);
+    };
     return mongoose.model('post', postSchema);
 };

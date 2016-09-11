@@ -129,5 +129,63 @@ module.exports = function (mongoose, regEx) {
         });
     };
     //
+    var query = [
+        {
+            path : "medias._ids",
+            select : "type directory description",
+            match : {active : true}
+        },
+        {
+            path : "userTypes._id",
+            select : "name userRoles._id",
+            match : {active : true},
+            populate : {
+                path : "userRoles._id",
+                select : "name routes",
+                match : {active : true},
+                populate : {
+                    path : "routes.urls._id",
+                    select : "name api",
+                    match : {active : true}
+                }
+            }
+        },
+        {
+            path : "organizations._id",
+            select : "name description",
+            match : {active : true},
+            populate : {
+                path : "medias._id",
+                select : "type directory description",
+                match : {active : true}
+            }
+        },
+        {
+            path : "organizationRoles._id",
+            select : "name description organizations._id",
+            match : {active : true},
+            populate : {
+                path : "organizations._id",
+                select : "name description",
+                match : {active : true},
+                populate : {
+                    path : "medias._id",
+                    select : "type directory description",
+                    match : {active : true}
+                }
+            }
+        }
+    ];
+    userSchema.statics.popFindOne = function (body, cb) {
+        body = body || {};
+        body.active = body.hasOwnProperty("active") ? body.active : true;
+        return this.findOne(body).populate(query).exec(cb);
+    };
+    userSchema.statics.popFind = function (body, cb) {
+        body = body || {};
+        body.active = body.hasOwnProperty("active") ? body.active : true;
+        return this.find(body).populate(query).exec(cb);
+    };
+    //
     return mongoose.model('user', userSchema);
 };
