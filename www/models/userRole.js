@@ -11,10 +11,10 @@ module.exports = function (mongoose) {
                     ref : 'url',
                     type : Schema.Types.ObjectId
                 },
-                getting  : {type : Boolean, default : true},
-                creating : {type : Boolean, default : true},
-                updating : {type : Boolean, default : true},
-                deleting : {type : Boolean, default : false}
+                read  : {type : Boolean, default : true},
+                create : {type : Boolean, default : true},
+                update : {type : Boolean, default : true},
+                delete : {type : Boolean, default : false}
             }
         ],
         notes : String,

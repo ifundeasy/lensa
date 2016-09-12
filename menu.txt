@@ -1,0 +1,34 @@
+feature (user use case, if logged);
+	/root/
+	* user (include group & role)
+	* organization
+
+	/public/
+	* dashboard laporan
+	  > tautan : lihat, tambah, perbaharui (but self owner), hapus (but self owner)
+	  > komentar : lihat, tambah, perbaharui (but self owner), hapus (but self owner)
+	  > status tautan : lihat
+
+	/moderator/
+	* dashboard laporan (crud + disposisi)
+	  > tautan : lihat, perbaharui (if reported by users), hapus (if reported by users)
+	  > komentar : lihat, perbaharui (if reported by users), hapus (if reported by users)
+	  > status tautan : lihat, tambah, perbaharui (but self owner), hapus (but self owner)
+	  > disposisi
+
+	/administrator/
+	*
+
+	/implementor/
+	*
+
+issue
+	chating issue
+	* ada backup, mirror di suatu server.
+	* mekasnisme nya cuma write-append, ga ada read
+
+	reporting issue
+	* untuk status suatu proses, jika dateline sudah terpenuhi dan kalo misal telat kasih tau elapsed timenya (telatnya berapa lama)
+	* satuan waktu sampe ke detik
+	* moderator bisa (sangat possible) untuk menyalurkan kaluhan ke banyak organisasi
+	* moderator adalah pihak bebas juga (seperti pelapor), cuma bedanya user_group nya moderator
