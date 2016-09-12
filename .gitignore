@@ -1,5 +1,5 @@
 .idea
 data/
 log/
-www/node_modules/*
+node_modules/
 www/config/mongo.js
