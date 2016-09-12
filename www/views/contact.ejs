@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="contact">
+	<meta name="author" content="Afa, Falih">
+	<title>About : <%- locals.name + " " + locals.version %></title>
+	<link href="/.inspinia/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/.inspinia/font-awesome/css/font-awesome.css" rel="stylesheet">
+	<link href="/.inspinia/css/animate.css" rel="stylesheet">
+	<link href="/.inspinia/css/style.css" rel="stylesheet">
+</head>
+<body class="gray-bg">
+<% if (locals.logged) { %>
+<a href="/" class="btn btn-success btn-sm" style="position: absolute;right: 0;margin: 10px;">Home</a>
+<% } %>
+<div class="middle-box text-center loginscreen animated fadeInDown">
+	<div>
+		<div>
+			<h4 class="logo-name" style="font-size: 57px;">LN+</h4>
+		</div>
+		<h3>Contact</h3>
+		<p>blah blah blah.</p>
+	</div>
+</div>
+<div class="footer fixed" style="margin: 0px;background-color: rgba(0,0,0,0.02);">
+	<div class="pull-right">
+		<% if (!locals.logged) { %>
+		<a href="/registration">Registration</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<a href="/login">Sign in</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<% } %>
+		<a href="/termspolicy">Terms</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<a href="/about">About</a>
+	</div>
+	<div>
+		<strong>Copyright</strong> Lensa &copy; 2016
+	</div>
+</div>
+<!-- Mainly scripts -->
+<script src="/.inspinia/js/jquery-2.1.1.js"></script>
+<script src="/.inspinia/js/bootstrap.min.js"></script>
+</body>
+</html>

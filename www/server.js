@@ -8,7 +8,9 @@ var fs = require('fs'),
     cors = require('cors'),
     assert = require('assert'),
     expressSession = require('express-session'),
-    connectMongo = require('connect-mongo');
+    connectMongo = require('connect-mongo'),
+    dateformat = require('dateformat'),
+    httpCode = http.STATUS_CODES;
 //
 module.exports = function (global, worker, db) {
     var account = global.account;
@@ -33,6 +35,24 @@ module.exports = function (global, worker, db) {
             ttl : 2 * 24 * 60 * 60
         })
     };
+    var forbiddenFn = function (msg) {
+        var err = new Error();
+        err.status = 403;
+        err.message = httpCode[403];
+        if (msg) err.stack = JSON.stringify(msg, 0, 2);
+        return err
+    };
+    var logger = function () {
+        logger.format = ':dtime :pid :method :url :status :response-time :res[content-length] :rbody';
+        logger.path = path.join(global.home, 'log');
+        fs.existsSync(logger.path) || fs.mkdirSync(logger.path);
+        logger.file = require('file-stream-rotator').getStream({
+            date_format : 'YYYYMMDD',
+            filename : path.join(logger.path, 'morgan.%DATE%.log'),
+            frequency : 'daily',
+            verbose : false
+        });
+    };
     //
     var param = {
         global : global,
@@ -42,6 +62,7 @@ module.exports = function (global, worker, db) {
         mongoose : mongoose
     };
     //
+    logger();
     app.set('title', global.name);
     app.set('port', global.port);
     app.set('x-powered-by', false);
@@ -54,35 +75,51 @@ module.exports = function (global, worker, db) {
     app.use(cors());
     app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        morgan.token('pid', function () {
+            return process.pid
+        });
+        morgan.token('dtime', function () {
+            return dateformat(new Date(), "yyyy-mm-dd HH:MM:ss");
+        });
+        morgan.token('rbody', function () {
+            return JSON.stringify(req.body)
+        });
         next();
     });
-    if (app.get('env') === 'production') {
+    if (app.get('env') == 'production') {
         app.set('trust proxy', 1);
         session.cookie.secure = true;
+        app.use(morgan(logger.format, {stream : logger.file}));
+    } else {
+        app.use(morgan(logger.format, {stream : logger.file}));
+        app.use(morgan(logger.format));
     }
     app.use(expressSession(session), auth(global, locals, models.user));
     //
     app.get('/', function (req, res, next) {
-        var type = req.auth.type = "root"; //todo : ini masih hardcode, next-nya baca dari userType;
-        try {
-            var route = require(global.routes + type);
-            app.use('/' + type, route(param));
-            res.redirect('/' + type);
-        } catch (e) {
-            next();
-        }
+        var type = req.user.type = "root";
+        res.render(type);
     });
-    /*
-    //todo : block of stupid way. please see app.get('/', fn)
-    //app.use('/root', require(global.routes + 'root')(param));
-    //app.use('/moderator', require(global.routes + 'moderator')(param));
-    //app.use('/administrator', require(global.routes + 'administrator')(param));
-    //app.use('/implementor', require(global.routes + 'implementor')(param));
-    */
     app.use('/api', require(global.routes + 'api')(param));
+    app.get('/contact', function (req, res, next) {
+        res.render('contact', {logged : req.user ? 1 : 0});
+    });
+    app.get('/termspolicy', function (req, res, next) {
+        res.render('termspolicy', {logged : req.user ? 1 : 0});
+    });
+    app.get('/about', function (req, res, next) {
+        var logged = req.user ? 1 : 0;
+        res.render('about', {logged : req.user ? 1 : 0});
+    });
+    app.get('/registration', function (req, res, next) {
+        res.render('registration');
+    });
+    app.get('/forgot', function (req, res, next) {
+        res.render('forgot');
+    });
     app.get('/login', function (req, res, next) {
         var message = {
-            error : {
+            login : {
                 subject : locals.loginMsgTxt || "Logged out",
                 value : locals.loginMsg.length ? locals.loginMsg : [{"Logged out" : 1}]
             },
@@ -102,9 +139,26 @@ module.exports = function (global, worker, db) {
             }
         });
         //
-        console.log('> Login', JSON.stringify(message.error));
+        console.log('> Login', JSON.stringify(message.login));
         locals.loginMsg = [];
         locals.loginMsgTxt = '';
+    });
+    /******************************************************************************/
+    app.use(function (req, res, next) {
+        var code = 404;
+        var err = new Error();
+        err.status = code;
+        err.message = httpCode[code];
+        next(err);
+    });
+    app.use(function (err, req, res, next) {
+        locals.error = {
+            status : err.status || 500,
+            message : err.message || "Oops! Something wrong.",
+        };
+        if (app.get('env') === 'development') locals.error["trace"] = err.stack;
+        res.status(locals.error.status);
+        res.render('error', locals);
     });
     //
     httpServer.timeout = global.timeOut;
@@ -126,11 +180,10 @@ module.exports = function (global, worker, db) {
                 throw error;
         }
     });
-    httpServer.on('listening', function onListening() {
-        var addr = app.address();
-        var bind = typeof addr === 'string' ? addr : addr.port;
-        console.info(global.processId.toString(), 'Listening on ' + global.ip + ':' + bind);
+    httpServer.on('handshake', function () {
+        //console.log(global.processId.toString(), 'Listening on ' + global.ip + ':' + global.port);
     });
+    /******************************************************************************/
     //
     var count = 0;
     scServer.on('connection', function (socket) {

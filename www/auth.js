@@ -15,7 +15,6 @@ module.exports = function (global, locals, user) {
         //var signedCookies = req.signedCookies;
         //
         locals.loginMsg = locals.loginMsg || [];
-        console.log(global.processId.toString(), method, req.url, Object.keys(body).length ? body : "");
         if (cookieId) {
             if (path == '/logout') {
                 res.clearCookie(global.name);
@@ -72,7 +71,7 @@ module.exports = function (global, locals, user) {
                                         } else {
                                             //success login here..
                                             res.cookie(global.name, cookieId, session.cookie);
-                                            req.auth = {
+                                            req.user = {
                                                 user : user,
                                                 cookie : {
                                                     id : cookieId,
@@ -82,8 +81,9 @@ module.exports = function (global, locals, user) {
                                                     expires: session.cookie._expires
                                                 }
                                             };
-                                            if (path == '/login') res.redirect('/');
-                                            else next();
+                                            if (path == '/login' || path == "/registration" || path == "/forgot") {
+                                                res.redirect('/');
+                                            } else next();
                                         }
                                     });
                                 }
@@ -93,7 +93,7 @@ module.exports = function (global, locals, user) {
                 }
             }
         } else {
-            if (method == 'POST' && path == '/auth') {
+            if (method == 'POST' && path == '/signin') {
                 user.findOne({username : body.username}, function (err, user) {
                     if (!err) {
                         if (!user) locals.loginMsg.push({'invalid username' : body.username});

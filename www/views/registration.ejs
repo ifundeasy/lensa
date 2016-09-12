@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="register">
+	<meta name="author" content="Afa, Falih">
+	<title>Register : <%- locals.name + " " + locals.version %></title>
+	<link href="/.inspinia/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/.inspinia/font-awesome/css/font-awesome.css" rel="stylesheet">
+	<link href="/.inspinia/css/animate.css" rel="stylesheet">
+	<link href="/.inspinia/css/style.css" rel="stylesheet">
+</head>
+<body class="gray-bg">
+<div class="middle-box text-center loginscreen animated fadeInDown">
+	<div>
+		<div>
+			<h4 class="logo-name" style="font-size: 57px;">LN+</h4>
+		</div>
+		<h3>Registration</h3>
+		<p>Create account to see it in action.</p>
+		<form class="m-t" role="form" method="POST" action="/signup">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Name" required="">
+			</div>
+			<div class="form-group">
+				<input type="email" class="form-control" placeholder="Email" required="">
+			</div>
+			<div class="form-group">
+				<input type="password" class="form-control" placeholder="Password" required="">
+			</div>
+			<div class="form-group">
+				<div class="checkbox i-checks">
+					<label><input type="checkbox"><i></i><a href="/termspolicy">Agree the terms and policy</a></label>
+				</div>
+			</div>
+			<button type="submit" class="btn btn-primary block full-width m-b">Register</button>
+			<p class="text-muted text-center">
+				<small>Already have an account?</small>
+			</p>
+			<a class="btn btn-sm btn-white btn-block" href="login.html">Login</a>
+		</form>
+	</div>
+</div>
+<div class="footer fixed" style="margin: 0px;background-color: rgba(0,0,0,0.02);">
+	<div class="pull-right">
+		<a href="/login">Sign in</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<a href="/contact">Contact</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<a href="/termspolicy">Terms</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<a href="/about">About</a>
+	</div>
+	<div>
+		<strong>Copyright</strong> Lensa &copy; 2016
+	</div>
+</div>
+<!-- Mainly scripts -->
+<script src="/.inspinia/js/jquery-2.1.1.js"></script>
+<script src="/.inspinia/js/bootstrap.min.js"></script>
+</body>
+</html>

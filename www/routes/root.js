@@ -7,7 +7,7 @@ module.exports = function (args) {
     var mongoose = args.mongoose;
     //
     router.get('/', function (req, res, next) {
-        res.render('root/index', {
+        res.render('root', {
             name : global.name,
             activePage : req.url,
             description : global.description,
