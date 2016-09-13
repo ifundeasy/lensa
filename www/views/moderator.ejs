@@ -12,9 +12,9 @@
 	<link href="/.inspinia/css/animate.css" rel="stylesheet">
 	<link href="/.inspinia/css/style.css" rel="stylesheet">
 </head>
-<body class="fixed-sidebar pace-done fixed-nav fixed-nav-basic">
+<body class="fixed-sidebar pace-done fixed-nav fixed-nav-basic" directive="/moderator">
 <div id="wrapper">
-	<nav class="navbar-default navbar-static-side" role="navigation">
+	<nav id="navbar" class="navbar-default navbar-static-side" role="navigation">
 		<div class="sidebar-collapse">
 			<ul class="nav metismenu" id="side-menu">
 				<li class="nav-header">
@@ -180,22 +180,22 @@
 				</ul>
 			</nav>
 		</div>
-		<div class="row wrapper border-bottom white-bg page-heading">
-			<div class="col-lg-9">
-				<h2>Widgets</h2>
-				<ol class="breadcrumb">
+		<div class="row wrapper border-bottom white-bg page-heading no-padding">
+			<div class="col-lg-12">
+				<h3 id="pagename" style="margin: 15px 0px;">&nbsp</h3>
+				<!--<ol class="breadcrumb">
 					<li>
 						<a href="/.inspinia/index.html">Home</a>
 					</li>
 					<li class="active">
 						<strong>Widgets</strong>
 					</li>
-				</ol>
+				</ol>-->
 			</div>
 		</div>
-		<div class="wrapper wrapper-content animated fadeInRight">
-			<div class="row">
-				<div class="col-lg-12">MODERATOR</div>
+		<div class="wrapper wrapper-content animated fadeInRight" style="padding-left: 0px; padding-right: 0px;">
+			<div id="main-content">
+				<!-- Page -->
 			</div>
 		</div>
 		<div class="footer">
@@ -228,5 +228,38 @@
 <script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
+<script type="application/javascript" delete>
+	var toTitleCase = function (str) {
+		return str.replace(/\w\S*/g, function (txt) {
+			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+		});
+	};
+	$(document).ready(function(){
+		var navbar = $("#navbar");
+		var pageName = $("#pagename");
+		var mainContent = $("#main-content");
+		var directive = $("body").attr('directive');
+		var moduleLinks = navbar.find('li>a[href^="#"][href!="#"]');
+		var loadModule = function (name) {
+			var folder = directive + "/" + name;
+			console.info("loading module", folder);
+			moduleLinks.each(function (i) {
+				if ($(this).attr("href") == '#' + name) $(this).parent().addClass("active")
+				else $(this).parent().removeClass("active")
+			})
+			mainContent.load(folder + "/view.html", function (res, status) {
+				pageName.html(toTitleCase(name.split(/(?=[A-Z])/).join(" ")));
+				if (status !== "success") mainContent.html(folder + " module not found.")
+			});
+		}
+		moduleLinks.on('click', function(){
+			loadModule($(this).attr('href').substr(1))
+		});
+		if (!window.location.hash.substr(1)) $(moduleLinks[0]).click();
+		else loadModule(window.location.hash.substr(1));
+		//
+		$('script[delete]').remove(); //delete this script block
+	});
+</script>
 </body>
 </html>
