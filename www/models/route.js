@@ -21,5 +21,5 @@ module.exports = function (mongoose) {
         body.active = body.hasOwnProperty("active") ? body.active : true;
         return this.find(body).populate(query).exec(cb);
     };
-    return mongoose.model('url', urlSchema);
+    return mongoose.model('route', urlSchema);
 };

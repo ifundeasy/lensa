@@ -7,14 +7,17 @@ module.exports = function (mongoose) {
         },
         routes : [
             {
-                "urls._id" : {
+                "routes._id" : {
                     ref : 'url',
-                    type : Schema.Types.ObjectId
+                    type : Schema.Types.ObjectId,
+                    required : true
                 },
-                read  : {type : Boolean, default : true},
-                create : {type : Boolean, default : true},
-                update : {type : Boolean, default : true},
-                delete : {type : Boolean, default : false}
+                methods  : [{
+                    type : String,
+                    required : true,
+                    enum : ["GET", "POST", "PUT", "DELETE"],
+                    default : "GET"
+                }]
             }
         ],
         notes : String,

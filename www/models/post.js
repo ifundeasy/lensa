@@ -69,7 +69,7 @@ module.exports = function (mongoose) {
                     match : {active : true}
                 },
                 {
-                    path : "userTypes._id",
+                    path : "userGroups._id",
                     select : "name userRoles._id",
                     match : {active : true},
                     populate : {
@@ -116,7 +116,7 @@ module.exports = function (mongoose) {
             match : {active : true},
             populate : [
                 {
-                    path : "userTypes._id",
+                    path : "userGroups._id",
                     select : "name userRoles._id",
                     match : {active : true},
                     populate : {
@@ -168,7 +168,7 @@ module.exports = function (mongoose) {
             match : {active : true},
             populate : [
                 {
-                    path : "userTypes._id",
+                    path : "userGroups._id",
                     select : "name userRoles._id",
                     match : {active : true},
                     populate : {

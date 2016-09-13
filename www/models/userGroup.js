@@ -1,6 +1,6 @@
 module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
-    var userTypeSchema = new Schema({
+    var userGroupSchema = new Schema({
         name : {
             type : String,
             required : true
@@ -24,15 +24,15 @@ module.exports = function (mongoose) {
             match : {active : true}
         }
     };
-    userTypeSchema.statics.popFindOne = function (body, cb) {
+    userGroupSchema.statics.popFindOne = function (body, cb) {
         body = body || {};
         body.active = body.hasOwnProperty("active") ? body.active : true;
         return this.findOne(body).populate(query).exec(cb);
     };
-    userTypeSchema.statics.popFind = function (body, cb) {
+    userGroupSchema.statics.popFind = function (body, cb) {
         body = body || {};
         body.active = body.hasOwnProperty("active") ? body.active : true;
         return this.find(body).populate(query).exec(cb);
     };
-    return mongoose.model('userType', userTypeSchema);
+    return mongoose.model('userGroup', userGroupSchema);
 };

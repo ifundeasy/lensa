@@ -83,8 +83,8 @@ module.exports = function (mongoose, regEx) {
         state : String,
         zipcode : String,
         birthDate : {type : Date, default : Date.now},
-        "userTypes._id" : {
-            ref : 'userType',
+        "userGroups._id" : {
+            ref : 'userGroup',
             type : Schema.Types.ObjectId,
             required : true
         },
@@ -136,7 +136,7 @@ module.exports = function (mongoose, regEx) {
             match : {active : true}
         },
         {
-            path : "userTypes._id",
+            path : "userGroups._id",
             select : "name userRoles._id",
             match : {active : true},
             populate : {

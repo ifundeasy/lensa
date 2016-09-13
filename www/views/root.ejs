@@ -9,6 +9,12 @@
 	<link href="/.inspinia/css/bootstrap.min.css" rel="stylesheet">
 	<link href="/.inspinia/font-awesome/css/font-awesome.css" rel="stylesheet">
 	<link href="/.inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/chosen/bootstrap-chosen.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/switchery/switchery.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/jasny/jasny-bootstrap.min.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/select2/select2.min.css" rel="stylesheet">
 	<link href="/.inspinia/css/animate.css" rel="stylesheet">
 	<link href="/.inspinia/css/style.css" rel="stylesheet">
 </head>
@@ -58,7 +64,7 @@
 					</a>
 					<ul class="nav nav-second-level collapse">
 						<li><a href="#routes">Routes</a></li>
-						<li><a href="#userGroup">Group</a></li>
+						<li><a href="#userGroup">User Groups</a></li>
 						<li><a href="#userGroupRole">Roles</a></li>
 					</ul>
 				</li>
@@ -214,27 +220,25 @@
 <script type="application/javascript" src="/.inspinia/js/jquery-2.1.1.js"></script>
 <script type="application/javascript" src="/.inspinia/js/jquery-ui-1.10.4.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/bootstrap.min.js"></script>
+<!-- Custom and plugin javascript -->
 <script type="application/javascript" src="/.inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-<!-- Custom and plugin javascript -->
-<script type="application/javascript" src="/.inspinia/js/inspinia.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/pace/pace.min.js"></script>
-<!-- iCheck -->
 <script type="application/javascript" src="/.inspinia/js/plugins/iCheck/icheck.min.js"></script>
-<!-- Jvectormap -->
-<script type="application/javascript" src="/.inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
-<script type="application/javascript" src="/.inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
-<!-- Flot -->
-<script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.js"></script>
-<script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
-<script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/chosen/chosen.jquery.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/jasny/jasny-bootstrap.min.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/switchery/switchery.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/select2/select2.full.min.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>
+<script type="application/javascript" src="/.inspinia/js/inspinia.js"></script>
 <script type="application/javascript" delete>
 	var toTitleCase = function (str) {
 		return str.replace(/\w\S*/g, function (txt) {
 			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 		});
 	};
-	$(document).ready(function(){
+	$(document).ready(function () {
 		var navbar = $("#navbar");
 		var pageName = $("#pagename");
 		var mainContent = $("#main-content");
@@ -252,7 +256,7 @@
 				if (status !== "success") mainContent.html(folder + " module not found.")
 			});
 		}
-		moduleLinks.on('click', function(){
+		moduleLinks.on('click', function () {
 			loadModule($(this).attr('href').substr(1))
 		});
 		if (!window.location.hash.substr(1)) $(moduleLinks[0]).click();
