@@ -3,9 +3,14 @@ module.exports = function (mongoose) {
     var urlSchema = new Schema({
         name : {
             type : String,
-            required : true
+            required : true,
+            unique : true
         },
-        api : String,
+        tableName : {
+            type : String,
+            required : true,
+            unique : true
+        },
         notes : String,
         createdAt : { type: Date, default: Date.now },
         active : { type: Boolean, default: true }

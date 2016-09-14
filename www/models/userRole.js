@@ -8,11 +8,11 @@ module.exports = function (mongoose) {
         routes : [
             {
                 "routes._id" : {
-                    ref : 'url',
+                    ref : 'route',
                     type : Schema.Types.ObjectId,
                     required : true
                 },
-                methods  : [{
+                methods : [{
                     type : String,
                     required : true,
                     enum : ["GET", "POST", "PUT", "DELETE"],
