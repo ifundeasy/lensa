@@ -1,4 +1,25 @@
-module.exports = function (obj) {
+var mongoose = require('mongoose');
+mongoose.nested = function (obj, nestIdx) {
+    nestIdx = nestIdx == -1 ? Infinity : nestIdx
+    if (!nestIdx && !(nestIdx == 0)) return obj;
+    else if (nestIdx == 0) return {};
+    return (function nest(o, j) {
+        if (o.constructor == Array) {
+            o.forEach(function (pop) {
+                nest(pop, j)
+            })
+        } else if (o.constructor == Object) {
+            if ((j < nestIdx-1) && o.populate) {
+                j += 1;
+                nest(o.populate, j)
+            } else {
+                delete o.populate
+            }
+        }
+        return o;
+    })(obj, 0)
+};
+mongoose.normalize = function (obj) {
     return new (function grep(obj) {
         if (obj && typeof obj == "object") {
             if (obj.constructor == Array) {
@@ -32,4 +53,6 @@ module.exports = function (obj) {
         }
         return obj
     })(JSON.parse(JSON.stringify(obj)))
-};
+}
+mongoose.Promise = require('bluebird');
+module.exports = mongoose;

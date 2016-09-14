@@ -1,5 +1,10 @@
 $(document).ready(function () {
-    $("#tableName").chosen({no_results_text : "Oops, nothing found!", width : "100%"});
+    var collection = $("#tableName");
+    App.models.forEach(function (model) {
+        var el = toTitleCase(splitCamelCase(model));
+        collection.append('<option value="'+ el +'">'+ el +'</option>');
+    })
+    collection.chosen({no_results_text : "Oops, nothing found!", width : "100%"});
     $('.dataTables-example').DataTable({
         pageLength : 25,
         responsive : true,

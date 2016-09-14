@@ -3,7 +3,7 @@
 var print = function (object) {
     return JSON.stringify(object, 0, 2);
 };
-var normalize = require('./../libs/normalize');
+//var normalize = require('./../libs/normalize');
 var ngo = require('./../config/mongo');
 var Db = require('./../libs/db');
 ngo.database.callback = function (err, db) {
@@ -222,17 +222,17 @@ var main = function (db) {
             process.exit()
         })*/
         Person
-        .finder(null)
+        .find({})
+        .populate("jobs._ids phones.phonetypes._id")
         .then(function (docs) {
-            var rows = normalize(docs);
-            console.log(print(rows))
+            //var rows = normalize(docs);
+            console.log(print(docs))
         })
         .catch(function (err) {
             console.log(err)
         })
     }
-    /*
-    putCountry(function(){
+    /*putCountry(function(){
         putJob(function(){
             putPhoneType(function(){
                 putCompany(function(){
@@ -242,7 +242,6 @@ var main = function (db) {
                 })
             })
         })
-    });
-    */
+    });*/
     getPerson()
 };

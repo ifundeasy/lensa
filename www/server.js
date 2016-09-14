@@ -14,11 +14,11 @@ var fs = require('fs'),
 //
 module.exports = function (global, worker, db) {
     var account = global.account;
-    var mongoose = db.mongoose;
     var httpServer = worker.httpServer;
     var scServer = worker.scServer;
     var app = express();
     var locals = app.locals;
+    var mongoose = db.mongoose;
     var models = require(global.models)(global.models, mongoose);
     //
     var auth = require(global.home + 'auth');
@@ -97,10 +97,21 @@ module.exports = function (global, worker, db) {
     app.use(expressSession(session), auth(global, locals, models.user));
     //
     app.get('/', function (req, res, next) {
-        var type = req.user.type = "root";
-        res.render(type);
+        if (req.user) {
+            var type = req.user.type = "root";
+            locals.www = {
+                models : Object.keys(models)
+            };
+            res.render(type, locals.www);
+        } else {
+            res.redirect('/login')
+        }
     });
-    app.use('/api', require(global.routes + 'api')(param));
+    //app.use('/api', require(global.routes + 'api')(param));
+    app.use('/api', function (req, res, next) {
+        req.user ? next() : res.redirect('/login');
+    }, require(global.routes + 'api')(param));
+    //
     app.get('/contact', function (req, res, next) {
         res.render('contact', {logged : req.user ? 1 : 0});
     });

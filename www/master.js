@@ -8,6 +8,7 @@ var options = {
     description : env.npm_package_description || '',
     node : env.NODE,
     workers : require('os').cpus().length || Number(argv.worker) || Number(env.npm_package_worker) || Number(env.SOCKETCLUSTER_WORKERS) || 4,
+    workers : 1,
     brokers : Number(argv.broker) || Number(env.npm_package_broker) || Number(env.SOCKETCLUSTER_BROKERS) || 1,
     port : Number(argv.port) || Number(env.npm_package_port) || 8000,
     // Switch wsEngine to 'uws' for a MAJOR performance boost (beta)

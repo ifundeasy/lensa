@@ -60,13 +60,12 @@
 				<li>
 					<a href="#">
 						<i class="fa fa-edit"></i>
-						<span class="nav-label">Routes, Group & Role</span>
+						<span class="nav-label">User Group & Role</span>
 						<span class="fa arrow"></span>
 					</a>
 					<ul class="nav nav-second-level collapse">
-						<li><a href="#routes">Routes</a></li>
-						<li><a href="#userGroup">User Groups</a></li>
-						<li><a href="#userGroupRole">Roles</a></li>
+						<li><a href="#userGroup">User Group</a></li>
+						<li><a href="#userGroupRole">Group Role</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -240,6 +239,12 @@
 			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 		});
 	};
+	var splitCamelCase = function (str) {
+		return str.split(/(?=[A-Z])/).join(" ");
+	}
+	window.App = <%- JSON.stringify(locals.www, 0, 2); %>;
+	delete window.App["_locals"];
+	//
 	$(document).ready(function () {
 		var navbar = $("#navbar");
 		var pageName = $("#pagename");
@@ -254,7 +259,7 @@
 				else $(this).parent().removeClass("active")
 			})
 			mainContent.load(folder + "/view.html", function (res, status) {
-				pageName.html(toTitleCase(name.split(/(?=[A-Z])/).join(" ")));
+				pageName.html(toTitleCase(splitCamelCase(name)));
 				if (status !== "success") mainContent.html(folder + " module not found.")
 			});
 		}

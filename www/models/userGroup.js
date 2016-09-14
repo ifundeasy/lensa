@@ -5,8 +5,8 @@ module.exports = function (mongoose) {
             type : String,
             required : true
         },
-        "userRoles._id" : {
-            ref : 'userRole',
+        "userGroupRoles._id" : {
+            ref : 'userGroupRole',
             type : Schema.Types.ObjectId,
             required : true
         },
@@ -14,25 +14,14 @@ module.exports = function (mongoose) {
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
     });
-    var query = {
-        path : "userRoles._id",
-        select : "name routes",
-        match : {active : true},
-        populate : {
-            path : "routes.urls._id",
-            select : "name api",
+    //
+    userGroupSchema.statics.getPopQuery = function (nestIdx) {
+        var populate = {
+            path : "userGroupRoles._id",
+            select : "name routes",
             match : {active : true}
-        }
-    };
-    userGroupSchema.statics.popFindOne = function (body, cb) {
-        body = body || {};
-        body.active = body.hasOwnProperty("active") ? body.active : true;
-        return this.findOne(body).populate(query).exec(cb);
-    };
-    userGroupSchema.statics.popFind = function (body, cb) {
-        body = body || {};
-        body.active = body.hasOwnProperty("active") ? body.active : true;
-        return this.find(body).populate(query).exec(cb);
+        };
+        return mongoose.nested(populate, nestIdx)
     };
     return mongoose.model('userGroup', userGroupSchema);
 };

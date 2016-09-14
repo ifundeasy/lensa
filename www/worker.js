@@ -21,7 +21,7 @@ module.exports.run = function (worker) {
         };
         //
         try {
-            obj.ip = require(home + 'libs/getip')()
+            obj.ip = require(obj.libs + 'getip')()
         } catch (e) {
             obj.ip = "localhost";
         }
@@ -32,13 +32,14 @@ module.exports.run = function (worker) {
         return obj
     })();
     //
-    var ngo = global.account.mongo;
-    ngo.database.callback = function (err, db) {
+    var mongodb = global.account.mongo;
+    var mongoose = require(global.libs + 'mongoose');
+    mongodb.database.onListen = function (err, db) {
         if (!err) {
             console.log('   >> ' + process.pid + ' Connected to mongodb');
             require(global.home + 'server')(global, worker, db);
         } else console.log('> Error open connection', err)
     };
     var Db = require(global.libs + 'db');
-    new Db(ngo.connection).open(ngo.database);
+    new Db(mongoose, mongodb.connection).open(mongodb.database);
 };

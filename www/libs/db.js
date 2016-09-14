@@ -1,4 +1,5 @@
-var Db = function (config) {
+var Db = function (mongoose, config) {
+    this.mongoose = mongoose;
     this.url = this.setURL(config);
     return this;
 };
@@ -16,10 +17,8 @@ Db.prototype.open = function (config) {
     //
     console.log('   >> ' + process.pid + ' Connecting to :', url);
     //
-    me.mongoose = require('mongoose');
-    me.mongoose.Promise = require('bluebird');
     me.mongoose.connect(url, o, function (err) {
-        config.callback(err, me)
+        config.onListen(err, me)
     });
 };
 Db.prototype.setURL = function (config) {

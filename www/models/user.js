@@ -103,6 +103,7 @@ module.exports = function (mongoose, regEx) {
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
     });
+    //
     userSchema.virtual('name.full').get(function () {
         return this.name.first + ' ' + this.name.last;
     });
@@ -129,42 +130,24 @@ module.exports = function (mongoose, regEx) {
         });
     };
     //
-    var query = [
-        {
-            path : "medias._ids",
-            select : "type directory description",
-            match : {active : true}
-        },
-        {
-            path : "userGroups._id",
-            select : "name userRoles._id",
-            match : {active : true},
-            populate : {
-                path : "userRoles._id",
-                select : "name routes",
-                match : {active : true},
-                populate : {
-                    path : "routes.urls._id",
-                    select : "name api",
-                    match : {active : true}
-                }
-            }
-        },
-        {
-            path : "organizations._id",
-            select : "name description",
-            match : {active : true},
-            populate : {
-                path : "medias._id",
+    userSchema.statics.getPopQuery = function (nestIdx) {
+        var populate = [
+            {
+                path : "medias._ids",
                 select : "type directory description",
                 match : {active : true}
-            }
-        },
-        {
-            path : "organizationRoles._id",
-            select : "name description organizations._id",
-            match : {active : true},
-            populate : {
+            },
+            {
+                path : "userGroups._id",
+                select : "name userGroupRoles._id",
+                match : {active : true},
+                populate : {
+                    path : "userGroupRoles._id",
+                    select : "name routes",
+                    match : {active : true}
+                }
+            },
+            {
                 path : "organizations._id",
                 select : "name description",
                 match : {active : true},
@@ -173,18 +156,24 @@ module.exports = function (mongoose, regEx) {
                     select : "type directory description",
                     match : {active : true}
                 }
+            },
+            {
+                path : "organizationRoles._id",
+                select : "name description organizations._id",
+                match : {active : true},
+                populate : {
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "medias._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
+                }
             }
-        }
-    ];
-    userSchema.statics.popFindOne = function (body, cb) {
-        body = body || {};
-        body.active = body.hasOwnProperty("active") ? body.active : true;
-        return this.findOne(body).populate(query).exec(cb);
-    };
-    userSchema.statics.popFind = function (body, cb) {
-        body = body || {};
-        body.active = body.hasOwnProperty("active") ? body.active : true;
-        return this.find(body).populate(query).exec(cb);
+        ];
+        return mongoose.nested(populate, nestIdx)
     };
     //
     return mongoose.model('user', userSchema);

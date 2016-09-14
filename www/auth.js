@@ -130,8 +130,7 @@ module.exports = function (global, locals, user) {
                 });
             } else {
                 res.clearCookie(global.name);
-                if (path == '/login') next();
-                else res.redirect('/login');
+                next();
             }
         }
     };
