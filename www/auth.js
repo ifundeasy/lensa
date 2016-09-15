@@ -29,7 +29,7 @@ module.exports = function (global, locals, user) {
                     res.clearCookie(global.name);
                     res.redirect('/login');
                 } else {
-                    user.findOne({username : usr}, function (err, user) {
+                    user.findOne({username : usr}).lean().exec(function (err, user) {
                         if (!err) {
                             if (!user) locals.loginMsg.push({'invalid username' : usr});
                         } else {
@@ -75,10 +75,10 @@ module.exports = function (global, locals, user) {
                                                 user : user,
                                                 cookie : {
                                                     id : cookieId,
-                                                    path: session.cookie.path,
-                                                    originalMaxAge: session.cookie.originalMaxAge,
-                                                    httpOnly: session.cookie.httpOnly,
-                                                    expires: session.cookie._expires
+                                                    path : session.cookie.path,
+                                                    originalMaxAge : session.cookie.originalMaxAge,
+                                                    httpOnly : session.cookie.httpOnly,
+                                                    expires : session.cookie._expires
                                                 }
                                             };
                                             if (path == '/login' || path == "/registration" || path == "/forgot") {
@@ -105,7 +105,7 @@ module.exports = function (global, locals, user) {
                         locals.loginMsgTxt = 'Login fail';
                         res.redirect('/login');
                     } else {
-                        user.pwdCheck(body.password, function(err, valid) {
+                        user.pwdCheck(body.password, function (err, valid) {
                             if (err) locals.loginMsg.push({'fail calculating work factor' : body.password})
                             if (!valid) locals.loginMsg.push({'invalid password' : body.password})
                             if (locals.loginMsg.length) {
