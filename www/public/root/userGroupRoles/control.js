@@ -1,5 +1,4 @@
 //todo : notification (when error ajax);
-//todo : prompt with message box (when create, update, delete);
 //todo : routing management, (method PUT, triggering when click button inside routes columns), please using messagebox.
 //
 $(document).ready(function () {
@@ -15,6 +14,14 @@ $(document).ready(function () {
     var form = $('#form');
     var info = $('#info');
     var infoname = $('#info-name');
+    var modal = new Modal({
+        title : "Prompt",
+        backdrop : true,
+        handler : {
+            OK : {class : "btn-success"},
+            Cancel : {class : "btn-default", dismiss : true}
+        }
+    });
     var setTable = function () {
         var table = $(
             '<table class="table table-striped table-bordered table-hover">' +
@@ -95,27 +102,39 @@ $(document).ready(function () {
                             }));
                             collection.trigger("chosen:updated");
                             info.text("Update");
+                            modal.setTitle("Update : " + data.name);
                             infoname.text("\"" + data.name + "\"");
                             name.val(data.name);
                             notes.val(data.notes);
                             isUpdate = data._id;
                         }
                     });
-                    deleteBtn.data('id', row._id);
+                    deleteBtn.data({
+                        id : row._id,
+                        name : row.name
+                    });
                     deleteBtn.on("click", function () {
-                        $.ajax({
-                            method : "DELETE",
-                            dataType : "json",
-                            url : url + $(this).data('id')
-                        }).error(function (jqXHR, is, message) {
-                            console.error(method, {
-                                is : is,
-                                message : message,
-                                response : jqXHR.responseJSON
-                            })
-                        }).success(function (res) {
-                            reset.click();
-                            getting();
+                        modal
+                        .setTitle("Delete : " + $(this).data('name'))
+                        .setBody("Are you sure want to remove these?")
+                        .show();
+                        modal.$buttons.OK.off("click");
+                        modal.$buttons.OK.on("click", function () {
+                            modal.hide();
+                            $.ajax({
+                                method : "DELETE",
+                                dataType : "json",
+                                url : url + $(this).data('id')
+                            }).error(function (jqXHR, is, message) {
+                                console.error(method, {
+                                    is : is,
+                                    message : message,
+                                    response : jqXHR.responseJSON
+                                })
+                            }).success(function (res) {
+                                reset.click();
+                                getting();
+                            });
                         });
                     })
                     table.find('tbody').append(tr)
@@ -139,6 +158,23 @@ $(document).ready(function () {
             notes : notes.val(),
             routes : collection.val() || []
         };
+        var save = function () {
+            $.ajax({
+                method : method,
+                dataType : "json",
+                data : data,
+                url : url_
+            }).error(function (jqXHR, is, message) {
+                console.error(method, {
+                    is : is,
+                    message : message,
+                    response : jqXHR.responseJSON
+                })
+            }).success(function (res) {
+                reset.click();
+                getting();
+            });
+        }
         if (isUpdate) {
             method = "PUT";
             url_ = url + isUpdate;
@@ -166,21 +202,16 @@ $(document).ready(function () {
                 }
             })
         }
-        $.ajax({
-            method : method,
-            dataType : "json",
-            data : data,
-            url : url_
-        }).error(function (jqXHR, is, message) {
-            console.error(method, {
-                is : is,
-                message : message,
-                response : jqXHR.responseJSON
-            })
-        }).success(function (res) {
-            reset.click();
-            getting();
-        });
+        if (method == "PUT") {
+            modal.setBody("Are you sure want to save these changes?").show();
+            modal.$buttons.OK.off("click");
+            modal.$buttons.OK.on("click", function () {
+                modal.hide();
+                save()
+            });
+        } else {
+            save()
+        }
     };
     //
     init();
