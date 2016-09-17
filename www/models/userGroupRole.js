@@ -23,6 +23,7 @@ module.exports = function (mongoose) {
                 },
                 methods : [{
                     type : String,
+                    uppercase: true,
                     required : true,
                     enum : ["GET", "POST", "PUT", "DELETE"],
                     default : "GET"

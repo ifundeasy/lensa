@@ -100,7 +100,11 @@ module.exports = function (global, worker, db) {
         if (req.user) {
             var type = req.user.type = "root";
             locals.www = {
-                models : Object.keys(models)
+                models : (function(){
+                    var o = {}
+                    for (var m in models) o[models[m].collection.name] = m;
+                    return o
+                })()
             };
             res.render(type, locals.www);
         } else {
@@ -163,13 +167,26 @@ module.exports = function (global, worker, db) {
         next(err);
     });
     app.use(function (err, req, res, next) {
-        locals.error = {
+        locals.ERR = {
             status : err.status || 500,
             message : err.message || "Oops! Something wrong.",
+            error : err.errors,
+            data : null
         };
-        if (app.get('env') === 'development') locals.error["trace"] = err.stack;
-        res.status(locals.error.status);
-        res.render('error', locals);
+        if (app.get('env') === 'development') locals.ERR["trace"] = err.stack;
+        //
+        res.status(locals.ERR.status);
+        res.format({
+            html : function () {
+                res.render('error', locals);
+            },
+            json : function () {
+                res.json(locals.ERR);
+            },
+            text : function () {
+                res.send(JSON.stringify(locals.ERR, 0, 2));
+            }
+        });
     });
     //
     httpServer.timeout = global.timeOut;
