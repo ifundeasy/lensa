@@ -22,6 +22,22 @@ $(document).ready(function () {
             Cancel : {class : "btn-default", dismiss : true}
         }
     });
+    var rolesPopUp = new Modal({
+        backdrop : true,
+        body : $(
+            '<label>Method role</label>' +
+            '<select data-placeholder="Choose methods" class="chosen-select" multiple>' +
+            '<option value="GET">Get</option>' +
+            '<option value="POST">Post</option>' +
+            '<option value="PUT">Put</option>' +
+            '<option value="DELETE">Delete</option>' +
+            '</select>'
+        ),
+        handler : {
+            Save : {class : "btn-success"},
+            Cancel : {class : "btn-default", dismiss : true}
+        }
+    });
     var setTable = function () {
         var table = $(
             '<table class="table table-striped table-bordered table-hover">' +
@@ -40,12 +56,14 @@ $(document).ready(function () {
         tcontainer.append(table);
         return table;
     }
-    for (var m in App.models) {
-        var model = App.models[m]
-        collection.append('<option value="' + m + '">' + model + '</option>');
-    }
-    collection.chosen({no_results_text : "Oops, nothing found!", width : "100%"});
     var init = function () {
+        var chosenConfig = {no_results_text : "Oops, nothing found!", width : "100%"};
+        for (var m in App.models) {
+            var model = App.models[m]
+            collection.append('<option value="' + m + '">' + model + '</option>');
+        }
+        collection.chosen(chosenConfig);
+        rolesPopUp.$body.find("select").chosen(chosenConfig)
         save.on('click', saving);
         reset.on('click', function () {
             isUpdate = false
@@ -64,11 +82,7 @@ $(document).ready(function () {
             dataType : "json",
             url : url + "?" + $.param({limit : 1000})
         }).error(function (jqXHR, is, message) {
-            console.error("GET", {
-                is : is,
-                message : message,
-                response : jqXHR.responseJSON
-            })
+            console.error("GET", jqXHR.responseJSON)
         }).success(function (res) {
             if (res.data.total) {
                 var rows = res.data.rows;
@@ -82,10 +96,43 @@ $(document).ready(function () {
                     tr.append(action)
                     tr.append("<td>" + row.name + "</td>")
                     if (row.routes && typeof row.routes == "object") {
+                        var data =
                         row.routes.forEach(function (route) {
                             var btn = $("<input type='button' class='btn btn-xs btn-default' style='margin-right: 3px'>")
                             btn.val(App.models[route.model])
                             btn.data(route);
+                            btn.on("click", function () {
+                                var selections = rolesPopUp.$body.find("select");
+                                var data = $(this).data();
+                                selections.val(data.methods).trigger("chosen:updated");
+                                rolesPopUp.$buttons.Save.off("click");
+                                rolesPopUp.$buttons.Save.on("click", function () {
+                                    rolesPopUp.hide();
+                                    console.log(data)
+                                    $.ajax({
+                                        method : "PUT",
+                                        dataType : "json",
+                                        data : {
+                                            nested : {
+                                                key : "routes._id",
+                                                value : data._id
+                                            },
+                                            docs : {
+                                                model : data.model,
+                                                methods : selections.val()
+                                            }
+                                        },
+                                        url : url + tr.data('_id')
+                                    }).error(function (jqXHR, is, message) {
+                                        console.error("PUT", jqXHR.responseJSON)
+                                    }).success(function (res) {
+                                        reset.click();
+                                        getting();
+                                    });
+                                });
+                                rolesPopUp.setTitle(tr.data("name") + " : " + App.models[data.model] + " role")
+                                .show();
+                            });
                             routes.append(btn);
                         })
                     }
@@ -94,8 +141,8 @@ $(document).ready(function () {
                     action.append(deleteBtn);
                     tr.on("click", function (ev) {
                         var is = ev.target.nodeName;
+                        var data = $(this).data();
                         if (["INPUT", "BUTTON", "I"].indexOf(is) == -1) {
-                            var data = $(this).data();
                             tempRoutes = data.routes;
                             collection.val(tempRoutes.map(function (a) {
                                 return a.model
@@ -124,13 +171,9 @@ $(document).ready(function () {
                             $.ajax({
                                 method : "DELETE",
                                 dataType : "json",
-                                url : url + $(this).data('id')
+                                url : url + tr.data('_id')
                             }).error(function (jqXHR, is, message) {
-                                console.error(method, {
-                                    is : is,
-                                    message : message,
-                                    response : jqXHR.responseJSON
-                                })
+                                console.error("DELETE", jqXHR.responseJSON)
                             }).success(function (res) {
                                 reset.click();
                                 getting();
@@ -165,11 +208,7 @@ $(document).ready(function () {
                 data : data,
                 url : url_
             }).error(function (jqXHR, is, message) {
-                console.error(method, {
-                    is : is,
-                    message : message,
-                    response : jqXHR.responseJSON
-                })
+                console.error(method, jqXHR.responseJSON)
             }).success(function (res) {
                 reset.click();
                 getting();
@@ -194,6 +233,7 @@ $(document).ready(function () {
                     methods : ["GET", "POST", "PUT", "DELETE"]
                 }
             }).concat(newState);
+            data = {docs : data};
         } else {
             data.routes = data.routes.map(function (route) {
                 return {

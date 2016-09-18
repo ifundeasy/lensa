@@ -170,10 +170,13 @@ module.exports = function (global, worker, db) {
         locals.ERR = {
             status : err.status || 500,
             message : err.message || "Oops! Something wrong.",
-            error : err.errors,
-            data : null
+            error : err.errors
         };
-        if (app.get('env') === 'development') locals.ERR["trace"] = err.stack;
+        console.log("> ", JSON.stringify(locals.ERR));
+        if (app.get('env') === 'development' && err.stack) {
+            locals.ERR.trace = err.stack;
+            console.log("> ", locals.ERR.trace)
+        }
         //
         res.status(locals.ERR.status);
         res.format({
