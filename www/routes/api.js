@@ -135,19 +135,22 @@ module.exports = function (args) {
         //
         if (notError == true) {
             var model = Collection[collname];
-            var selection = {_id : id};
+            var selection = {_id : id, active : true};
             var docs = req.body.docs;
             var nested = req.body.nested;
             if (nested) {
                 selection[nested.key] = nested.value;
                 var partial = {};
                 for (var key in docs) {
-                    var parent = nested.key.substr(0, nested.key.lastIndexOf("."));
-                    var selected = [parent,key].join('.$.');
-                    partial[selected] = docs[key];
+                    if (key !== "active") {
+                        var parent = nested.key.substr(0, nested.key.lastIndexOf("."));
+                        var selected = [parent, key].join('.$.');
+                        partial[selected] = docs[key];
+                    }
                 }
                 docs = partial;
-            }
+            } else delete docs["active"];
+            //
             model.update(selection, {$set : docs}).then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
@@ -174,7 +177,7 @@ module.exports = function (args) {
         var id = req.params.id;
         if (Collection.hasOwnProperty(collname) && id) {
             var model = Collection[collname];
-            model.update({_id : id}, {$set : {active : false}}).then(function (docs) {
+            model.update({_id : id, active : true}, {$set : {active : false}}).then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
                     status : 200,

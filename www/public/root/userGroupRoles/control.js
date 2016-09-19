@@ -1,7 +1,5 @@
-//todo : notification (when error ajax);
-//todo : routing management, (method PUT, triggering when click button inside routes columns), please using messagebox.
-//
 $(document).ready(function () {
+    var clsColors = ["primary", "success", "default", "warning", "danger"];
     var url = "/api/usergrouproles/";
     var isUpdate = false;
     var tempRoutes = undefined;
@@ -116,7 +114,9 @@ $(document).ready(function () {
                     if (row.routes && typeof row.routes == "object") {
                         var data =
                         row.routes.forEach(function (route) {
-                            var btn = $("<input type='button' class='btn btn-xs btn-default' style='margin-right: 3px'>")
+                            route.methods = route.methods || [];
+                            var cls = clsColors[route.methods.length];
+                            var btn = $("<input type='button' class='btn btn-xs btn-outline btn-"+ cls +"' style='margin-right: 3px'>")
                             btn.val(App.models[route.model])
                             btn.data(route);
                             btn.on("click", function () {
