@@ -14,7 +14,8 @@ module.exports = function (mongoose, regEx) {
             required : true,
             minlength : 5,
             maxlength : 20,
-            unique : true
+            unique : true,
+            index : true
         },
         "medias._id" : { //avatar
             ref : 'media',
@@ -139,13 +140,8 @@ module.exports = function (mongoose, regEx) {
             },
             {
                 path : "userGroups._id",
-                select : "name userGroupRoles._id",
-                match : {active : true},
-                populate : {
-                    path : "userGroupRoles._id",
-                    select : "name routes",
-                    match : {active : true}
-                }
+                select : "name routes",
+                match : {active : true}
             },
             {
                 path : "organizations._id",

@@ -3,31 +3,23 @@
 		<div class="ibox float-e-margins">
 			<div class="ibox-title">
 				<h5>
-					<span>Form</span>
-					<small>add group</small>
+					<span id="info">Create</span>
+					<small id="info-name"></small>
 				</h5>
 			</div>
 			<div class="ibox-content">
 				<div class="row">
 					<div class="col-sm-12">
-						<form role="form">
+						<form id="form" role="form">
 							<div class="form-group">
 								<label>Name</label>
-								<input id="name" type="text" placeholder="Enter alias" class="form-control">
+								<input id="name" type="text" placeholder="Enter name" class="form-control">
 							</div>
 							<div class="form-group">
-								<label>Routes</label>
+								<label>Collection</label>
 								<div>
-									<select id="routes" data-placeholder="Choose routes" class="chosen-select" multiple style="">
-										<option value="United States">United States</option>
-										<option value="United Kingdom">United Kingdom</option>
-										<option value="Afghanistan">Afghanistan</option>]
-										<option value="Bhutan">Bhutan</option>
-										<option value="Bolivia, Plurinational State of">Bolivia, Plur...of</option>
-										<option value="Saint Helena, Ascension and Tristan da Cunha">Saint Hele..a</option>
-										<option value="Yemen">Yemen</option>
-										<option value="Zambia">Zambia</option>
-										<option value="Zimbabwe">Zimbabwe</option>
+									<select id="tableName" data-placeholder="Choose collection" class="chosen-select" multiple style="">
+										<!---->
 									</select>
 								</div>
 							</div>
@@ -36,14 +28,14 @@
 								<input id="notes" type="text" placeholder="" class="form-control">
 							</div>
 							<div class="pull-right">
-								<button class="btn btn-sm btn-default m-t-n-xs">
+								<button id="reset" type="button" class="btn btn-sm btn-default m-t-n-xs">
 									<strong>Reset</strong>
 								</button>
-								<button class="btn btn-sm btn-success m-t-n-xs">
+								<button id="save" type="button" class="btn btn-sm btn-success m-t-n-xs">
 									<strong>Save</strong>
 								</button>
 							</div>
-							<div class="switch">
+							<!--<div class="switch">
 								<div class="onoffswitch">
 									<input type="checkbox" checked class="onoffswitch-checkbox" id="active">
 									<label class="onoffswitch-label" for="active">
@@ -51,7 +43,7 @@
 										<span class="onoffswitch-switch"></span>
 									</label>
 								</div>
-							</div>
+							</div>-->
 						</form>
 					</div>
 				</div>
@@ -61,95 +53,11 @@
 	<div class="col-lg-8">
 		<div class="ibox float-e-margins">
 			<div class="ibox-title">
-				<h5>Custom responsive table </h5>
-				<div class="ibox-tools">
-					<a class="collapse-link">
-						<i class="fa fa-chevron-up"></i>
-					</a>
-					<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-						<i class="fa fa-wrench"></i>
-					</a>
-					<ul class="dropdown-menu dropdown-user">
-						<li><a href="#">Config option 1</a>
-						</li>
-						<li><a href="#">Config option 2</a>
-						</li>
-					</ul>
-					<a class="close-link">
-						<i class="fa fa-times"></i>
-					</a>
-				</div>
+				<h5>Current data </h5>
 			</div>
 			<div class="ibox-content">
-				<div class="row">
-					<div class="col-sm-5 m-b-xs"><select class="input-sm form-control input-s-sm inline">
-						<option value="0">Option 1</option>
-						<option value="1">Option 2</option>
-						<option value="2">Option 3</option>
-						<option value="3">Option 4</option>
-					</select>
-					</div>
-					<div class="col-sm-4 m-b-xs">
-						<div data-toggle="buttons" class="btn-group">
-							<label class="btn btn-sm btn-white"> <input type="radio" id="option1" name="options"> Day </label>
-							<label class="btn btn-sm btn-white active"> <input type="radio" id="option2" name="options"> Week </label>
-							<label class="btn btn-sm btn-white"> <input type="radio" id="option3" name="options"> Month </label>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="input-group"><input type="text" placeholder="Search" class="input-sm form-control"> <span class="input-group-btn">
-                                        <button type="button" class="btn btn-sm btn-primary"> Go!</button> </span></div>
-					</div>
-				</div>
-				<div class="table-responsive">
-					<table class="table table-striped">
-						<thead>
-						<tr>
-							<th></th>
-							<th>Project</th>
-							<th>Completed</th>
-							<th>Task</th>
-							<th>Date</th>
-							<th>Action</th>
-						</tr>
-						</thead>
-						<tbody>
-						<tr>
-							<td><input type="checkbox" checked class="i-checks" name="input[]"></td>
-							<td>Project
-								<small>This is example of project</small>
-							</td>
-							<td><span class="pie">0.52/1.561</span></td>
-							<td>20%</td>
-							<td>Jul 14, 2013</td>
-							<td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" class="i-checks" name="input[]"></td>
-							<td>Alpha project</td>
-							<td><span class="pie">6,9</span></td>
-							<td>40%</td>
-							<td>Jul 16, 2013</td>
-							<td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" class="i-checks" name="input[]"></td>
-							<td>Betha project</td>
-							<td><span class="pie">3,1</span></td>
-							<td>75%</td>
-							<td>Jul 18, 2013</td>
-							<td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" class="i-checks" name="input[]"></td>
-							<td>Gamma project</td>
-							<td><span class="pie">4,9</span></td>
-							<td>18%</td>
-							<td>Jul 22, 2013</td>
-							<td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-						</tr>
-						</tbody>
-					</table>
+				<div id="table" class="table-responsive">
+					<!---->
 				</div>
 			</div>
 		</div>

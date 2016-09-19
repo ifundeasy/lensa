@@ -72,13 +72,8 @@ module.exports = function (mongoose) {
                     },
                     {
                         path : "userGroups._id",
-                        select : "name userGroupRoles._id",
-                        match : {active : true},
-                        populate : {
-                            path : "userGroupRoles._id",
-                            select : "name routes",
-                            match : {active : true}
-                        }
+                        select : "name routes",
+                        match : {active : true}
                     },
                     {
                         path : "organizations._id",
@@ -114,13 +109,8 @@ module.exports = function (mongoose) {
                 populate : [
                     {
                         path : "userGroups._id",
-                        select : "name userGroupRoles._id",
-                        match : {active : true},
-                        populate : {
-                            path : "userGroupRoles._id",
-                            select : "name routes",
-                            match : {active : true}
-                        }
+                        select : "name",
+                        match : {active : true}
                     },
                     {
                         path : "organizations._id",
@@ -161,13 +151,8 @@ module.exports = function (mongoose) {
                 populate : [
                     {
                         path : "userGroups._id",
-                        select : "name userGroupRoles._id",
-                        match : {active : true},
-                        populate : {
-                            path : "userGroupRoles._id",
-                            select : "name routes",
-                            match : {active : true}
-                        }
+                        select : "name",
+                        match : {active : true}
                     },
                     {
                         path : "organizations._id",

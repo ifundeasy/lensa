@@ -1,27 +1,38 @@
 module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
+    var routesSchema = new Schema({
+        model : {
+            type : String,
+            lowercase : true,
+            validate : {
+                validator : function (v) {
+                    var models = Object.keys(mongoose.models).map(function (key) {
+                        return mongoose.models[key].collection.name
+                    });
+                    return models.indexOf(v.toLowerCase()) > -1;
+                },
+                message : '{VALUE} is not a valid model'
+            },
+            required : true
+        },
+        methods : [{
+            type : String,
+            uppercase : true,
+            required : true,
+            enum : ["GET", "POST", "PUT", "DELETE"],
+            default : "GET"
+        }]
+    })
     var userGroupSchema = new Schema({
         name : {
             type : String,
-            required : true
+            required : true,
+            unique : true
         },
-        "userGroupRoles._id" : {
-            ref : 'userGroupRole',
-            type : Schema.Types.ObjectId,
-            required : true
-        },
+        routes : [routesSchema],
         notes : String,
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
     });
-    //
-    userGroupSchema.statics.getPopQuery = function (nestIdx) {
-        var populate = {
-            path : "userGroupRoles._id",
-            select : "name routes",
-            match : {active : true}
-        };
-        return mongoose.nested(populate, nestIdx)
-    };
     return mongoose.model('userGroup', userGroupSchema);
 };

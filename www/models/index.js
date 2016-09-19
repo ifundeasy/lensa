@@ -13,7 +13,7 @@ module.exports = function (dir, mongoose) {
     fs.readdirSync(d).forEach(function (file) {
         var location = path.resolve(dir, file);
         var modelName = path.basename(location, '.js');
-        if (modelName != 'index') {
+        if ((modelName.indexOf(".") !== 0) && modelName != 'index') {
             o[modelName] = require(location)(mongoose, regEx)
         }
     });
