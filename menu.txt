@@ -23,6 +23,9 @@ feature (user use case, if logged);
 	*
 
 issue
+	starting point (installation)
+	* default userGroupRole + userGroup + user (this default row can not be delete / deactivate)!
+
 	chating issue
 	* ada backup, mirror di suatu server.
 	* mekasnisme nya cuma write-append, ga ada read
