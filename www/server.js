@@ -100,6 +100,9 @@ module.exports = function (global, worker, db) {
         if (req.user) {
             var type = req.user.type = "root";
             locals.www = {
+                name: param.global.name,
+                description: param.global.description,
+                version: param.global.version,
                 models : (function(){
                     var o = {}
                     for (var m in models) o[models[m].collection.name] = m;
@@ -167,17 +170,20 @@ module.exports = function (global, worker, db) {
         next(err);
     });
     app.use(function (err, req, res, next) {
+        //For avoid .map file error request.
+        var verb1 = req.url.length - 7 == req.url.lastIndexOf(".js.map");
+        var verb2 = req.url.length - 8 == req.url.lastIndexOf(".css.map");
         locals.ERR = {
             status : err.status || 500,
             message : err.message || "Oops! Something wrong.",
             error : err.errors
         };
-        console.log("> ", JSON.stringify(locals.ERR));
+        //
+        if (!(verb1 || verb2)) console.log("> ", JSON.stringify(locals.ERR));
         if (app.get('env') === 'development' && err.stack) {
             locals.ERR.trace = err.stack;
-            console.log("> ", locals.ERR.trace)
+            if (!(verb1 || verb2)) console.log("> ", locals.ERR.trace);
         }
-        //
         res.status(locals.ERR.status);
         res.format({
             html : function () {

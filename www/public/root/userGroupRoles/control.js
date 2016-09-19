@@ -38,6 +38,18 @@ $(document).ready(function () {
             Cancel : {class : "btn-default", dismiss : true}
         }
     });
+    var toastmsg = false;
+    var twowew = function (obj) {
+        obj.type = obj.type || "error";
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            newestOnTop : true,
+            showMethod: 'slideDown',
+            timeOut: obj.time
+        };
+        toastr[obj.type](obj.message, obj.title);
+    }
     var setTable = function () {
         var table = $(
             '<table class="table table-striped table-bordered table-hover">' +
@@ -82,6 +94,12 @@ $(document).ready(function () {
             dataType : "json",
             url : url + "?" + $.param({limit : 1000})
         }).error(function (jqXHR, is, message) {
+            twowew({
+                type : "error",
+                title : "GET",
+                message : jqXHR.responseJSON.message,
+                time : 0
+            })
             console.error("GET", jqXHR.responseJSON)
         }).success(function (res) {
             if (res.data.total) {
@@ -108,7 +126,6 @@ $(document).ready(function () {
                                 rolesPopUp.$buttons.Save.off("click");
                                 rolesPopUp.$buttons.Save.on("click", function () {
                                     rolesPopUp.hide();
-                                    console.log(data)
                                     $.ajax({
                                         method : "PUT",
                                         dataType : "json",
@@ -124,10 +141,19 @@ $(document).ready(function () {
                                         },
                                         url : url + tr.data('_id')
                                     }).error(function (jqXHR, is, message) {
+                                        toastmsg = jqXHR.responseJSON.message;
                                         console.error("PUT", jqXHR.responseJSON)
                                     }).success(function (res) {
                                         reset.click();
                                         getting();
+                                    }).complete(function(){
+                                        twowew({
+                                            type : toastmsg ? "error" : "success",
+                                            title : "PUT",
+                                            message : toastmsg || "success",
+                                            time : toastmsg ? 0 : 3000
+                                        })
+                                        toastmsg = false;
                                     });
                                 });
                                 rolesPopUp.setTitle(tr.data("name") + " : " + App.models[data.model] + " role")
@@ -173,10 +199,19 @@ $(document).ready(function () {
                                 dataType : "json",
                                 url : url + tr.data('_id')
                             }).error(function (jqXHR, is, message) {
+                                toastmsg = jqXHR.responseJSON.message;
                                 console.error("DELETE", jqXHR.responseJSON)
                             }).success(function (res) {
                                 reset.click();
                                 getting();
+                            }).complete(function(){
+                                twowew({
+                                    type : toastmsg ? "error" : "success",
+                                    title : "DELETE",
+                                    message : toastmsg || "success",
+                                    time : toastmsg ? 0 : 3000
+                                });
+                                toastmsg = false;
                             });
                         });
                     })
@@ -185,7 +220,7 @@ $(document).ready(function () {
                 table.DataTable({
                     pageLength : 5,
                     lengthMenu : [5, 10, 25, 50, 75, 100],
-                    order : [[1, "desc"]],
+                    order : [[1, "asc"]],
                     responsive : false,
                     dom : '<"html5buttons"B>lTfgitp',
                     buttons : []
@@ -208,10 +243,19 @@ $(document).ready(function () {
                 data : data,
                 url : url_
             }).error(function (jqXHR, is, message) {
+                toastmsg = jqXHR.responseJSON.message;
                 console.error(method, jqXHR.responseJSON)
             }).success(function (res) {
                 reset.click();
                 getting();
+            }).complete(function () {
+                twowew({
+                    type : toastmsg ? "error" : "success",
+                    title : method.toUpperCase(),
+                    message : toastmsg || "success",
+                    time : toastmsg ? 0 : 3000
+                })
+                toastmsg = false;
             });
         }
         if (isUpdate) {
