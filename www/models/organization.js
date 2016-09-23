@@ -14,37 +14,32 @@ module.exports = function (mongoose, regEx) {
         email : {
             value : {
                 type : String,
-                validate : {
-                    validator : function (v) {
-                        //v = v.replace(/[\(\)\+\-\s]/g, "");
-                        return regEx.email.test(v);
-                    },
-                    message : '{VALUE} is not a valid email address!'
-                },
+                trim : true,
+                lowercase : true,
+                //v = v.replace(/[\(\)\+\-\s]/g, "");
+                //match : [regEx.email, '{VALUE} is not a valid email address!'],
                 unique : true,
-                required : true,
+                required : true
             },
             verified : {type : Boolean, default : false}
         },
         phone : {
             value : {
                 type : String,
-                validate : {
-                    validator : function (v) {
-                        return regEx.phone.test(v);
-                    },
-                    message : '{VALUE} is not a valid phone number!'
-                },
-                unique : true
+                trim : true,
+                lowercase : true,
+                //match : [regEx.phone, '{VALUE} is not a valid phone number!'],
+                unique : true,
+                required : true
             },
             verified : {type : Boolean, default : false}
         },
         lat : {
-            type : Schema.Types.Double,
+            type : Number,
             required : true
         },
         long : {
-            type : Schema.Types.Double,
+            type : Number,
             required : true
         },
         address : String,

@@ -24,18 +24,7 @@ module.exports = function (mongoose, regEx) {
         },
         name : {
             first : String,
-            last : {
-                type : String,
-                validate : {
-                    validator : function (v) {
-                        return regEx.username.test(v);
-                    },
-                    message : '{VALUE} is not a valid last name!'
-                },
-                required : true,
-                minlength : 5,
-                maxlength : 20,
-            }
+            last : String
         },
         gender : {
             type : String,

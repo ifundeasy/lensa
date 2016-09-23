@@ -188,7 +188,7 @@ module.exports = function (global, worker, db) {
         if (!(verb1 || verb2)) console.log("> ", JSON.stringify(locals.ERR));
         if (app.get('env') === 'development' && err.stack) {
             locals.ERR.trace = err.stack;
-            if (!(verb1 || verb2)) console.log("> ", locals.ERR.trace);
+            //if (!(verb1 || verb2)) console.log("> ", locals.ERR.trace);
         }
         res.status(locals.ERR.status);
         res.format({
