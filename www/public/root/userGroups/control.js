@@ -3,15 +3,16 @@ $(document).ready(function () {
     var url = "/api/usergroups/";
     var isUpdate = false;
     var tempRoutes = undefined;
-    var tcontainer = $('#table');
-    var collection = $("#tableName");
-    var name = $('#name');
-    var notes = $('#notes');
     var save = $('#save');
     var reset = $('#reset');
-    var form = $('#form');
     var info = $('#info');
     var infoname = $('#info-name');
+    var tcontainer = $('#table');
+    //
+    var name = $('#name');
+    var routes = $('#routes');
+    var notes = $('#notes');
+    //
     var modal = new Modal({
         title : "Prompt",
         backdrop : true,
@@ -70,41 +71,49 @@ $(document).ready(function () {
         var chosenConfig = {no_results_text : "Oops, nothing found!", width : "100%"};
         for (var m in App.models) {
             var model = App.models[m]
-            collection.append('<option value="' + m + '">' + model + '</option>');
+            routes.append('<option value="' + m + '">' + model + '</option>');
         }
-        collection.chosen(chosenConfig);
-        rolesPopUp.$body.find("select").chosen(chosenConfig)
+        routes.chosen(chosenConfig);
+        rolesPopUp.$body.find("select").chosen(chosenConfig);
         save.on('click', saving);
         reset.on('click', function () {
-            isUpdate = false
+            isUpdate = false;
             info.text("Create");
             infoname.text("");
             name.val("");
-            collection.val("").trigger("chosen:updated");
+            routes.val("").trigger("chosen:updated");
             notes.val("");
         });
         getting();
     }
     var getting = function () {
         var table = setTable();
+        var putEmpty = function () {
+            table.find('tbody').append(
+                '<tr role="row" class="text-center">' +
+                '<td colspan="'+ table.find('thead tr th').length +'">Empty</td>' +
+                '</tr>'
+            );
+        };
         $.ajax({
             method : "GET",
             dataType : "json",
             url : url + "?" + $.param({limit : 1000})
         }).error(function (jqXHR, is, message) {
+            putEmpty();
             twowew({
                 type : "error",
                 title : "GET",
                 message : jqXHR.responseJSON.message,
                 time : 0
-            })
-            console.error("GET", jqXHR.responseJSON)
+            });
+            console.error("GET", jqXHR.responseJSON);
         }).success(function (res) {
             if (res.data.total) {
                 var rows = res.data.rows;
                 rows.forEach(function (row) {
                     var tr = $('<tr>');
-                    var routes = $('<td>');
+                    var tdRoutes = $('<td>');
                     var action = $('<td>');
                     var deleteBtn = $("<button type='button' class='btn btn-xs btn-danger'><i class='fa fa-times'></i></button>")
                     row.notes = row.notes || "";
@@ -156,13 +165,13 @@ $(document).ready(function () {
                                         toastmsg = false;
                                     });
                                 });
-                                rolesPopUp.setTitle(tr.data("name") + " : " + App.models[data.model] + " role")
-                                .show();
+                                rolesPopUp.setTitle(tr.data("name") + " : " + App.models[data.model] + " role");
+                                rolesPopUp.show();
                             });
-                            routes.append(btn);
+                            tdRoutes.append(btn);
                         })
                     }
-                    tr.append(routes)
+                    tr.append(tdRoutes)
                     tr.append("<td>" + row.notes + "</td>")
                     action.append(deleteBtn);
                     tr.on("click", function (ev) {
@@ -170,10 +179,10 @@ $(document).ready(function () {
                         var data = $(this).data();
                         if (["INPUT", "BUTTON", "I"].indexOf(is) == -1) {
                             tempRoutes = data.routes;
-                            collection.val(tempRoutes.map(function (a) {
+                            routes.val(tempRoutes.map(function (a) {
                                 return a.model
                             }));
-                            collection.trigger("chosen:updated");
+                            routes.trigger("chosen:updated");
                             info.text("Update");
                             modal.setTitle("Update : " + data.name);
                             infoname.text("\"" + data.name + "\"");
@@ -225,7 +234,7 @@ $(document).ready(function () {
                     dom : '<"html5buttons"B>lTfgitp',
                     buttons : []
                 });
-            }
+            } else putEmpty();
         });
     }
     var saving = function () {
@@ -234,7 +243,7 @@ $(document).ready(function () {
         var data = {
             name : name.val(),
             notes : notes.val(),
-            routes : collection.val() || []
+            routes : routes.val() || []
         };
         var save = function () {
             $.ajax({

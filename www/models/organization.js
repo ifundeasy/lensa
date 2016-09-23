@@ -6,7 +6,7 @@ module.exports = function (mongoose, regEx) {
             required : true,
             unique : true
         },
-        description : String,
+        pic : String,
         "medias._id" : { //avatar
             ref : 'media',
             type : Schema.Types.ObjectId
@@ -16,6 +16,7 @@ module.exports = function (mongoose, regEx) {
                 type : String,
                 validate : {
                     validator : function (v) {
+                        //v = v.replace(/[\(\)\+\-\s]/g, "");
                         return regEx.email.test(v);
                     },
                     message : '{VALUE} is not a valid email address!'
@@ -34,17 +35,16 @@ module.exports = function (mongoose, regEx) {
                     },
                     message : '{VALUE} is not a valid phone number!'
                 },
-                //unique : true,
-                //required : true,
+                unique : true
             },
             verified : {type : Boolean, default : false}
         },
         lat : {
-            type : String,
+            type : Schema.Types.Double,
             required : true
         },
         long : {
-            type : String,
+            type : Schema.Types.Double,
             required : true
         },
         address : String,

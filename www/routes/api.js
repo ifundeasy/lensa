@@ -151,7 +151,7 @@ module.exports = function (args) {
                 docs = partial;
             } else delete docs["active"];
             //
-            model.update(selection, {$set : docs}).then(function (docs) {
+            model.update(selection, {$set : docs,}, {runValidators : true}).then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
                     status : 200,

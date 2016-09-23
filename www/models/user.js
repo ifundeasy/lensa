@@ -12,6 +12,7 @@ module.exports = function (mongoose, regEx) {
                 message : '{VALUE} is not a valid email address!'
             },
             required : true,
+            lowercase : true,
             minlength : 5,
             maxlength : 20,
             unique : true,
