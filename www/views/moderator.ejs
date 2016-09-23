@@ -18,6 +18,8 @@
 	<link href="/.inspinia/css/plugins/dataTables/datatables.min.css" rel="stylesheet">
 	<link href="/.inspinia/css/animate.css" rel="stylesheet">
 	<link href="/.inspinia/css/style.css" rel="stylesheet">
+	<!-- c3 Charts -->
+    <link href="/.inspinia/css/plugins/c3/c3.min.css" rel="stylesheet">
 </head>
 <body class="fixed-sidebar pace-done fixed-nav fixed-nav-basic" directive="/moderator">
 <div id="wrapper">
@@ -48,25 +50,19 @@
 					<div class="logo-element">IN+</div>
 				</li>
 				<li class="active">
-					<a href="#users">
-						<i class="fa fa-users"></i> <span class="nav-label">Users</span>
+					<a href="#dashboard">
+						<i class="fa fa-server"></i> <span class="nav-label">Dashboard</span>
 					</a>
 				</li>
 				<li>
-					<a href="#organization">
-						<i class="fa fa-sitemap"></i> <span class="nav-label">Organizations</span>
+					<a href="#laporan">
+						<i class="fa fa-files-o"></i> <span class="nav-label">Laporan</span>
 					</a>
 				</li>
 				<li>
-					<a href="#">
-						<i class="fa fa-edit"></i>
-						<span class="nav-label">User Group & Role</span>
-						<span class="fa arrow"></span>
+					<a href="#peta">
+						<i class="fa fa-map-marker"></i> <span class="nav-label">Peta</span>
 					</a>
-					<ul class="nav nav-second-level collapse">
-						<li><a href="#userGroup">User Group</a></li>
-						<li><a href="#userGroupRole">Group Role</a></li>
-					</ul>
 				</li>
 			</ul>
 		</div>
@@ -76,11 +72,7 @@
 			<nav class="navbar navbar-fixed-top" role="navigation" style="margin-bottom: 0">
 				<div class="navbar-header">
 					<a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
-					<form role="search" class="navbar-form-custom" action="search_results.html">
-						<div class="form-group">
-							<input type="text" placeholder="Search" class="form-control" name="top-search" id="top-search">
-						</div>
-					</form>
+					<h2 class="navbar-form-custom" id="pagename" style="margin: 15px 0px; height: inherit;">&nbsp</h2>
 				</div>
 				<ul class="nav navbar-top-links navbar-right">
 					<li class="dropdown">
@@ -186,19 +178,7 @@
 				</ul>
 			</nav>
 		</div>
-		<div class="row wrapper border-bottom white-bg page-heading no-padding">
-			<div class="col-lg-12">
-				<h3 id="pagename" style="margin: 15px 0px;">&nbsp</h3>
-				<!--<ol class="breadcrumb">
-					<li>
-						<a href="/.inspinia/index.html">Home</a>
-					</li>
-					<li class="active">
-						<strong>Widgets</strong>
-					</li>
-				</ol>-->
-			</div>
-		</div>
+
 		<div class="wrapper wrapper-content animated fadeInRight" style="padding-left: 0px; padding-right: 0px;">
 			<div id="main-content">
 				<!-- Page -->
@@ -233,6 +213,20 @@
 <script type="application/javascript" src="/.inspinia/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/dataTables/datatables.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/inspinia.js"></script>
+<script type="application/javascript" src="/.assets/js/modal.js"></script>
+
+
+<!-- Flot -->
+<script src="/.inspinia/js/plugins/flot/jquery.flot.js"></script>
+<script src="/.inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+<script src="/.inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
+<script src="/.inspinia/js/plugins/flot/jquery.flot.pie.js"></script>
+<script src="/.inspinia/js/plugins/flot/jquery.flot.time.js"></script>
+
+<!-- d3 and c3 charts -->
+<script src="/.inspinia/js/plugins/d3/d3.min.js"></script>
+<script src="/.inspinia/js/plugins/c3/c3.min.js"></script>
+
 <script type="application/javascript" delete>
 	var toTitleCase = function (str) {
 		return str.replace(/\w\S*/g, function (txt) {

@@ -98,7 +98,13 @@ module.exports = function (global, worker, db) {
     //
     app.get('/', function (req, res, next) {
         if (req.user) {
-            var type = req.user.type = "root";
+            // very very hard code. Don't do this at home!
+            if(req.user.user.username === "afa"){
+                var type = req.user.type = "root";
+            } else {
+                var type = req.user.type = "moderator";
+            }
+
             locals.www = {
                 name: param.global.name,
                 description: param.global.description,
