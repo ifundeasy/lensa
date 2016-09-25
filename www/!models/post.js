@@ -71,7 +71,7 @@ module.exports = function (mongoose) {
                         match : {active : true}
                     },
                     {
-                        path : "groups._id",
+                        path : "userGroups._id",
                         select : "name routes",
                         match : {active : true}
                     },
@@ -86,7 +86,7 @@ module.exports = function (mongoose) {
                         }
                     },
                     {
-                        path : "roles._id",
+                        path : "organizationRoles._id",
                         select : "name description organizations._id",
                         match : {active : true},
                         populate : {
@@ -108,7 +108,7 @@ module.exports = function (mongoose) {
                 match : {active : true},
                 populate : [
                     {
-                        path : "groups._id",
+                        path : "userGroups._id",
                         select : "name",
                         match : {active : true}
                     },
@@ -123,7 +123,7 @@ module.exports = function (mongoose) {
                         }
                     },
                     {
-                        path : "roles._id",
+                        path : "organizationRoles._id",
                         select : "name description organizations._id",
                         match : {active : true},
                         populate : {
@@ -150,7 +150,7 @@ module.exports = function (mongoose) {
                 match : {active : true},
                 populate : [
                     {
-                        path : "groups._id",
+                        path : "userGroups._id",
                         select : "name",
                         match : {active : true}
                     },
@@ -165,7 +165,7 @@ module.exports = function (mongoose) {
                         }
                     },
                     {
-                        path : "roles._id",
+                        path : "organizationRoles._id",
                         select : "name description organizations._id",
                         match : {active : true},
                         populate : {
@@ -183,10 +183,10 @@ module.exports = function (mongoose) {
             },
             {
                 path : "statuses.procedure._id",
-                select : "name description steps categories._id",
+                select : "name description steps organizationCategories._id",
                 match : {active : true},
                 populate : {
-                    path : "categories._id",
+                    path : "organizationCategories._id",
                     select : "name description organizations._id",
                     match : {active : true},
                     populate : {

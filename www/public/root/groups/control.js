@@ -1,6 +1,6 @@
 $(document).ready(function () {
     var clsColors = ["default", "success", "primary", "warning", "danger"];
-    var url = "/api/usergroups/";
+    var url = "/api/groups/";
     var isUpdate = false;
     var tempRoutes = undefined;
     var save = $('#save');

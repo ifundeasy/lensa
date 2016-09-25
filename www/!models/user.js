@@ -74,8 +74,8 @@ module.exports = function (mongoose, regEx) {
         state : String,
         zipcode : String,
         birthDate : {type : Date, default : Date.now},
-        "groups._id" : {
-            ref : 'group',
+        "userGroups._id" : {
+            ref : 'userGroup',
             type : Schema.Types.ObjectId,
             required : true
         },
@@ -84,8 +84,8 @@ module.exports = function (mongoose, regEx) {
             type : Schema.Types.ObjectId,
             required : true
         },
-        "roles._id" : {
-            ref : 'role',
+        "organizationRoles._id" : {
+            ref : 'organizationRole',
             type : Schema.Types.ObjectId
         },
         //verified : { type: Boolean, default: false },
@@ -128,7 +128,7 @@ module.exports = function (mongoose, regEx) {
                 match : {active : true}
             },
             {
-                path : "groups._id",
+                path : "userGroups._id",
                 select : "name routes",
                 match : {active : true}
             },
@@ -143,7 +143,7 @@ module.exports = function (mongoose, regEx) {
                 }
             },
             {
-                path : "roles._id",
+                path : "organizationRoles._id",
                 select : "name description organizations._id",
                 match : {active : true},
                 populate : {

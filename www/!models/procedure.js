@@ -19,8 +19,8 @@ module.exports = function (mongoose) {
         },
         description : String,
         steps : [stepSchema],
-        "categories._id" : {
-            ref : 'category',
+        "organizationCategories._id" : {
+            ref : 'organizationCategory',
             type : Schema.Types.ObjectId,
             required : true
         },
@@ -31,7 +31,7 @@ module.exports = function (mongoose) {
     //
     procedureSchema.statics.getPopQuery = function (nestIdx) {
         var populate = {
-            path : "categories._id",
+            path : "organizationCategories._id",
             select : "name description organizations._id",
             match : {active : true},
             populate : {
