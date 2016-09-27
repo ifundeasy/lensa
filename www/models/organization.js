@@ -6,7 +6,11 @@ module.exports = function (mongoose, regEx) {
             required : true,
             unique : true
         },
-        pic : String,
+        pic : {
+            type : String,
+            required : true,
+            unique : true
+        },
         "medias._id" : { //avatar
             ref : 'media',
             type : Schema.Types.ObjectId
@@ -16,8 +20,7 @@ module.exports = function (mongoose, regEx) {
                 type : String,
                 trim : true,
                 lowercase : true,
-                //v = v.replace(/[\(\)\+\-\s]/g, "");
-                //match : [regEx.email, '{VALUE} is not a valid email address!'],
+                match : [regEx.email, '{VALUE} is not a valid email address!'],
                 unique : true,
                 required : true
             },
@@ -28,7 +31,7 @@ module.exports = function (mongoose, regEx) {
                 type : String,
                 trim : true,
                 lowercase : true,
-                //match : [regEx.phone, '{VALUE} is not a valid phone number!'],
+                match : [regEx.phone, '{VALUE} is not a valid phone number!'],
                 unique : true,
                 required : true
             },
@@ -59,5 +62,15 @@ module.exports = function (mongoose, regEx) {
         };
         return mongoose.nested(populate, nestIdx)
     };
+    orgSchema.pre('update', function (next) {
+        var org = this._update.$set;
+        if (org["phone.value"]) org["phone.value"] = org["phone.value"].replace(/[\(\)\+\-\s]/g, "");
+        return next();
+    });
+    orgSchema.pre('save', function (next) {
+        var org = this;
+        org.phone.value = org.phone.value.replace(/[\(\)\+\-\s]/g, "");
+        return next();
+    });
     return mongoose.model('organization', orgSchema);
 };

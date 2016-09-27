@@ -97,14 +97,9 @@ module.exports = function (global, worker, db) {
     app.use(expressSession(session), auth(global, locals, models.user));
     //
     app.get('/', function (req, res, next) {
-        if (req.user) {
-            // very very hard code. Don't do this at home!
-            if(req.user.user.username === "afa"){
-                var type = req.user.type = "root";
-            } else {
-                var type = req.user.type = "moderator";
-            }
-
+        if (req.logged) {
+            req.logged.user = mongoose.normalize(req.logged.user);
+            var group = req.logged.user.groups.name.toLowerCase();
             locals.www = {
                 name: param.global.name,
                 description: param.global.description,
@@ -115,25 +110,26 @@ module.exports = function (global, worker, db) {
                     return o
                 })()
             };
-            res.render(type, locals.www);
+            if (group !== "root") delete locals.www["models"];
+            res.render(group, locals.www);
         } else {
             res.redirect('/login')
         }
     });
     //app.use('/api', require(global.routes + 'api')(param));
     app.use('/api', function (req, res, next) {
-        req.user ? next() : res.redirect('/login');
+        req.logged ? next() : res.redirect('/login');
     }, require(global.routes + 'api')(param));
     //
     app.get('/contact', function (req, res, next) {
-        res.render('contact', {logged : req.user ? 1 : 0});
+        res.render('contact', {logged : req.logged ? 1 : 0});
     });
     app.get('/termspolicy', function (req, res, next) {
-        res.render('termspolicy', {logged : req.user ? 1 : 0});
+        res.render('termspolicy', {logged : req.logged ? 1 : 0});
     });
     app.get('/about', function (req, res, next) {
-        var logged = req.user ? 1 : 0;
-        res.render('about', {logged : req.user ? 1 : 0});
+        var logged = req.logged ? 1 : 0;
+        res.render('about', {logged : req.logged ? 1 : 0});
     });
     app.get('/registration', function (req, res, next) {
         res.render('registration');

@@ -40,7 +40,7 @@ $(document).ready(function () {
             progressBar: true,
             newestOnTop : true,
             showMethod: 'slideDown',
-            timeOut: obj.time
+            timeOut: obj.time || 10000
         };
         toastr[obj.type](obj.message, obj.title);
     }
