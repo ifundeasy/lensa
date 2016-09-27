@@ -21,9 +21,9 @@
     }
   ],
   "scripts": {
-    "!start": "p=`pwd` && pm2 start master.js --no-pmx --name 'BPM' -o $p/log/pm2.out -e $p/log/pm2.err",
-    "stop": "pm2 stop BPM",
-    "restart": "pm2 restart BPM --no-pmx",
+    "!start": "p=`pwd` && pm2 start master.js --no-pmx --name 'Lensa' -o $p/log/pm2.out -e $p/log/pm2.err",
+    "stop": "pm2 stop Lensa",
+    "restart": "pm2 restart Lensa --no-pmx",
     "test": "node-dev test.js",
     "start": "node-dev master.js"
   },
@@ -44,7 +44,6 @@
     "file-stream-rotator": "0.0.7",
     "minimist": "",
     "mongoose": "",
-    "mongoose-double": "0.0.1",
     "morgan": "",
     "node-dev": "",
     "q": "",

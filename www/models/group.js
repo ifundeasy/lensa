@@ -15,13 +15,34 @@ module.exports = function (mongoose) {
             },
             required : true
         },
-        methods : [{
+        GET : {
             type : String,
-            uppercase : true,
+            lowercase : true,
             required : true,
-            enum : ["GET", "POST", "PUT", "DELETE"],
-            default : "GET"
-        }]
+            enum : ["block", "self", "restrict", "all"],
+            default : "block"
+        },
+        POST : {
+            type : String,
+            lowercase : true,
+            required : true,
+            enum : ["block", "self", "restrict", "all"],
+            default : "block"
+        },
+        PUT : {
+            type : String,
+            lowercase : true,
+            required : true,
+            enum : ["block", "self", "restrict", "all"],
+            default : "block"
+        },
+        DELETE : {
+            type : String,
+            lowercase : true,
+            required : true,
+            enum : ["block", "self", "restrict", "all"],
+            default : "block"
+        }
     })
     var groupSchema = new Schema({
         name : {

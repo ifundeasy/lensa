@@ -24,6 +24,29 @@ $(document).ready(function () {
     var rolesPopUp = new Modal({
         backdrop : true,
         body : $(
+            ["GET", "POST", "PUT", "DELETE"].map(function(m, i, all){
+                return (
+                    '<div class="row">' +
+                        '<label class="col-sm-2 control-label b-r">'+ m +'</label>' +
+                        '<div class="col-sm-10">' +
+                            '<div class="col-sm-3">' +
+                                '<label><input type="radio" value="block" name="'+ m +'-routes"> Block</label>' +
+                            '</div>' +
+                            '<div class="col-sm-3">' +
+                                '<label><input type="radio" value="self" name="'+ m +'-routes"> Self</label>' +
+                            '</div>' +
+                            '<div class="col-sm-3">' +
+                                '<label><input type="radio" value="restrict" name="'+ m +'-routes"> Restrict</label>' +
+                            '</div>' +
+                            '<div class="col-sm-3">' +
+                                '<label><input type="radio" value="all" name="'+ m +'-routes"> All</label>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    (i < all.length - 1 ? '<div class="hr-line-dashed" style="margin:10px 0px;"></div>' : '')
+                )
+            }).join("")
+            /* +
             '<label>Method role</label>' +
             '<select data-placeholder="Choose methods" class="chosen-select" multiple>' +
             '<option value="GET">Get</option>' +
@@ -31,6 +54,7 @@ $(document).ready(function () {
             '<option value="PUT">Put</option>' +
             '<option value="DELETE">Delete</option>' +
             '</select>'
+            */
         ),
         handler : {
             Save : {class : "btn-success"},
@@ -74,7 +98,7 @@ $(document).ready(function () {
             routes.append('<option value="' + m + '">' + model + '</option>');
         }
         routes.chosen(chosenConfig);
-        rolesPopUp.$body.find("select").chosen(chosenConfig);
+        //rolesPopUp.$body.find("select").chosen(chosenConfig);
         save.on('click', saving);
         reset.on('click', function () {
             isUpdate = false;
@@ -125,13 +149,16 @@ $(document).ready(function () {
                         row.routes.forEach(function (route) {
                             route.methods = route.methods || [];
                             var cls = clsColors[route.methods.length];
-                            var btn = $("<input type='button' class='btn btn-xs btn-outline btn-"+ cls +"' style='margin-right: 3px'>")
+                            var btn = $("<input type='button' class='btn btn-xs btn-outline btn-primary' style='margin-right: 3px'>")
                             btn.val(App.models[route.model])
                             btn.data(route);
                             btn.on("click", function () {
-                                var selections = rolesPopUp.$body.find("select");
+                                //var selections = rolesPopUp.$body.find("select");
                                 var data = $(this).data();
-                                selections.val(data.methods).trigger("chosen:updated");
+                                ["GET", "POST", "PUT", "DELETE"].forEach(function(m){
+                                    $('[name="'+ m +'-routes"][value="' + (data[m] || "block") + '"]').prop('checked', true);
+                                });
+                                //selections.val(data.methods).trigger("chosen:updated");
                                 rolesPopUp.$buttons.Save.off("click");
                                 rolesPopUp.$buttons.Save.on("click", function () {
                                     rolesPopUp.hide();
@@ -145,7 +172,11 @@ $(document).ready(function () {
                                             },
                                             docs : {
                                                 model : data.model,
-                                                methods : selections.val()
+                                                GET : $('[name="GET-routes"]:checked').val(),
+                                                POST : $('[name="POST-routes"]:checked').val(),
+                                                PUT : $('[name="PUT-routes"]:checked').val(),
+                                                DELETE : $('[name="DELETE-routes"]:checked').val()
+                                                //methods : selections.val()
                                             }
                                         },
                                         url : url + tr.data('_id')
