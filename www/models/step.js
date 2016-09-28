@@ -16,7 +16,7 @@ module.exports = function (mongoose) {
     stepSchema.statics.getPopQuery = function (nestIdx) {
         var populate = {
             path : "procedure._id",
-            select : "name description procedures._id",
+            select : "name description",
             match : {active : true}
         };
         return mongoose.nested(populate, nestIdx)
