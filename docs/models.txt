@@ -95,6 +95,7 @@ LEGENDS
     active : Boolean
 }
 (C) steps = {
+    _id : ObjectId,
     name : (R) String,
     description : String,
     stepNumber : Number[1,~],
