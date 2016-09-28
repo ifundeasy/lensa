@@ -1,0 +1,6 @@
+
+@media (max-width: 1365px) {
+	input[type="search"] {
+	    width: 100px !important;
+	}
+}

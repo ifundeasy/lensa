@@ -41,6 +41,11 @@ module.exports = function (mongoose) {
             type : Schema.Types.ObjectId,
             required : true
         },
+        "organizations._id" : {
+            ref : 'organization',
+            type : Schema.Types.ObjectId,
+            required : true
+        },
         "medias._ids" : [
             {
                 ref : 'media',
@@ -50,6 +55,14 @@ module.exports = function (mongoose) {
         statuses : [statusSchema],
         comments : [commentSchema],
         createdAt : {type : Date, default : Date.now},
+        lat : {
+            type : String,
+            required : false
+        },
+        long : {
+            type : String,
+            required : false
+        },
         active : {type : Boolean, default : true}
     });
     //

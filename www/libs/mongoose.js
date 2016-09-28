@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-require('mongoose-double')(mongoose);
 mongoose.nested = function (obj, nestIdx) {
     nestIdx = nestIdx == -1 ? Infinity : nestIdx
     if (!nestIdx && !(nestIdx == 0)) return obj;

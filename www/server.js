@@ -102,7 +102,7 @@ module.exports = function (global, worker, db) {
             if(req.user.user.username === "afa"){
                 var type = req.user.type = "root";
             } else {
-                var type = req.user.type = "moderator";
+                var type = req.user.type = "administrator";
             }
 
             locals.www = {
