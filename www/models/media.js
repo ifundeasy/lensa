@@ -2,7 +2,7 @@ module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
     var mediaScema = new Schema({
         type : String,
-        directory : String,
+        directory : {type : Date, required : true},
         description : String,
         notes : String,
         createdAt : {type : Date, default : Date.now},

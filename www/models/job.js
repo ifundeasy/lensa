@@ -32,7 +32,7 @@ module.exports = function (mongoose) {
                     select : "name description",
                     match : {active : true},
                     populate : {
-                        path : "medias._id",
+                        path : "media._id",
                         select : "type directory description",
                         match : {active : true}
                     }
@@ -47,7 +47,7 @@ module.exports = function (mongoose) {
                     select : "name description",
                     match : {active : true},
                     populate : {
-                        path : "medias._id",
+                        path : "media._id",
                         select : "type directory description",
                         match : {active : true}
                     }

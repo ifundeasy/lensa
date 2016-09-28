@@ -11,7 +11,7 @@ module.exports = function (mongoose, regEx) {
             required : true,
             unique : true
         },
-        "medias._id" : { //avatar
+        "media._id" : { //avatar
             ref : 'media',
             type : Schema.Types.ObjectId
         },
@@ -56,7 +56,7 @@ module.exports = function (mongoose, regEx) {
     //
     orgSchema.statics.getPopQuery = function (nestIdx) {
         var populate = {
-            path : "medias._id",
+            path : "media._id",
             select : "type directory description",
             match : {active : true}
         };

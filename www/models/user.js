@@ -13,7 +13,7 @@ module.exports = function (mongoose, regEx) {
             unique : true,
             index : true
         },
-        "medias._id" : { //avatar
+        "media._id" : { //avatar
             ref : 'media',
             type : Schema.Types.ObjectId
         },
@@ -124,7 +124,7 @@ module.exports = function (mongoose, regEx) {
     userSchema.statics.getPopQuery = function (nestIdx) {
         var populate = [
             {
-                path : "medias._ids",
+                path : "media._ids",
                 select : "type directory description",
                 match : {active : true}
             },
@@ -138,7 +138,7 @@ module.exports = function (mongoose, regEx) {
                 select : "name description",
                 match : {active : true},
                 populate : {
-                    path : "medias._id",
+                    path : "media._id",
                     select : "type directory description",
                     match : {active : true}
                 }
@@ -152,7 +152,7 @@ module.exports = function (mongoose, regEx) {
                     select : "name description",
                     match : {active : true},
                     populate : {
-                        path : "medias._id",
+                        path : "media._id",
                         select : "type directory description",
                         match : {active : true}
                     }

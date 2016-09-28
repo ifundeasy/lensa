@@ -1,0 +1,162 @@
+LEGENDS
+=======
+(S)    : Sub document,
+(C)    : Collection / Table / Entity,
+(R)    : Required field,
+(U)    : Unique field,
+(I)    : Indexed field
+<text> : Collection reference
+"text" : Embedd with sub document
+-
+---
+-
+(S) route = {
+	model : (R) String,
+    GET : (R) String of Enum,    //["block", "self", "restrict", "all"]
+    POST : (R) String of Enum,   //["block", "self", "restrict", "all"]
+    PUT : (R) String of Enum,    //["block", "self", "restrict", "all"]
+    DELETE : (R) String of Enum, //["block", "self", "restrict", "all"]
+}
+(C) groups = {
+	_id : ObjectId,
+	name : (R) String,
+    routes : Array of "route",
+    notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) media = {
+	_id : ObjectId,
+	type : String,
+	directory : String,
+	description : String,
+	notes : String,
+	createdAt : Date,
+	active : Date
+}
+(C) organizations = {
+	_id : ObjectId,
+	name : (R,U) String,
+    pic : (R,U) String,
+    media._id : <media> ObjectId,
+    email : {
+        value : (R,U) String,
+        verified : Boolean
+    },
+    phone : {
+        value : (R,U) String,
+        verified : Boolean
+    },
+    lat : (R) Number,
+    long : (R) Number,
+    address : String,
+    country : String,
+    state : String,
+    zipcode : String,
+    notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) roles = {
+	_id : ObjectId,
+	name : (R) String,
+	description : String,
+	organizations._id : (R) <organizations> ObjectId,
+	notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) categories = {
+	_id : ObjectId,
+    name : (R) String,
+    description : String,
+    organizations._id : (R) <organizations> ObjectId,
+    notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) jobs = {
+	_id : ObjectId,
+    name : (R) String,
+    description : String,
+    roles._id : (R) <roles> ObjectId,
+    categories._id : (R) <categories> ObjectId,
+    notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) procedures = {
+	_id : ObjectId,
+	name : (R) String,
+    description : String,
+    categories._id : (R) <categories> ObjectId,
+    notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) steps = {
+	name : (R) String,
+	description : String,
+	stepNumber : Number[1,~],
+	duration : Number[0,~],
+	notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(C) users = {
+	_id : ObjectId,
+	username : (R,U,I) String[4,20],
+    media._id : <media> ObjectId,
+    name : {
+        first : String,
+        last : String
+    },
+    gender : (R) String of Enum, //["male", "female"]
+    password : (R) String[4,~],
+    email : {
+        value : (R,U) String,
+        verified : Boolean
+    },
+    phone : {
+        value : (R,U) String,
+        verified : Boolean
+    },
+    address : String,
+    country : String,
+    state : String,
+    zipcode : String,
+    birthDate : {type : Date, default : Date.now},
+    groups._id : (R) <groups> ObjectId,
+    organizations._id : (R) <organizations> ObjectId,
+    roles._id : <roles> ObjectId,
+    notes : String,
+    createdAt : Date,
+    active : Boolean
+}
+(S) status = {
+	users._id : (R) <users> ObjectId,
+	procedures._id : (R) <procedures> ObjectId,
+    createdAt : Date,
+    active : Boolean
+}
+(S) comment = {
+	text : String,
+	users._id : (R) <users> ObjectId,
+	media._ids : Array of <media> ObjectId,
+    createdAt : Date,
+    active : Boolean
+}
+(C) posts = {
+	_id : ObjectId,
+	title : (R) String,
+	text : String,
+	users._id : (R) <users> ObjectId,
+	organizations._id : (R) <organizations> ObjectId,
+	media._ids : Array of <media> ObjectId,
+	statuses : Array of "status",
+	comments : Array of "comment",
+	lat : String,
+	long : String,
+    createdAt : Date,
+    active : Boolean
+}

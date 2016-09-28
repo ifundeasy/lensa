@@ -7,7 +7,7 @@ module.exports = function (mongoose) {
             type : Schema.Types.ObjectId,
             required : true
         },
-        "medias._ids" : [
+        "media._ids" : [
             {
                 ref : 'media',
                 type : Schema.Types.ObjectId
@@ -46,7 +46,7 @@ module.exports = function (mongoose) {
             type : Schema.Types.ObjectId,
             required : true
         },
-        "medias._ids" : [
+        "media._ids" : [
             {
                 ref : 'media',
                 type : Schema.Types.ObjectId
@@ -69,7 +69,7 @@ module.exports = function (mongoose) {
     postSchema.statics.getPopQuery = function (nestIdx) {
         var populate = [
             {
-                path : "medias._ids",
+                path : "media._ids",
                 select : "type directory description",
                 match : {active : true}
             },
@@ -79,7 +79,7 @@ module.exports = function (mongoose) {
                 match : {active : true},
                 populate : [
                     {
-                        path : "medias._ids",
+                        path : "media._ids",
                         select : "type directory description",
                         match : {active : true}
                     },
@@ -93,7 +93,7 @@ module.exports = function (mongoose) {
                         select : "name description",
                         match : {active : true},
                         populate : {
-                            path : "medias._id",
+                            path : "media._id",
                             select : "type directory description",
                             match : {active : true}
                         }
@@ -107,7 +107,7 @@ module.exports = function (mongoose) {
                             select : "name description",
                             match : {active : true},
                             populate : {
-                                path : "medias._id",
+                                path : "media._id",
                                 select : "type directory description",
                                 match : {active : true}
                             }
@@ -130,7 +130,7 @@ module.exports = function (mongoose) {
                         select : "name description",
                         match : {active : true},
                         populate : {
-                            path : "medias._id",
+                            path : "media._id",
                             select : "type directory description",
                             match : {active : true}
                         }
@@ -144,7 +144,7 @@ module.exports = function (mongoose) {
                             select : "name description",
                             match : {active : true},
                             populate : {
-                                path : "medias._id",
+                                path : "media._id",
                                 select : "type directory description",
                                 match : {active : true}
                             }
@@ -153,7 +153,7 @@ module.exports = function (mongoose) {
                 ]
             },
             {
-                path : "comments.medias._ids",
+                path : "comments.media._ids",
                 select : "type directory description",
                 match : {active : true}
             },
@@ -172,7 +172,7 @@ module.exports = function (mongoose) {
                         select : "name description",
                         match : {active : true},
                         populate : {
-                            path : "medias._id",
+                            path : "media._id",
                             select : "type directory description",
                             match : {active : true}
                         }
@@ -186,7 +186,7 @@ module.exports = function (mongoose) {
                             select : "name description",
                             match : {active : true},
                             populate : {
-                                path : "medias._id",
+                                path : "media._id",
                                 select : "type directory description",
                                 match : {active : true}
                             }
@@ -207,7 +207,7 @@ module.exports = function (mongoose) {
                         select : "name description",
                         match : {active : true},
                         populate : {
-                            path : "medias._id",
+                            path : "media._id",
                             select : "type directory description",
                             match : {active : true}
                         }
