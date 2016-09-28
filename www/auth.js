@@ -2,6 +2,11 @@ var token = require('rand-token');
 //
 module.exports = function (global, locals, user) {
     var base64 = require(global.libs + 'base64');
+    var popQuery = "";
+    if (user.getPopQuery) {
+        popQuery = user.getPopQuery();
+        if (!Object.keys(popQuery).length) popQuery = "";
+    }
     return function (req, res, next) {
         var method = req.method;
         var body = req.body;
@@ -29,9 +34,17 @@ module.exports = function (global, locals, user) {
                     res.clearCookie(global.name);
                     res.redirect('/login');
                 } else {
-                    user.findOne({username : usr}).lean().exec(function (err, user) {
+                    user
+                    .findOne({username : usr, active : true})
+                    .populate(popQuery).lean()
+                    .exec(function (err, user) {
                         if (!err) {
-                            if (!user) locals.loginMsg.push({'invalid username' : usr});
+                            if (!user) {
+                                locals.loginMsg.push({'invalid username' : usr});
+                            } else {
+                                if (!user.organizations._id) locals.loginMsg.push({'invalid organization' : usr});
+                                if (!user.groups._id) locals.loginMsg.push({'invalid group' : usr});
+                            }
                         } else {
                             locals.loginMsg.push({'Error 001' : err});
                         }
@@ -71,7 +84,7 @@ module.exports = function (global, locals, user) {
                                         } else {
                                             //success login here..
                                             res.cookie(global.name, cookieId, session.cookie);
-                                            req.user = {
+                                            req.logged = {
                                                 user : user,
                                                 cookie : {
                                                     id : cookieId,
@@ -94,9 +107,9 @@ module.exports = function (global, locals, user) {
             }
         } else {
             if (method == 'POST' && path == '/signin') {
-                user.findOne({username : body.username}, function (err, user) {
+                user.findOne({username : body.username, active : true}, function (err, data) {
                     if (!err) {
-                        if (!user) locals.loginMsg.push({'invalid username' : body.username});
+                        if (!data) locals.loginMsg.push({'invalid username' : body.username});
                     } else {
                         locals.loginMsg.push({'Error 004' : err});
                     }
@@ -105,7 +118,7 @@ module.exports = function (global, locals, user) {
                         locals.loginMsgTxt = 'Login fail';
                         res.redirect('/login');
                     } else {
-                        user.pwdCheck(body.password, function (err, valid) {
+                        data.pwdCheck(body.password, function (err, valid) {
                             if (err) locals.loginMsg.push({'fail calculating work factor' : body.password})
                             if (!valid) locals.loginMsg.push({'invalid password' : body.password})
                             if (locals.loginMsg.length) {
@@ -121,7 +134,18 @@ module.exports = function (global, locals, user) {
                                         locals.loginMsgTxt = 'Extend fail';
                                         res.redirect('/login');
                                     } else {
-                                        res.redirect('/');
+                                        user
+                                        .findOne({username : body.username, active : true})
+                                        .populate(popQuery).lean().exec(function (err, user) {
+                                            if (!user.organizations._id) locals.loginMsg.push({'invalid organization' : body.username});
+                                            if (!user.groups._id) locals.loginMsg.push({'invalid group' : body.username});
+                                            if (locals.loginMsg.length) {
+                                                locals.loginMsgTxt = 'Login fail';
+                                                res.redirect('/login');
+                                            } else {
+                                                res.redirect('/');
+                                            }
+                                        });
                                     }
                                 });
                             }

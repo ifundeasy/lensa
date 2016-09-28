@@ -5,16 +5,11 @@ module.exports = function (mongoose, regEx) {
     var userSchema = new Schema({
         username : {
             type : String,
-            validate : {
-                validator : function (v) {
-                    return regEx.username.test(v);
-                },
-                message : '{VALUE} is not a valid email address!'
-            },
             required : true,
             lowercase : true,
-            minlength : 5,
+            minlength : 4,
             maxlength : 20,
+            match : [regEx.username, '{VALUE} is not a valid username format!'],
             unique : true,
             index : true
         },
@@ -29,43 +24,35 @@ module.exports = function (mongoose, regEx) {
         gender : {
             type : String,
             required : true,
-            enum : ['male', 'female']
+            enum : ['male', 'female'],
+            default : 'male'
         },
         password : {
             type : String,
-            validate : {
-                validator : function (v) {
-                    return regEx.password.test(v);
-                },
-                message : '{VALUE} is not a valid password format!'
-            },
+            minlength : 4,
+            match : [regEx.password, '{VALUE} is not a valid password format!'],
             required : true
         },
         email : {
             value : {
                 type : String,
-                validate : {
-                    validator : function (v) {
-                        return regEx.email.test(v);
-                    },
-                    message : '{VALUE} is not a valid email address!'
-                },
+                trim : true,
+                lowercase : true,
+                match : [regEx.email, '{VALUE} is not a valid email address!'],
                 unique : true,
-                required : true,
+                required : true
             },
             verified : {type : Boolean, default : false}
         },
         phone : {
             value : {
                 type : String,
-                validate : {
-                    validator : function (v) {
-                        return regEx.phone.test(v);
-                    },
-                    message : '{VALUE} is not a valid phone number!'
-                },
-                //unique : true,
-                //required : true,
+                trim : true,
+                lowercase : true,
+                //v = v.replace(/[\(\)\+\-\s]/g, "");
+                match : [regEx.phone, '{VALUE} is not a valid phone number!'],
+                unique : true,
+                required : true
             },
             verified : {type : Boolean, default : false}
         },
@@ -88,7 +75,6 @@ module.exports = function (mongoose, regEx) {
             ref : 'role',
             type : Schema.Types.ObjectId
         },
-        //verified : { type: Boolean, default: false },
         notes : String,
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
@@ -97,9 +83,24 @@ module.exports = function (mongoose, regEx) {
     userSchema.virtual('name.full').get(function () {
         return this.name.first + ' ' + this.name.last;
     });
+    userSchema.pre('update', function (next) {
+        var user = this._update.$set;
+        if (user["phone.value"]) user["phone.value"] = user["phone.value"].replace(/[\(\)\+\-\s]/g, "");
+        if (!user.password) return next();
+        bcrypt.genSalt(factory, function (err, salt) {
+            if (err) return next(err);
+            // hash the password using our new salt
+            bcrypt.hash(user.password, salt, function (err, hash) {
+                if (err) return next(err);
+                // override the cleartext password with the hashed one
+                user.password = hash;
+                next();
+            });
+        });
+    });
     userSchema.pre('save', function (next) {
         var user = this;
-        // only hash the password if it has been modified (or is new)
+        user.phone.value = user.phone.value.replace(/[\(\)\+\-\s]/g, "");
         if (!user.isModified('password')) return next();
         // generate a salt
         bcrypt.genSalt(factory, function (err, salt) {
