@@ -41,10 +41,12 @@ LEGENDS
     media._id : <media> ObjectId,
     email : {
         value : (R,U) String,
+        verifyUrl : String,
         verified : Boolean
     },
     phone : {
         value : (R,U) String,
+        verifyCode : String,
         verified : Boolean
     },
     lat : (R) Number,
@@ -116,10 +118,12 @@ LEGENDS
     password : (R) String[4,~],
     email : {
         value : (R,U) String,
+        verifyUrl : String,
         verified : Boolean
     },
     phone : {
         value : (R,U) String,
+        verifyCode : String,
         verified : Boolean
     },
     address : String,

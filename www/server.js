@@ -122,6 +122,8 @@ module.exports = function (global, worker, db) {
         req.logged ? next() : res.redirect('/login');
     }, require(global.routes + 'api')(param));
     //
+    app.use('/temp', require(global.routes + 'api')(param));
+    //
     app.get('/contact', function (req, res, next) {
         res.render('contact', {logged : req.logged ? 1 : 0});
     });

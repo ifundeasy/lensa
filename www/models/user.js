@@ -42,6 +42,7 @@ module.exports = function (mongoose, regEx) {
                 unique : true,
                 required : true
             },
+            verifyUrl : String,
             verified : {type : Boolean, default : false}
         },
         phone : {
@@ -54,6 +55,7 @@ module.exports = function (mongoose, regEx) {
                 unique : true,
                 required : true
             },
+            verifyCode : String,
             verified : {type : Boolean, default : false}
         },
         address : String,
