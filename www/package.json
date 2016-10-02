@@ -46,6 +46,7 @@
     "mongoose": "",
     "morgan": "",
     "node-dev": "",
+    "nodemailer": "^2.6.4",
     "q": "",
     "rand-token": "",
     "request": "",

@@ -1,4 +1,4 @@
-module.exports = function (mongoose, regEx) {
+module.exports = function (mongoose, opts) {
     var Schema = mongoose.Schema;
     var orgSchema = new Schema({
         name : {
@@ -20,7 +20,7 @@ module.exports = function (mongoose, regEx) {
                 type : String,
                 trim : true,
                 lowercase : true,
-                match : [regEx.email, '{VALUE} is not a valid email address!'],
+                match : [opts.regEx.email, '{VALUE} is not a valid email address!'],
                 unique : true,
                 required : true
             },
@@ -32,7 +32,7 @@ module.exports = function (mongoose, regEx) {
                 type : String,
                 trim : true,
                 lowercase : true,
-                match : [regEx.phone, '{VALUE} is not a valid phone number!'],
+                match : [opts.regEx.phone, '{VALUE} is not a valid phone number!'],
                 unique : true,
                 required : true
             },

@@ -10,16 +10,25 @@ var fs = require('fs'),
     expressSession = require('express-session'),
     connectMongo = require('connect-mongo'),
     dateformat = require('dateformat'),
+    nodemailer = require("nodemailer"),
+    bcrypt = require('bcrypt'),
     httpCode = http.STATUS_CODES;
 //
 module.exports = function (global, worker, db) {
     var account = global.account;
+    var config = global.config;
     var httpServer = worker.httpServer;
     var scServer = worker.scServer;
+    var mongoose = db.mongoose;
     var app = express();
     var locals = app.locals;
-    var mongoose = db.mongoose;
-    var models = require(global.models)(global.models, mongoose);
+    var mails = account.mail;
+    var models = require(global.models)(mongoose, {
+        directory : global.models,
+        getCode4 : global.getCode4,
+        factory : global.factory,
+        regEx : global.regEx
+    });
     //
     var auth = require(global.home + 'auth');
     var store = connectMongo(expressSession);
@@ -100,12 +109,11 @@ module.exports = function (global, worker, db) {
         if (req.logged) {
             req.logged.user = mongoose.normalize(req.logged.user);
             var group = req.logged.user.groups.name.toLowerCase();
-
             locals.www = {
-                name: param.global.name,
-                description: param.global.description,
-                version: param.global.version,
-                models : (function(){
+                name : param.global.name,
+                description : param.global.description,
+                version : param.global.version,
+                models : (function () {
                     var o = {}
                     for (var m in models) o[models[m].collection.name] = m;
                     return o
@@ -136,6 +144,105 @@ module.exports = function (global, worker, db) {
     });
     app.get('/registration', function (req, res, next) {
         res.render('registration');
+    });
+    app.post('/verify/:mode', function (req, res, next) {
+        var mode = (req.params.mode || "").toLowerCase();
+        var code = req.query.q || "";
+        var data = req.logged.user;
+        if (mode == "email" || mode == "phone") {
+            data[mode] = data[mode] || {};
+            var value = data[mode].value;
+            if (code) {
+                if (mode == "email") {
+                    var q = value + new Date().getTime().toString(36)
+                    bcrypt.genSalt(global.factory, function (err, salt) {
+                        if (err) return next(err);
+                        bcrypt.hash(q, salt, function (err, mailhash) {
+                            if (err) return next(err);
+                            else {
+                                var selection = {_id : req.logged.user._id, active : true};
+                                var docs = {
+                                    "email.value" : value,
+                                    "email.verifyUrl" : mailhash,
+                                    "email.verified" : false
+                                };
+                                //
+                                models.user.update(selection, {$set : docs}, {runValidators : true})
+                                .then(function (updated) {
+                                    var url = account.domain + "/verify/email?q=" + mailhash;
+                                    var sender = mails.system;
+                                    var message = "";
+                                    var smtp = nodemailer.createTransport({
+                                        service : 'Gmail',
+                                        auth : sender
+                                    });
+                                    var mailOptions = {
+                                        from : sender.user,
+                                        to : value,
+                                        subject : "Lensa : Email verifiying",
+                                        html : url
+                                    };
+                                    console.log("> Sending mail for verification", JSON.stringify(mailOptions, 0, 2))
+                                    smtp.sendMail(mailOptions, function (e, info) {
+                                        if (e) next(e);
+                                        else {
+                                            res.send({
+                                                status : 200,
+                                                message : httpCode[200],
+                                                error : null,
+                                                data : docs
+                                            })
+                                        }
+                                    });
+                                }).catch(function (e) {
+                                    next(e)
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    res.send({msg : "under developement"});
+                }
+            } else {
+                next();
+            }
+        } else next();
+    })
+    app.get('/verify/:mode', function (req, res, next) {
+        var mode = (req.params.mode || "").toLowerCase();
+        var code = req.query.q || "";
+        if (mode == "email" || mode == "phone") {
+            var render = function (is, invalid) {
+                res.render('emailVerify', {
+                    invalid : invalid,
+                    value : req.logged.user[mode].value,
+                    verified : is,
+                    name : param.global.name,
+                    description : param.global.description,
+                    version : param.global.version
+                });
+            };
+            if (code) {
+                if (mode == "email") {
+                    if (req.logged.user.email.verifyUrl == code) {
+                        var selection = {
+                            _id : req.logged.user._id,
+                            active : true
+                        };
+                        var doc = {"email.verified" : false};
+                        models.user.update(selection, {$set : doc}, {runValidators : true})
+                        .then(function (updated) {
+                            render(true);
+                        }).catch(function (e) {
+                            next(e)
+                        });
+                    } else render(req.logged.user.email.verified)
+                } else {
+                    //todo : under development
+                    res.send({msg : "under developement"});
+                }
+            } else next();
+        } else next();
     });
     app.get('/forgot', function (req, res, next) {
         res.render('forgot');

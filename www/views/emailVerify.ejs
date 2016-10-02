@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="register">
+	<meta name="author" content="Afa, Falih">
+	<title>Verify : <%- locals.name + " " + locals.version %></title>
+	<link href="/.inspinia/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/.inspinia/font-awesome/css/font-awesome.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/toastr/toastr.min.css" rel="stylesheet">
+	<link href="/.inspinia/css/animate.css" rel="stylesheet">
+	<link href="/.inspinia/css/style.css" rel="stylesheet">
+	<link href="/.assets/css/style.css" rel="stylesheet">
+</head>
+<body class="gray-bg">
+<div class="middle-box text-center loginscreen animated fadeInDown">
+	<div>
+		<div>
+			<h4 class="logo-name" style="font-size: 57px;">LN+</h4>
+		</div>
+		<h3>Email Verifying</h3>
+		<% if (locals.verified) { %>
+			<p>You are verified!</p>
+			<a type="button" class="btn btn-sm btn-success" href="/">Home</a>
+		<% } else { %>
+			<p id="info">Please check your inbox that we send to <%- locals.value %></p>
+			<form id="form" class="m-t" role="form">
+				<p class="text-muted text-center">
+					<small>Have no incoming message?</small>
+				</p>
+				<button id="send" type="button" class="btn btn-sm btn-danger">Send me email</button>
+			</form>
+		<% } %>
+	</div>
+</div>
+<div class="footer fixed" style="margin: 0px;background-color: #eeeeef;">
+	<div class="pull-right">
+		<a href="/termspolicy">Terms</a>
+		<span style="color: rgba(0,0,0,0.2);">|</span>
+		<a href="/about">About</a>
+	</div>
+	<div>
+		<strong>Copyright</strong> Lensa &copy; 2016
+	</div>
+</div>
+<!-- Mainly scripts -->
+<script src="/.inspinia/js/jquery-2.1.1.js"></script>
+<script src="/.inspinia/js/bootstrap.min.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/toastr/toastr.min.js"></script>
+<script type="application/javascript" delete>
+	$(document).ready(function () {
+		var toastmsg = false;
+		var btn = $("button#send");
+		var form = $("form#form");
+		var info = $("p#info");
+		var text = info.text();
+		var twowew = function (obj) {
+			obj.type = obj.type || "error";
+			toastr.options = {
+				closeButton : true,
+				progressBar : true,
+				newestOnTop : true,
+				showMethod : 'slideDown',
+				timeOut : obj.time || 10000
+			};
+			toastr[obj.type](obj.message, obj.title);
+		}
+		info.hide();
+		btn.on("click", function () {
+			form.hide();
+			info.text("please wait..")
+			info.show();
+			$.ajax({
+				method : "post",
+				url : "/verify/email?q=<%- locals.value %>",
+				dataType : "json",
+			}).error(function (jqXHR, is, message) {
+				var to = setTimeout(function () {
+					clearTimeout(to)
+					form.show();
+				}, 6 * 1000)
+				toastmsg = jqXHR.responseJSON.message;
+				info.hide()
+				console.error("POST", jqXHR.responseJSON)
+			}).success(function () {
+				info.text(text)
+				btn.off("click");
+			}).complete(function () {
+				form.hide();
+				twowew({
+					type : toastmsg ? "error" : "success",
+					title : "POST",
+					message : toastmsg || "success",
+					time : toastmsg ? 0 : 3000
+				})
+				toastmsg = false;
+			})
+		});
+		$("script[delete]").remove();
+	})
+</script>
+</body>
+</html>

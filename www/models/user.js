@@ -1,6 +1,10 @@
-var factory = 7, bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt');
 //
-module.exports = function (mongoose, regEx) {
+module.exports = function (mongoose, opts) {
+    var regEx = opts.regEx;
+    var getCode4 = opts.getCode4;
+    var factory = opts.factory;
+    //
     var Schema = mongoose.Schema;
     var userSchema = new Schema({
         username : {
@@ -86,19 +90,47 @@ module.exports = function (mongoose, regEx) {
         return this.name.first + ' ' + this.name.last;
     });
     userSchema.pre('update', function (next) {
+        var older = {};
         var user = this._update.$set;
-        if (user["phone.value"]) user["phone.value"] = user["phone.value"].replace(/[\(\)\+\-\s]/g, "");
-        if (!user.password) return next();
-        bcrypt.genSalt(factory, function (err, salt) {
-            if (err) return next(err);
-            // hash the password using our new salt
-            bcrypt.hash(user.password, salt, function (err, hash) {
-                if (err) return next(err);
-                // override the cleartext password with the hashed one
-                user.password = hash;
-                next();
+        var verifyPwd = function (callback) {
+            if (!user["password"]) return callback();
+            //
+            bcrypt.genSalt(factory, function (err, salt) {
+                if (err) return callback(err);
+                bcrypt.hash(user.password, salt, function (err, hash) {
+                    if (err) return callback(err);
+                    user.password = hash;
+                    return callback();
+                });
             });
-        });
+        }
+        var verifyPhone = function (callback) {
+            if (!user["phone.value"] || (older.phone.value == user["phone.value"])) return callback();
+            //
+            user["phone.value"] = user["phone.value"].replace(/[\(\)\+\-\s]/g, "");
+            user["phone.verifyCode"] = "";
+            user["phone.verified"] = false;
+            return callback();
+        }
+        var verifyEmail = function (callback) {
+            if (!user["email.value"] || (older.email.value == user["email.value"])) {
+                if (older.email.verifyUrl !== user["email.verifyUrl"]) user["email.verified"] = false;
+            } else {
+                user["email.verifyUrl"] = "";
+                user["email.verified"] = false;
+            }
+            return callback();
+        }
+        this.findOne(this._conditions).lean().then(function (docs) {
+            older = (docs);
+            verifyPwd(function(){
+                verifyEmail(function () {
+                    verifyPhone(next);
+                })
+            })
+        }).catch(function (e) {
+            return next(e)
+        })
     });
     userSchema.pre('save', function (next) {
         var user = this;
@@ -109,10 +141,18 @@ module.exports = function (mongoose, regEx) {
             if (err) return next(err);
             // hash the password using our new salt
             bcrypt.hash(user.password, salt, function (err, hash) {
+                var url = user.email.value + new Date().getTime().toString(36);
                 if (err) return next(err);
                 // override the cleartext password with the hashed one
                 user.password = hash;
-                next();
+                user.phone.verifyCode = getCode4();
+                user.phone.verified = false;
+                user.email.verified = false;
+                bcrypt.hash(url, salt, function (err, mailhash) {
+                    if (err) return next(err);
+                    user.email.verifyUrl = mailhash;
+                    next();
+                });
             });
         });
     });

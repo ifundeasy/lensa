@@ -85,6 +85,7 @@ module.exports = function (args) {
         } else next(req.params);
     });
     router.post('/:collection', function (req, res, next) {
+        //todo : auto gen phone verify code & email verify url if insert new user;
         var collname = (req.params.collection || "").toLowerCase();
         if (Collection.hasOwnProperty(collname)) {
             var model = Collection[collname];
