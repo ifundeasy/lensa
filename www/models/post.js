@@ -54,7 +54,6 @@ module.exports = function (mongoose) {
         ],
         statuses : [statusSchema],
         comments : [commentSchema],
-        createdAt : {type : Date, default : Date.now},
         lat : {
             type : String,
             required : false
@@ -63,6 +62,11 @@ module.exports = function (mongoose) {
             type : String,
             required : false
         },
+        "posts._id" : {
+            ref : 'post',
+            type : Schema.Types.ObjectId
+        },
+        createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
     });
     //

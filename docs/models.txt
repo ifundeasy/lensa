@@ -162,6 +162,7 @@ LEGENDS
     comments : Array of "comment",
     lat : String,
     long : String,
+    posts._id : <posts> ObjectId,
     createdAt : Date,
     active : Boolean
 }
