@@ -22,8 +22,8 @@ module.exports = function (mongoose) {
             type : Schema.Types.ObjectId,
             required : true
         },
-        "procedures._id" : {
-            ref : 'procedure',
+        "steps._id" : {
+            ref : 'step',
             type : Schema.Types.ObjectId,
             required : true
         },
@@ -54,6 +54,22 @@ module.exports = function (mongoose) {
         ],
         statuses : [statusSchema],
         comments : [commentSchema],
+        assignFrom: {
+            "users._id" :  {
+                ref: 'user',
+                type: Schema.Types.ObjectId,
+                required: true
+            },
+            createdAt : {type : Date, default : Date.now}
+        },
+        assignTo : {
+            "users._id" :  {
+                ref: 'user',
+                type: Schema.Types.ObjectId,
+                required: true
+            },
+            createdAt : {type : Date, default : Date.now}
+        },
         lat : {
             type : String,
             required : false
