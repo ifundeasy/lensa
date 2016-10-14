@@ -10,7 +10,7 @@ var options = {
     workers : require('os').cpus().length || Number(argv.worker) || Number(env.npm_package_worker) || Number(env.SOCKETCLUSTER_WORKERS) || 4,
     workers : 1,
     brokers : Number(argv.broker) || Number(env.npm_package_broker) || Number(env.SOCKETCLUSTER_BROKERS) || 1,
-    port : Number(argv.port) || Number(env.npm_package_port) || 8000,
+    port : process.env.PORT || Number(env.npm_package_port) || Number(argv.port) || 3000,
     // Switch wsEngine to 'uws' for a MAJOR performance boost (beta)
     wsEngine : env.SOCKETCLUSTER_WS_ENGINE || 'ws',
     appName : argv.name || env.npm_package_name || env.SOCKETCLUSTER_APP_NAME || "Lensa",
