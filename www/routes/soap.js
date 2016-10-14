@@ -48,7 +48,7 @@ module.exports = function(args){
  								'groups._id': '57e27d79c4785029e9df3fda' // usergroup "A"
  							});
 
- 							newUser.save().then(function(docs){
+ 							newUser.save().then(function(doc){
  								var body = {
 						            "status": 1,
 						            "message": "new user has been created"
@@ -83,7 +83,67 @@ module.exports = function(args){
  				}
  				break;
 
+
+
+
+
+
+
+
+
+
+
  			case 'timeline':
+ 				var Post = Collection['posts'];
+
+ 				Post.find().then(function(docs){
+ 					var body = {
+			            "status": 1,
+			            "data": docs
+			        };
+
+			        res.status(200).send(body);
+ 				}).catch(function(e){
+ 					var body = {
+			            "status": 0,
+			            "message": e
+			        };
+
+			        res.status(500).send(body);
+ 				});
+ 				break;
+
+
+ 			case 'newreport':
+ 				var Post = Collection['posts'];
+
+ 				var newPost = new Post({
+ 					title: req.body.title,
+ 					text: req.body.text,
+ 					"users._id": '5800364438e91da4b2e74c74', // hardcode buat testing. TODO: cek session atau token dan ambil id user yg bersangkutan
+ 					"organizations._id": '57ead1e9e324096fa1277bd4', // hardcode buat testing. TODO: pake metode geofencing untuk menentukan laporan ini untuk organisasi mana berdasarkan lokasi. lokasi diambil dari req.body.lat & req.body.long
+ 					statuses: [],
+ 					comments: [],
+ 					lat: req.body.lat,
+ 					long: req.body.long
+ 				});
+
+ 				newPost.save().then(function(doc){
+ 					var body = {
+			            "status": 1,
+			            "message": "new post has been created"
+			        };
+
+			        res.status(201).send(body);
+ 				}).catch(function(e){
+ 					var body = {
+			            "status": 0,
+			            "message": e
+			        };
+
+			        res.status(500).send(body);
+ 				});
+
  				break;
  		}
 

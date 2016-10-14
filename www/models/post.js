@@ -36,6 +36,11 @@ module.exports = function (mongoose) {
             required : true
         },
         text : String,
+        "categories._id" : {
+            ref : 'category',
+            type : Schema.Types.ObjectId,
+            required : false
+        },
         "users._id" : {
             ref : 'user',
             type : Schema.Types.ObjectId,
@@ -58,7 +63,7 @@ module.exports = function (mongoose) {
             "users._id" :  {
                 ref: 'user',
                 type: Schema.Types.ObjectId,
-                required: true
+                required: false
             },
             createdAt : {type : Date, default : Date.now}
         },
@@ -66,7 +71,7 @@ module.exports = function (mongoose) {
             "users._id" :  {
                 ref: 'user',
                 type: Schema.Types.ObjectId,
-                required: true
+                required: false
             },
             createdAt : {type : Date, default : Date.now}
         },
