@@ -56,7 +56,7 @@ module.exports = function (mongoose, opts) {
                 lowercase : true,
                 //v = v.replace(/[\(\)\+\-\s]/g, "");
                 match : [regEx.phone, '{VALUE} is not a valid phone number!'],
-                unique : true,
+                unique : false,
                 required : false
             },
             verifyCode : String,

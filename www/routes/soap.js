@@ -1,5 +1,5 @@
 var router = require('express').Router();
-
+var bcrypt = require('bcrypt');
 
 module.exports = function(args){
 	var global = args.global;
@@ -83,7 +83,8 @@ module.exports = function(args){
  				}
  				break;
 
-
+ 			case 'login':
+ 				break;
 
 
 
