@@ -93,10 +93,10 @@ module.exports = function(args){
 
  			case 'report/all':
  				var Post = Collection['posts'];
- 				var start = req.body.start;
- 				var limit = req.body.limit;
+ 				var start = parseInt(req.body.start);
+ 				var limit = parseInt(req.body.limit);
 
- 				Post.find().sort('createdAt').then(function(docs){
+ 				Post.find().sort('createdAt').skip(start).limit(limit).then(function(docs){
  					var body = {
 			            "status": 1,
 			            "data": docs
@@ -116,12 +116,21 @@ module.exports = function(args){
  			case 'report/get':
  				var Post = Collection['posts'];
 
- 				Post.findOne({ _id: req.body._id}).then(function(docs){
- 					var body = {
-			            "status": 1,
-			            "data": doc
-			        };
-			        res.status(200).send(body);
+ 				Post.findOne({ _id: req.body._id}).then(function(doc){
+ 					if(doc !== null){
+ 						var body = {
+				            "status": 1,
+				            "data": doc
+				        };
+				        res.status(200).send(body);
+ 					} else {
+ 						var body = {
+				            "status": 1,
+				            "message": "invalid report id"
+				        };
+
+				        res.status(500).send(body);
+ 					}
  				}).catch(function(e){
  					var body = {
 			            "status": 0,
@@ -137,6 +146,7 @@ module.exports = function(args){
 
  				var useridDummies = ['5800eada5cfa2608637c49c5','5800364438e91da4b2e74c74', '5800f03cfc3d480d6f32e51a', '5800f01bfc3d480d6f32e519'];
  				var useridDummiesIndex = Math.floor(Math.random() * ((useridDummies.length-1) - 0 + 1)) + 0;
+ 				
  				var newPost = new Post({
  					title: req.body.title,
  					text: req.body.text,
@@ -171,12 +181,21 @@ module.exports = function(args){
  				var Post = Collection['posts'];
 
  				Post.findOne({_id: req.body._id}).remove().then(function(doc){
- 					var body = {
-			            "status": 1,
-			            "data": doc
-			        };
+ 					if(doc!==null){
+ 						var body = {
+				            "status": 1,
+				            "message": "report has been deleted"
+				        };
 
-			        res.status(200).send(body);
+				        res.status(200).send(body);
+ 					} else {
+ 						var body = {
+				            "status": 0,
+				            "message": "invalid report id"
+				        };
+
+				        res.status(500).send(body);
+ 					}
  				}).catch(function(e){
  					var body = {
 			            "status": 0,
@@ -188,22 +207,114 @@ module.exports = function(args){
  				break;
 
  			case 'comment/create':
+ 				var Post = Collection['posts'];
+
+ 				Post.findOne({_id: req.body.parent_id}).then(function(doc){
+ 					if(doc!==null){
+ 						var newComment = {
+ 							text: req.body.text,
+ 							"users._id": '5800f01bfc3d480d6f32e519', // dummy. TODO: baca user id dari session/cookie/token
+
+ 						};
+ 						doc.comments.push(newComment);
+
+ 						doc.save(function(err){
+ 							if(!err){
+ 								var body = {
+						            "status": 1,
+						            "message": "comment has been posted"
+						        };
+
+						        res.status(200).send(body);
+ 							} else {
+ 								var body = {
+						            "status": 0,
+						            "message": err
+						        };
+
+						        res.status(500).send(body);
+ 							}
+ 						});
+ 					} else {
+ 						var body = {
+				            "status": 0,
+				            "message": "invalid report id"
+				        };
+
+				        res.status(500).send(body);
+ 					}
+ 				}).catch(function(e){
+ 					var body = {
+			            "status": 0,
+			            "message": e
+			        };
+
+			        res.status(500).send(body);
+ 				});
  				break;
 
 
  			case 'comment/delete':
+ 				var Post = Collection['posts'];
+
+ 				Post.findOne({_id: req.body.parent_id}).then(function(doc){
+ 					if(doc!==null){
+ 						var rm = doc.comments.id(req.body._id).remove();
+
+ 						doc.save(function(err){
+ 							if(!err){
+ 								var body = {
+						            "status": 1,
+						            "message": "comment has been removed"
+						        };
+
+						        res.status(200).send(body);
+ 							} else {
+ 								var body = {
+						            "status": 0,
+						            "message": err
+						        };
+
+						        res.status(500).send(body);
+ 							}
+ 						});
+ 					} else {
+ 						var body = {
+				            "status": 0,
+				            "message": "invalid report id"
+				        };
+
+				        res.status(500).send(body);
+ 					}
+ 				}).catch(function(e){
+ 					var body = {
+			            "status": 0,
+			            "message": e
+			        };
+
+			        res.status(500).send(body);
+ 				});
  				break;
 
 
  			case 'user/get':
  				var User = Collection['users'];
- 				User.findOne({_id: req.body._id}).then(function(doc){
- 					var body = {
-			            "status": 1,
-			            "data": doc
-			        };
+ 				User.findOne({_id: req.body._id}).select('-password').then(function(doc){
+ 					if(doc!==null){
+ 						var body = {
+				            "status": 1,
+				            "data": doc
+				        };
 
-			        res.status(200).send(body);
+				        res.status(200).send(body);
+ 					} else {
+ 						var body = {
+				            "status": 0,
+				            "message": "invalid user id"
+				        };
+
+				        res.status(500).send(body);
+ 					}
  				}).catch(function(e){
  					var body = {
 			            "status": 0,
@@ -217,7 +328,7 @@ module.exports = function(args){
  			case 'user/update':
  				var User = Collection['users'];
  				User.findOne({_id: req.body._id}).then(function(doc){
- 					if(Object.keys(doc).length != 0){
+ 					if(doc !== null){
  						if(req.body.username) doc.username = req.body.username;
  						if(req.body.first_name) doc.name.first = req.body.first_name;
  						if(req.body.last_name) doc.name.last = req.body.last_name;
@@ -270,12 +381,21 @@ module.exports = function(args){
  			case 'organization/get':
  				var Organization = Collection['organizations'];
  				Organization.findOne({_id: req.body._id}).then(function(doc){
- 					var body = {
-			            "status": 1,
-			            "data": doc
-			        };
+ 					if(doc!==null){
+ 						var body = {
+				            "status": 1,
+				            "data": doc
+				        };
 
-			        res.status(201).send(body);
+				        res.status(200).send(body);
+ 					} else {
+ 						var body = {
+				            "status": 0,
+				            "message": "invalid organization id"
+				        };
+
+				        res.status(500).send(body);
+ 					}
  				}).catch(function(e){
  					var body = {
 			            "status": 0,
