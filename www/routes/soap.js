@@ -40,6 +40,7 @@ module.exports = function(args){
  									first: req.body.first_name,
  									last : req.body.last_name || null
  								},
+ 								"phone.value": req.body.phone || null,
  								email: {
  									value: req.body.email
  								},
@@ -118,10 +119,12 @@ module.exports = function(args){
  			case 'newreport':
  				var Post = Collection['posts'];
 
+ 				var useridDummies = ['5800eada5cfa2608637c49c5','5800364438e91da4b2e74c74'];
+ 				var useridDummiesIndex = Math.floor(Math.random() * ((useridDummies.length-1) - 0 + 1)) + 0;
  				var newPost = new Post({
  					title: req.body.title,
  					text: req.body.text,
- 					"users._id": '5800364438e91da4b2e74c74', // hardcode buat testing. TODO: cek session atau token dan ambil id user yg bersangkutan
+ 					"users._id": useridDummies[useridDummiesIndex], // hardcode buat testing. TODO: cek session atau token dan ambil id user yg bersangkutan
  					"organizations._id": '57ead1e9e324096fa1277bd4', // hardcode buat testing. TODO: pake metode geofencing untuk menentukan laporan ini untuk organisasi mana berdasarkan lokasi. lokasi diambil dari req.body.lat & req.body.long
  					statuses: [],
  					comments: [],
