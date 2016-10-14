@@ -57,7 +57,7 @@ module.exports = function (mongoose, opts) {
                 //v = v.replace(/[\(\)\+\-\s]/g, "");
                 match : [regEx.phone, '{VALUE} is not a valid phone number!'],
                 unique : true,
-                required : true
+                required : false
             },
             verifyCode : String,
             verified : {type : Boolean, default : false}
@@ -134,7 +134,7 @@ module.exports = function (mongoose, opts) {
     });
     userSchema.pre('save', function (next) {
         var user = this;
-        user.phone.value = user.phone.value.replace(/[\(\)\+\-\s]/g, "");
+        if(user.phone.value) user.phone.value = user.phone.value.replace(/[\(\)\+\-\s]/g, "");
         if (!user.isModified('password')) return next();
         // generate a salt
         bcrypt.genSalt(factory, function (err, salt) {
@@ -145,8 +145,8 @@ module.exports = function (mongoose, opts) {
                 if (err) return next(err);
                 // override the cleartext password with the hashed one
                 user.password = hash;
-                user.phone.verifyCode = getCode4();
-                user.phone.verified = false;
+                if(user.phone.value) user.phone.verifyCode = getCode4();
+                if(user.phone.value) user.phone.verified = false;
                 user.email.verified = false;
                 bcrypt.hash(url, salt, function (err, mailhash) {
                     if (err) return next(err);
