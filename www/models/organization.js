@@ -39,18 +39,22 @@ module.exports = function (mongoose, opts) {
             verifyCode : String,
             verified : {type : Boolean, default : false}
         },
-        lat : {
-            type : Number,
-            required : true
+        location: {
+            address : String,
+            country : String,
+            state : String,
+            zipcode : String,
+            administrativeAreaLevel: Number,
+            administrativeName: String,
+            lat : {
+                type : Number,
+                required : true
+            },
+            long : {
+                type : Number,
+                required : true
+            },
         },
-        long : {
-            type : Number,
-            required : true
-        },
-        address : String,
-        country : String,
-        state : String,
-        zipcode : String,
         notes : String,
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}

@@ -33,9 +33,12 @@ module.exports = function (mongoose) {
     var postSchema = new Schema({
         title : {
             type : String,
+            required : false
+        },
+        text : {
+            type : String,
             required : true
         },
-        text : String,
         "categories._id" : {
             ref : 'category',
             type : Schema.Types.ObjectId,

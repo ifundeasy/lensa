@@ -146,9 +146,7 @@ module.exports = function(args){
 
  				var useridDummies = ['5800eada5cfa2608637c49c5','5800364438e91da4b2e74c74', '5800f03cfc3d480d6f32e51a', '5800f01bfc3d480d6f32e519'];
  				var useridDummiesIndex = Math.floor(Math.random() * ((useridDummies.length-1) - 0 + 1)) + 0;
- 				
- 				var newPost = new Post({
- 					title: req.body.title,
+ 				var postobj = {
  					text: req.body.text,
  					"users._id": useridDummies[useridDummiesIndex], // hardcode buat testing. TODO: cek session atau token dan ambil id user yg bersangkutan
  					"organizations._id": '57ead1e9e324096fa1277bd4', // hardcode buat testing. TODO: pake metode geofencing untuk menentukan laporan ini untuk organisasi mana berdasarkan lokasi. lokasi diambil dari req.body.lat & req.body.long
@@ -156,12 +154,14 @@ module.exports = function(args){
  					comments: [],
  					lat: req.body.lat,
  					long: req.body.long
- 				});
+ 				};
+ 				if(req.body.title) postobj.title = req.body.title;
+ 				var newPost = new Post(postobj);
 
  				newPost.save().then(function(doc){
  					var body = {
 			            "status": 1,
-			            "message": "new post has been created"
+			            "message": "new report has been posted"
 			        };
 
 			        res.status(201).send(body);
