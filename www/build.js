@@ -1,5 +1,47 @@
 var factory = 7;
 var home = __dirname + "/";
+var data = {
+    group : {
+        "name": "Root"
+    },
+    organization : {
+        "name": "Super User",
+        "pic": "Lensa Corp",
+        "location": {
+            "address": "Jl. Sejauh Mata Memandang",
+            "state": "Jawa Barat",
+            "zipcode": "40132",
+            "country": "Indonesia",
+            "administrativeAreaLevel": 2,
+            "administrativeName": "Bandung",
+            "lat": "-6.8850527",
+            "long": "107.6177385"
+        },
+        "phone": {
+            "value": "62899100000"
+        },
+        "email": {
+            "value": "boot@lensa.com"
+        }
+    },
+    user : {
+        "username": "usethisuser",
+        "password": "passwd" + Math.floor(Math.random() * 10000),
+        "organizations._id": null,
+        "groups._id": null,
+        "phone": {
+            "value": "628996362062"
+        },
+        "email": {
+            "value": "user.boot@lensa.com"
+        },
+        "gender": "male",
+        "name": {
+            "first": "User",
+            "last": "Name"
+        }
+    }
+};
 var global = (function () {
     var obj = {
         factory : factory,
@@ -42,50 +84,37 @@ var main = function (db) {
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
-
-    var data = {
-        group : {
-            "name": "Root"
-        },
-        organizations : {
-            "name": "Super User",
-            "pic": "Lensa Corp",
-            "location": {
-                "address": "Jl. Sejauh Mata Memandang",
-                "state": "Jawa Barat",
-                "zipcode": "40132",
-                "country": "Indonesia",
-                "administrativeAreaLevel": 2,
-                "administrativeName": "Bandung",
-                "lat": "-6.8850527",
-                "long": "107.6177385"
-            },
-            "phone": {
-                "value": "62899100000",
-                "verified": false
-            },
-            "email": {
-                "value": "super@lensa.com",
-                "verified": false
-            }
-        },
-        users : {
-
-        },
-    };
-    //var data = new Collection["users"]({});
-    /*data.save().then(function (docs) {
-        var rows = mongoose.normalize(docs);
-        res.send({
-            status : 200,
-            message : httpCode[200],
-            error : null,
-            data : rows
-        })
+    //
+    var groups = Collection["groups"];
+    var organizations = Collection["organizations"];
+    var users = Collection["users"];
+    var groupId, group = new Collection["groups"](data.group);
+    group.save().then(function (docs) {
+        var row1 = mongoose.normalize(docs);
+        data.user["groups._id"] = row1._id;
+        var organizationId, organization = new Collection["organizations"](data.organization);
+        organization.save().then(function (docs) {
+            var row2 = mongoose.normalize(docs);
+            data.user["organizations._id"] = row2._id;
+            var user = new Collection["users"](data.user);
+            user.save().then(function (docs) {
+                var row3 = mongoose.normalize(docs);
+                console.log('   >> You can login with this account..');
+                console.log('      Username : ' + data.user.username);
+                console.log('      Password : ' + data.user.password);
+                process.exit(1);
+            }).catch(function (e) {
+                console.log(e);
+                process.exit(1);
+            });
+        }).catch(function (e) {
+            console.log(e);
+            process.exit(1);
+        });
     }).catch(function (e) {
-        next(e)
-    });*/
-    console.log(model)
+        console.log(e);
+        process.exit(1);
+    });
 
 };
 mongodb.database.onListen = function (err, db) {
