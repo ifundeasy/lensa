@@ -1,11 +1,63 @@
 var factory = 7;
 var home = __dirname + "/";
-var data = {
+var master = {
     group : {
-        "name": "Root"
+        name : "Root"
     },
     organization : {
-        "name": "Super User",
+        name : "Developer"
+    },
+    user : {
+        username : "root",
+        password : "passwd" + Math.floor(Math.random() * 10000)
+    }
+};
+var masterGroup = "Root";
+var data = {
+    groups : [
+        {
+            "name": master.group.name,
+            "routes" : [],
+            "restricted" : true,
+            "notes" : "",
+            "createdAt" : new Date(),
+            "active" : true
+        },
+        {
+            "name": "Super Administrator",
+            "routes" : [],
+            "restricted" : true,
+            "notes" : "",
+            "createdAt" : new Date(),
+            "active" : true
+        },
+        {
+            "name": "Moderator",
+            "routes" : [],
+            "restricted" : true,
+            "notes" : "",
+            "createdAt" : new Date(),
+            "active" : true
+        },
+        {
+            "name": "Administrator",
+            "routes" : [],
+            "restricted" : true,
+            "notes" : "",
+            "createdAt" : new Date(),
+            "active" : true
+        },
+        {
+            "name": "Pelaksana",
+            "routes" : [],
+            "restricted" : true,
+            "notes" : "",
+            "createdAt" : new Date(),
+            "active" : true
+        }
+    ],
+    organization : {
+        "name": master.organization.name,
         "pic": "Lensa Corp",
         "location": {
             "address": "Jl. Sejauh Mata Memandang",
@@ -21,25 +73,27 @@ var data = {
             "value": "62899100000"
         },
         "email": {
-            "value": "boot@lensa.com"
-        }
+            "value": "developer@lensa.com"
+        },
+        "restricted" : true
     },
     user : {
-        "username": "usethisuser",
-        "password": "passwd" + Math.floor(Math.random() * 10000),
+        "username": master.user.username,
+        "password": master.user.password,
         "organizations._id": null,
         "groups._id": null,
         "phone": {
-            "value": "628996362062"
+            "value": "62899100000"
         },
         "email": {
-            "value": "user.boot@lensa.com"
+            "value": "developer@lensa.com"
         },
         "gender": "male",
         "name": {
-            "first": "User",
-            "last": "Name"
-        }
+            "first": "Im",
+            "last": "Root"
+        },
+        "restricted" : true
     }
 };
 var global = (function () {
@@ -86,36 +140,37 @@ var main = function (db) {
     })();
     //
     var groups = Collection["groups"];
-    var organizations = Collection["organizations"];
-    var users = Collection["users"];
-    var groupId, group = new Collection["groups"](data.group);
-    group.save().then(function (docs) {
-        var row1 = mongoose.normalize(docs);
-        data.user["groups._id"] = row1._id;
-        var organizationId, organization = new Collection["organizations"](data.organization);
-        organization.save().then(function (docs) {
-            var row2 = mongoose.normalize(docs);
-            data.user["organizations._id"] = row2._id;
-            var user = new Collection["users"](data.user);
-            user.save().then(function (docs) {
-                var row3 = mongoose.normalize(docs);
-                console.log('   >> You can login with this account..');
-                console.log('      Username : ' + data.user.username);
-                console.log('      Password : ' + data.user.password);
-                process.exit(1);
+    groups.collection.insert(data.groups, function(e1, res1){
+        if (e1) {
+            console.log(e1);
+            process.exit(1);
+        } else {
+            var rows1 = mongoose.normalize(res1.ops);
+            data.user["groups._id"] = rows1.filter(function(el){
+                return el.name == master.group.name
+            })[0]._id;
+            var organization = new Collection["organizations"](data.organization);
+            organization.save().then(function (docs) {
+                var row2 = mongoose.normalize(docs);
+                data.user["organizations._id"] = row2._id;
+                var user = new Collection["users"](data.user);
+                console.log(data.user)
+                user.save().then(function (docs) {
+                    var row3 = mongoose.normalize(docs);
+                    console.log('   >> You can login with this account..');
+                    console.log('      Username : ' + data.user.username);
+                    console.log('      Password : ' + data.user.password);
+                    process.exit(1);
+                }).catch(function (e) {
+                    console.log(e);
+                    process.exit(1);
+                });
             }).catch(function (e) {
                 console.log(e);
                 process.exit(1);
             });
-        }).catch(function (e) {
-            console.log(e);
-            process.exit(1);
-        });
-    }).catch(function (e) {
-        console.log(e);
-        process.exit(1);
-    });
-
+        }
+    })
 };
 mongodb.database.onListen = function (err, db) {
     if (!err) {
