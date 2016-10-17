@@ -81,6 +81,7 @@ module.exports = function (mongoose, opts) {
             ref : 'role',
             type : Schema.Types.ObjectId
         },
+        restricted : {type : Boolean, default : false},
         notes : String,
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}

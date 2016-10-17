@@ -55,6 +55,7 @@ module.exports = function (mongoose, opts) {
                 required : true
             },
         },
+        restricted : {type : Boolean, default : false},
         notes : String,
         createdAt : {type : Date, default : Date.now},
         active : {type : Boolean, default : true}
