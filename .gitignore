@@ -1,4 +1,5 @@
 .idea
+mongo/
 data/
 log/
 node_modules/

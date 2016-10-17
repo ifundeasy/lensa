@@ -1,2 +1,9 @@
 p=`pwd`
-mongod --bind_ip=$IP --dbpath=$p/data --repair --nojournal
+datadir="$p/data"
+logdir="$p/log"
+logfile="$logdir/$d.log"
+ip="127.0.0.1"
+if [ $IP ]; then
+   ip=$IP
+fi
+mongod --bind_ip=$ip --dbpath=$datadir --repair --nojournal

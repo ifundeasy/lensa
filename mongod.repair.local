@@ -1,0 +1,7 @@
+p=`pwd`
+datadir="$p/data"
+ip="127.0.0.1"
+if [ $IP ]; then
+   ip=$IP
+fi
+mongo/bin/mongod --bind_ip=$ip --dbpath=$datadir --repair --nojournal

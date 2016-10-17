@@ -11,4 +11,4 @@ fi
 mkdir -p $logdir
 mkdir -p $datadir
 #
-mongod --bind_ip=$ip --dbpath=$datadir --nojournal --fork --logpath $logfile --rest "$@" --logappend --verbose
+mongo/bin/mongod --bind_ip=$ip --dbpath=$datadir --nojournal
