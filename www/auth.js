@@ -137,8 +137,8 @@ module.exports = function (global, locals, user) {
                                         user
                                         .findOne({username : body.username, active : true})
                                         .populate(popQuery).lean().exec(function (err, user) {
-                                            if (!user.organizations._id) locals.loginMsg.push({'invalid organization' : body.username});
-                                            if (!user.groups._id) locals.loginMsg.push({'invalid group' : body.username});
+                                            if (!user.organizations._id) locals.loginMsg.push({'invalid user organization' : null});
+                                            if (!user.groups._id) locals.loginMsg.push({'invalid user group' : null});
                                             if (locals.loginMsg.length) {
                                                 locals.loginMsgTxt = 'Login fail';
                                                 res.redirect('/login');
