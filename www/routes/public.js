@@ -1,4 +1,4 @@
-var namescape = "moderator";
+var namescape = "public";
 var page = require('express').Router();
 var api = require('express').Router();
 var httpCode = require('http').STATUS_CODES;
