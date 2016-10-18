@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    var url = "/api/organizations/";
+    var url = "!/organizations/";
     var isUpdate = false;
     var form1 = $('#form1');
     var form2 = $('#form2');
@@ -139,7 +139,7 @@ $(document).ready(function () {
                     tr.append("<td>" + row.long + "</td>");
                     tr.append("<td>" + row.notes + "</td>");
                     */
-                    tr.append("<td>" + row.country + "</td>");
+                    tr.append("<td>" + row.location.country + "</td>");
                     action.append(deleteBtn);
                     tr.on("click", function (ev) {
                         var is = ev.target.nodeName;
@@ -152,12 +152,12 @@ $(document).ready(function () {
                             pic.val(data.pic);
                             email.val(data.email.value);
                             phone.val(data.phone.value);
-                            address.val(data.address);
-                            state.val(data.state);
-                            zipcode.val(data.zipcode);
-                            country.val(data.country);
-                            lat.val(data.lat);
-                            long.val(data.long);
+                            address.val(data.location.address);
+                            state.val(data.location.state);
+                            zipcode.val(data.location.zipcode);
+                            country.val(data.location.country);
+                            lat.val(data.location.lat);
+                            long.val(data.location.long);
                             notes.val(data.notes);
                             isUpdate = data._id;
                         }
@@ -216,12 +216,14 @@ $(document).ready(function () {
             pic : pic.val(),
             "email.value" : email.val(),
             "phone.value" : phone.val(),
-            address : address.val(),
-            state : state.val(),
-            zipcode : zipcode.val(),
-            country : country.val(),
-            lat : lat.val(),
-            long : long.val(),
+            location : {
+                address : address.val(),
+                state : state.val(),
+                zipcode : zipcode.val(),
+                country : country.val(),
+                lat : lat.val(),
+                long : long.val(),
+            },
             notes : notes.val()
         };
         var save = function () {
