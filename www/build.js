@@ -1,22 +1,9 @@
 var factory = 7;
 var home = __dirname + "/";
-var master = {
-    group : {
-        name : "Root"
-    },
-    organization : {
-        name : "Developer"
-    },
-    user : {
-        username : "root",
-        password : "passwd" + Math.floor(Math.random() * 10000)
-    }
-};
-var masterGroup = "Root";
 var data = {
     groups : [
         {
-            "name": master.group.name,
+            "name": "Root",
             "routes" : [],
             "restricted" : true,
             "notes" : "",
@@ -24,7 +11,15 @@ var data = {
             "active" : true
         },
         {
-            "name": "Super Administrator",
+            "name": "Public",
+            "routes" : [],
+            "restricted" : true,
+            "notes" : "",
+            "createdAt" : new Date(),
+            "active" : true
+        },
+        {
+            "name": "Super Admin",
             "routes" : [],
             "restricted" : true,
             "notes" : "",
@@ -40,7 +35,7 @@ var data = {
             "active" : true
         },
         {
-            "name": "Administrator",
+            "name": "Admin",
             "routes" : [],
             "restricted" : true,
             "notes" : "",
@@ -48,7 +43,7 @@ var data = {
             "active" : true
         },
         {
-            "name": "Pelaksana",
+            "name": "Implementor",
             "routes" : [],
             "restricted" : true,
             "notes" : "",
@@ -57,7 +52,7 @@ var data = {
         }
     ],
     organization : {
-        "name": master.organization.name,
+        "name": "Developer",
         "pic": "Lensa Corp",
         "location": {
             "address": "Jl. Sejauh Mata Memandang",
@@ -77,24 +72,111 @@ var data = {
         },
         "restricted" : true
     },
-    user : {
-        "username": master.user.username,
-        "password": master.user.password,
-        "organizations._id": null,
-        "groups._id": null,
-        "phone": {
-            "value": "62899100000"
+    users : [
+        {
+            "username": "root",
+            "password": "root" + Math.floor(Math.random() * 10000),
+            "organizations._id": null,
+            "groups._id": null,
+            "phone": {
+                "value": "62899100000"
+            },
+            "email": {
+                "value": "developer.root@lensa.com"
+            },
+            "gender": "male",
+            "name": {
+                "first": "Dev",
+                "last": "Root"
+            },
+            "restricted" : true
         },
-        "email": {
-            "value": "developer@lensa.com"
+        {
+            "username": "superadmin",
+            "password": "superadmin" + Math.floor(Math.random() * 10000),
+            "organizations._id": null,
+            "groups._id": null,
+            "phone": {
+                "value": "62899100001"
+            },
+            "email": {
+                "value": "developer.superadmin@lensa.com"
+            },
+            "gender": "male",
+            "name": {
+                "first": "Dev",
+                "last": "Super Admin"
+            }
         },
-        "gender": "male",
-        "name": {
-            "first": "Im",
-            "last": "Root"
+        {
+            "username": "moderator",
+            "password": "moderator" + Math.floor(Math.random() * 10000),
+            "organizations._id": null,
+            "groups._id": null,
+            "phone": {
+                "value": "62899100002"
+            },
+            "email": {
+                "value": "developer.moderator@lensa.com"
+            },
+            "gender": "male",
+            "name": {
+                "first": "Dev",
+                "last": "Moderator"
+            }
         },
-        "restricted" : true
-    }
+        {
+            "username": "admin",
+            "password": "admin" + Math.floor(Math.random() * 10000),
+            "organizations._id": null,
+            "groups._id": null,
+            "phone": {
+                "value": "62899100003"
+            },
+            "email": {
+                "value": "developer.admin@lensa.com"
+            },
+            "gender": "male",
+            "name": {
+                "first": "Dev",
+                "last": "Admin"
+            }
+        },
+        {
+            "username": "implementor",
+            "password": "implementor" + Math.floor(Math.random() * 10000),
+            "organizations._id": null,
+            "groups._id": null,
+            "phone": {
+                "value": "62899100004"
+            },
+            "email": {
+                "value": "developer.implementor@lensa.com"
+            },
+            "gender": "male",
+            "name": {
+                "first": "Dev",
+                "last": "Implementor"
+            }
+        },
+        {
+            "username": "public",
+            "password": "public" + Math.floor(Math.random() * 10000),
+            "organizations._id": null,
+            "groups._id": null,
+            "phone": {
+                "value": "62899100005"
+            },
+            "email": {
+                "value": "developer.public@lensa.com"
+            },
+            "gender": "male",
+            "name": {
+                "first": "Dev",
+                "last": "Public"
+            }
+        }
+    ]
 };
 var global = (function () {
     var obj = {
@@ -146,25 +228,33 @@ var main = function (db) {
             process.exit(1);
         } else {
             var rows1 = mongoose.normalize(res1.ops);
-            data.user["groups._id"] = rows1.filter(function(el){
-                return el.name == master.group.name
-            })[0]._id;
             var organization = new Collection["organizations"](data.organization);
             organization.save().then(function (docs) {
                 var row2 = mongoose.normalize(docs);
-                data.user["organizations._id"] = row2._id;
-                var user = new Collection["users"](data.user);
-                console.log(data.user)
-                user.save().then(function (docs) {
-                    var row3 = mongoose.normalize(docs);
-                    console.log('   >> You can login with this account..');
-                    console.log('      Username : ' + data.user.username);
-                    console.log('      Password : ' + data.user.password);
-                    process.exit(1);
-                }).catch(function (e) {
-                    console.log(e);
-                    process.exit(1);
-                });
+                data.users.forEach(function(d, i){
+                    d["groups._id"] = rows1.filter(function(el){
+                        return el.name.toLowerCase().replace(/\s/g, "") == d.username
+                    })[0]._id;
+                    d["organizations._id"] = row2._id;
+                    //
+                    var user = new Collection["users"](d);
+                    user.save().then(function (docs) {
+                        if (i == data.users.length -1 ) {
+                            console.log('   >> You can login with this account..');
+                            data.users.forEach(function (d) {
+                                console.log('      Username : ' + d.username);
+                                console.log('      Password : ' + d.password);
+                                console.log('      ---------------------------');
+                            });
+                            setTimeout(function(){
+                                process.exit(1);
+                            }, 5000)
+                        }
+                    }).catch(function (e) {
+                        console.log(e);
+                        process.exit(1);
+                    });
+                })
             }).catch(function (e) {
                 console.log(e);
                 process.exit(1);
