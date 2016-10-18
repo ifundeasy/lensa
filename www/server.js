@@ -63,7 +63,6 @@ module.exports = function (global, worker, db) {
         });
     };
     //
-    var group = undefined;
     var param = {
         global : global,
         locals : locals,
@@ -114,13 +113,6 @@ module.exports = function (global, worker, db) {
     /** **************************************************************************
      ** rest api & page by user groups
      ** **************************************************************************/
-    /*
-    app.use('/api', function (req, res, next) {
-        app.group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");
-        console.log("SERVER.js", app.group)
-        req.logged ? next() : res.redirect('/login');
-    }, require(global.routes + 'a')(param, app));
-    */
     var checking = function (req, res, next) {
         req.logged ? next() : res.redirect('/login');
     };
@@ -133,11 +125,11 @@ module.exports = function (global, worker, db) {
     });
     app.use('/admin', checking, require(global.routes + 'admin')(param));
     app.use('/moderator', checking, require(global.routes + 'moderator')(param));
-    app.use('/implementor', checking, require(global.routes + 'implementor')(param));
-    app.use('/public', checking, require(global.routes + 'public')(param));
+    app.use('/implementor', require(global.routes + 'implementor')(param));
+    app.use('/public', require(global.routes + 'public')(param));
     app.use('/root', checking, require(global.routes + 'root')(param));
     app.use('/superadmin', checking, require(global.routes + 'superadmin')(param));
-    app.use('/soap', require(global.routes + 'soap')(param));
+    //app.use('/soap', require(global.routes + 'soap')(param));
     /** **************************************************************************
      ** standard http request
      ** **************************************************************************/
