@@ -137,7 +137,7 @@ module.exports = function (global, worker, db) {
     app.use('/public', checking, require(global.routes + 'public')(param));
     app.use('/root', checking, require(global.routes + 'root')(param));
     app.use('/superadmin', checking, require(global.routes + 'superadmin')(param));
-    //app.use('/soap', require(global.routes + 'soap')(param));
+    app.use('/soap', require(global.routes + 'soap')(param));
     /** **************************************************************************
      ** standard http request
      ** **************************************************************************/
