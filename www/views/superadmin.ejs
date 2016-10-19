@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="main">
 	<meta name="author" content="Afa, Falih">
-	<title>Root : <%- locals.name + " " + locals.version %></title>
+	<title>Super Admin : <%- locals.name + " " + locals.version %></title>
 	<link href="/.inspinia/css/bootstrap.min.css" rel="stylesheet">
 	<link href="/.inspinia/font-awesome/css/font-awesome.css" rel="stylesheet">
 	<link href="/.inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
@@ -16,12 +16,10 @@
 	<link href="/.inspinia/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
 	<link href="/.inspinia/css/plugins/select2/select2.min.css" rel="stylesheet">
 	<link href="/.inspinia/css/plugins/dataTables/datatables.min.css" rel="stylesheet">
-	<link href="/.inspinia/css/plugins/toastr/toastr.min.css" rel="stylesheet">
 	<link href="/.inspinia/css/animate.css" rel="stylesheet">
 	<link href="/.inspinia/css/style.css" rel="stylesheet">
-	<link href="/.assets/css/style.css" rel="stylesheet">
 </head>
-<body class="fixed-sidebar pace-done fixed-nav fixed-nav-basic" directive="/root">
+<body class="fixed-sidebar pace-done fixed-nav fixed-nav-basic" directive="/superadmin">
 <div id="wrapper">
 	<nav id="navbar" class="navbar-default navbar-static-side" role="navigation">
 		<div class="sidebar-collapse">
@@ -49,36 +47,27 @@
 					</div>
 					<div class="logo-element">IN+</div>
 				</li>
-				<!--
-				<li>
-					<a href="#groups">
-						<i class="fa fa-edit"></i> <span class="nav-label">Groups</span>
-					</a>
-				</li>
-				-->
-				<li>
-					<a href="#organizations">
-						<i class="fa fa-sitemap"></i> <span class="nav-label">Organizations</span>
-					</a>
-				</li>
 				<li class="active">
 					<a href="#users">
 						<i class="fa fa-users"></i> <span class="nav-label">Users</span>
 					</a>
 				</li>
-				<!--
+				<li>
+					<a href="#organization">
+						<i class="fa fa-sitemap"></i> <span class="nav-label">Organizations</span>
+					</a>
+				</li>
 				<li>
 					<a href="#">
 						<i class="fa fa-edit"></i>
-						<span class="nav-label">Group & Role</span>
+						<span class="nav-label">User Group & Role</span>
 						<span class="fa arrow"></span>
 					</a>
 					<ul class="nav nav-second-level collapse">
-						<li><a href="#userGroups"></a></li>
-						<li><a href="#userGroupRoles">User Group Roles</a></li>
+						<li><a href="#userGroup">User Group</a></li>
+						<li><a href="#userGroupRole">Group Role</a></li>
 					</ul>
 				</li>
-				-->
 			</ul>
 		</div>
 	</nav>
@@ -243,9 +232,7 @@
 <script type="application/javascript" src="/.inspinia/js/plugins/select2/select2.full.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/dataTables/datatables.min.js"></script>
-<script type="application/javascript" src="/.inspinia/js/plugins/toastr/toastr.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/inspinia.js"></script>
-<script type="application/javascript" src="/.assets/js/modal.js"></script>
 <script type="application/javascript" delete>
 	var toTitleCase = function (str) {
 		return str.replace(/\w\S*/g, function (txt) {

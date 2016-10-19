@@ -103,35 +103,36 @@ module.exports = function (global, worker, db) {
         app.use(morgan(logger.format, {stream : logger.file}));
         app.use(morgan(logger.format));
     }
-    app.use(expressSession(session), auth(global, locals, models.user));
-    //
+    /** **************************************************************************
+     ** session, authorizing and authentication
+     ** **************************************************************************/
+    app.use(expressSession(session), auth(global, locals, models.user), function (req, res, next) {
+        if (req.logged) req.logged.user = mongoose.normalize(req.logged.user);
+        next();
+    });
+    /** **************************************************************************
+     ** rest api & page by user groups
+     ** **************************************************************************/
+    var checking = function (req, res, next) {
+        req.logged ? next() : res.redirect('/login');
+    };
     app.get('/', function (req, res, next) {
         if (req.logged) {
-            req.logged.user = mongoose.normalize(req.logged.user);
-            var group = req.logged.user.groups.name.toLowerCase();
-            locals.www = {
-                name : param.global.name,
-                description : param.global.description,
-                version : param.global.version,
-                models : (function () {
-                    var o = {}
-                    for (var m in models) o[models[m].collection.name] = m;
-                    return o
-                })()
-            };
-            if (group !== "root") delete locals.www["models"];
-            res.render(group, locals.www);
+            res.redirect('/' + req.logged.user.groups.name.toLowerCase().replace(/\s/g, ""));
         } else {
             res.redirect('/login')
         }
     });
-    //app.use('/api', require(global.routes + 'api')(param));
-    app.use('/api', function (req, res, next) {
-        req.logged ? next() : res.redirect('/login');
-    }, require(global.routes + 'api')(param));
-    //
-    app.use('/soap', require(global.routes + 'soap')(param));
-    //
+    app.use('/admin', checking, require(global.routes + 'admin')(param));
+    app.use('/moderator', checking, require(global.routes + 'moderator')(param));
+    app.use('/implementor', require(global.routes + 'implementor')(param));
+    app.use('/public', require(global.routes + 'public')(param));
+    app.use('/root', checking, require(global.routes + 'root')(param));
+    app.use('/superadmin', checking, require(global.routes + 'superadmin')(param));
+    //app.use('/soap', require(global.routes + 'soap')(param));
+    /** **************************************************************************
+     ** standard http request
+     ** **************************************************************************/
     app.get('/contact', function (req, res, next) {
         res.render('contact', {logged : req.logged ? 1 : 0});
     });
@@ -273,7 +274,9 @@ module.exports = function (global, worker, db) {
         locals.loginMsg = [];
         locals.loginMsgTxt = '';
     });
-    /******************************************************************************/
+    /** **************************************************************************
+     ** http request error handling
+     ** **************************************************************************/
     app.use(function (req, res, next) {
         var code = 404;
         var err = new Error();
@@ -287,7 +290,7 @@ module.exports = function (global, worker, db) {
         var verb2 = req.url.length - 8 == req.url.lastIndexOf(".css.map");
         locals.ERR = {
             status : err.status || 500,
-            message : err.message || "Oops! Something wrong.",
+            message : err.message || "Oops! Something wrong",
             error : err.errors
         };
         //
@@ -309,7 +312,9 @@ module.exports = function (global, worker, db) {
             }
         });
     });
-    //
+    /** **************************************************************************
+     ** web server setting
+     ** **************************************************************************/
     httpServer.timeout = global.timeOut;
     httpServer.on('request', app);
     httpServer.on('error', function onError(error) {
@@ -332,8 +337,9 @@ module.exports = function (global, worker, db) {
     httpServer.on('handshake', function () {
         //console.log(global.processId.toString(), 'Listening on ' + global.ip + ':' + global.port);
     });
-    /******************************************************************************/
-    //
+    /** **************************************************************************
+     ** web socket setting
+     ** **************************************************************************/
     var count = 0;
     scServer.on('connection', function (socket) {
         // Some sample logic to show how to handle client events,

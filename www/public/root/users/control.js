@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    var url = "/api/users/";
+    var url = "!/users/";
     var isUpdate = false;
     var form1 = $('#form1');
     var form2 = $('#form2');
@@ -96,7 +96,7 @@ $(document).ready(function () {
             method : "GET",
             dataType : "json",
             async : false,
-            url : "/api/organizations?" + $.param({limit : 1000})
+            url : "!/organizations?" + $.param({limit : 1000})
         }).error(function (jqXHR, is, message) {
             twowew({
                 type : "error",
@@ -120,7 +120,7 @@ $(document).ready(function () {
             method : "GET",
             dataType : "json",
             async : false,
-            url : "/api/groups?" + $.param({limit : 1000})
+            url : "!/groups?" + $.param({limit : 1000})
         }).error(function (jqXHR, is, message) {
             twowew({
                 type : "error",
