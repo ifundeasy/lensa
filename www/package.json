@@ -45,6 +45,7 @@
     "mongoose": "",
     "morgan": "",
     "node-dev": "",
+    "node-geocoder": "^3.15.0",
     "nodemailer": "",
     "pm2": "",
     "q": "",

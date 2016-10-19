@@ -125,7 +125,7 @@ module.exports = function (args) {
                 var postobj = {
                     text : req.body.text,
                     "users._id" : useridDummies[useridDummiesIndex], // hardcode buat testing. TODO: cek session atau token dan ambil id user yg bersangkutan
-                    "organizations._id" : '57ead1e9e324096fa1277bd4', // hardcode buat testing. TODO: pake metode geofencing untuk menentukan laporan ini untuk organisasi mana berdasarkan lokasi. lokasi diambil dari req.body.lat & req.body.long
+                    "organizations._id" : '57e4c4d0194f677f2b17b4e8', // default : PUBLIC organization
                     statuses : [],
                     comments : [],
                     lat : req.body.lat,
