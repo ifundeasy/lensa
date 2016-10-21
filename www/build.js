@@ -75,7 +75,7 @@ var data = {
     users : [
         {
             "username": "root",
-            "password": "root" + Math.floor(Math.random() * 10000),
+            "password": "root", // + Math.floor(Math.random() * 10000),
             "organizations._id": null,
             "groups._id": null,
             "phone": {
@@ -93,7 +93,7 @@ var data = {
         },
         {
             "username": "superadmin",
-            "password": "superadmin" + Math.floor(Math.random() * 10000),
+            "password": "superadmin", // + Math.floor(Math.random() * 10000),
             "organizations._id": null,
             "groups._id": null,
             "phone": {
@@ -110,7 +110,7 @@ var data = {
         },
         {
             "username": "moderator",
-            "password": "moderator" + Math.floor(Math.random() * 10000),
+            "password": "moderator", // + Math.floor(Math.random() * 10000),
             "organizations._id": null,
             "groups._id": null,
             "phone": {
@@ -127,7 +127,7 @@ var data = {
         },
         {
             "username": "admin",
-            "password": "admin" + Math.floor(Math.random() * 10000),
+            "password": "admin", // + Math.floor(Math.random() * 10000),
             "organizations._id": null,
             "groups._id": null,
             "phone": {
@@ -144,7 +144,7 @@ var data = {
         },
         {
             "username": "implementor",
-            "password": "implementor" + Math.floor(Math.random() * 10000),
+            "password": "implementor", // + Math.floor(Math.random() * 10000),
             "organizations._id": null,
             "groups._id": null,
             "phone": {
@@ -161,7 +161,7 @@ var data = {
         },
         {
             "username": "public",
-            "password": "public" + Math.floor(Math.random() * 10000),
+            "password": "public", // + Math.floor(Math.random() * 10000),
             "organizations._id": null,
             "groups._id": null,
             "phone": {
