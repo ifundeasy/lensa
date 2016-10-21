@@ -16,8 +16,10 @@
 	<link href="/.inspinia/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
 	<link href="/.inspinia/css/plugins/select2/select2.min.css" rel="stylesheet">
 	<link href="/.inspinia/css/plugins/dataTables/datatables.min.css" rel="stylesheet">
+	<link href="/.inspinia/css/plugins/toastr/toastr.min.css" rel="stylesheet">
 	<link href="/.inspinia/css/animate.css" rel="stylesheet">
 	<link href="/.inspinia/css/style.css" rel="stylesheet">
+	<link href="/.assets/css/style.css" rel="stylesheet">
 </head>
 <body class="fixed-sidebar pace-done fixed-nav fixed-nav-basic" directive="/superadmin">
 <div id="wrapper">
@@ -48,24 +50,42 @@
 					<div class="logo-element">IN+</div>
 				</li>
 				<li class="active">
-					<a href="#users">
-						<i class="fa fa-users"></i> <span class="nav-label">Users</span>
+					<a href="#dashboard">
+						<i class="fa fa-dashboard"></i> <span class="nav-label">Dashboard</span>
 					</a>
 				</li>
 				<li>
 					<a href="#organization">
-						<i class="fa fa-sitemap"></i> <span class="nav-label">Organizations</span>
+						<i class="fa fa-building-o"></i> <span class="nav-label">Organization</span>
+					</a>
+				</li>
+				<li>
+					<a href="#department">
+						<i class="fa fa-bullhorn"></i> <span class="nav-label">Department</span>
+					</a>
+				</li>
+				<li>
+					<a href="#employee">
+						<i class="fa fa-users"></i> <span class="nav-label">Employee</span>
 					</a>
 				</li>
 				<li>
 					<a href="#">
 						<i class="fa fa-edit"></i>
-						<span class="nav-label">User Group & Role</span>
+						<span class="nav-label">S.O.P.</span>
 						<span class="fa arrow"></span>
 					</a>
 					<ul class="nav nav-second-level collapse">
-						<li><a href="#userGroup">User Group</a></li>
-						<li><a href="#userGroupRole">Group Role</a></li>
+						<li>
+							<a href="#category">
+								<i class="fa fa-th-large"></i> <span class="nav-label">Category</span>
+							</a>
+						</li>
+						<li>
+							<a href="#procedure">
+								<i class="fa fa-list-alt"></i> <span class="nav-label">Procedure</span>
+							</a>
+						</li>
 					</ul>
 				</li>
 			</ul>
@@ -232,7 +252,9 @@
 <script type="application/javascript" src="/.inspinia/js/plugins/select2/select2.full.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/dataTables/datatables.min.js"></script>
+<script type="application/javascript" src="/.inspinia/js/plugins/toastr/toastr.min.js"></script>
 <script type="application/javascript" src="/.inspinia/js/inspinia.js"></script>
+<script type="application/javascript" src="/.assets/js/modal.js"></script>
 <script type="application/javascript" delete>
 	var toTitleCase = function (str) {
 		return str.replace(/\w\S*/g, function (txt) {

@@ -180,7 +180,10 @@ module.exports = function (args, app) {
         var id = req.params.id;
         if (Collection.hasOwnProperty(collname) && id) {
             var model = Collection[collname];
-            model.update({_id : id, active : true}, {$set : {active : false}}).then(function (docs) {
+            model.update(
+                {_id : id, active : true, restricted : false},
+                {$set : {active : false}}
+            ).then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
                     status : 200,
@@ -194,7 +197,7 @@ module.exports = function (args, app) {
         } else next(req.params);
     });
     //
-    page.use(function(req, res, next){
+    page.use(function (req, res, next) {
         var group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");
         if (group !== namescape) next(group)
         else next();

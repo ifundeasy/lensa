@@ -49,12 +49,16 @@ LEGENDS
         verifyCode : String,
         verified : Boolean
     },
-    lat : (R) Number,
-    long : (R) Number,
-    address : String,
-    country : String,
-    state : String,
-    zipcode : String,
+    location : {
+        lat : (R) Number,
+        long : (R) Number,
+        address : String,
+        country : String,
+        state : String,
+        administrativeAreaLevel: Number,
+        administrativeName: String,
+        zipcode : String
+    }
     notes : String,
     createdAt : Date,
     active : Boolean
@@ -77,20 +81,11 @@ LEGENDS
     createdAt : Date,
     active : Boolean
 }
-(C) jobs = {
-    _id : ObjectId,
-    name : (R) String,
-    description : String,
-    roles._id : (R) <roles> ObjectId,
-    categories._id : (R) <categories> ObjectId,
-    notes : String,
-    createdAt : Date,
-    active : Boolean
-}
 (C) procedures = {
     _id : ObjectId,
     name : (R) String,
     description : String,
+    roles._id : (R) <roles> ObjectId,
     categories._id : (R) <categories> ObjectId,
     notes : String,
     createdAt : Date,
@@ -102,6 +97,7 @@ LEGENDS
     description : String,
     stepNumber : Number[1,~],
     duration : Number[0,~],
+    procedures._id :  (R) <procedures> ObjectId,
     notes : String,
     createdAt : Date,
     active : Boolean
@@ -155,11 +151,20 @@ LEGENDS
     _id : ObjectId,
     title : (R) String,
     text : String,
+    categories._id : (R) <categories> ObjectId,
     users._id : (R) <users> ObjectId,
     organizations._id : (R) <organizations> ObjectId,
     media._ids : Array of <media> ObjectId,
     statuses : Array of "status",
     comments : Array of "comment",
+    assignFrom: {
+		users._id : (R) <users> ObjectId,
+		createdAt : Date
+	},
+	assignTo : {
+		users._id : (R) <users> ObjectId,
+		createdAt : Date
+	},
     lat : String,
     long : String,
     posts._id : <posts> ObjectId,

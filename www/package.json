@@ -1,7 +1,7 @@
 {
   "name": "Lensa",
   "description": "Lensa - Bussiness Process Management",
-  "version": "0.0.3",
+  "version": "0.0.2",
   "private": true,
   "port": 6200,
   "sessionAge": 900000,

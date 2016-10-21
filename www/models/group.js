@@ -50,7 +50,7 @@ module.exports = function (mongoose) {
             required : true,
             unique : true
         },
-        routes : [routesSchema],
+        //routes : [routesSchema],
         restricted : {type : Boolean, default : false},
         notes : String,
         createdAt : {type : Date, default : Date.now},

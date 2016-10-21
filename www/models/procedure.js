@@ -7,6 +7,11 @@ module.exports = function (mongoose) {
             required : true
         },
         description : String,
+        "roles._id" : {
+            ref : 'role',
+            type : Schema.Types.ObjectId,
+            required : true
+        },
         "categories._id" : {
             ref : 'category',
             type : Schema.Types.ObjectId,
@@ -18,21 +23,38 @@ module.exports = function (mongoose) {
     });
     //
     procedureSchema.statics.getPopQuery = function (nestIdx) {
-        var populate = {
-            path : "categories._id",
-            select : "name description organizations._id",
-            match : {active : true},
-            populate : {
-                path : "organizations._id",
-                select : "name description",
+        var populate = [
+            {
+                path : "roles._id",
+                select : "name description organizations._id",
                 match : {active : true},
                 populate : {
-                    path : "media._id",
-                    select : "type directory description",
-                    match : {active : true}
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "media._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
+                }
+            },
+            {
+                path : "categories._id",
+                select : "name description organizations._id",
+                match : {active : true},
+                populate : {
+                    path : "organizations._id",
+                    select : "name description",
+                    match : {active : true},
+                    populate : {
+                        path : "media._id",
+                        select : "type directory description",
+                        match : {active : true}
+                    }
                 }
             }
-        };
+        ];
         return mongoose.nested(populate, nestIdx)
     };
     return mongoose.model('procedure', procedureSchema);
