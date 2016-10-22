@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    var organization = undefined;
     var url = "!/users/";
     var isUpdate = false;
     var form1 = $('#form1');
@@ -84,8 +85,29 @@ $(document).ready(function () {
             forminfo.text("1");
         });
         prev.click();
+        gettingOrganization() //async
         gettingGroup();  //sync
         getting(); //async
+    }
+    var gettingOrganization = function () {
+        $.ajax({
+            method : "GET",
+            dataType : "json",
+            async : true,
+            url : "!/organizations"
+        }).error(function (jqXHR, is, message) {
+            twowew({
+                type : "error",
+                title : "GET",
+                message : jqXHR.responseJSON.message,
+                time : 0
+            });
+            console.error("GET", jqXHR.responseJSON);
+        }).success(function (res) {
+            if (res.data.total) {
+                organization = res.data.rows[0]
+            }
+        });
     }
     var gettingGroup = function () {
         $.ajax({
@@ -227,6 +249,7 @@ $(document).ready(function () {
             "email.value" : email.val(),
             "phone.value" : phone.val(),
             "groups._id" : group.val(),
+            "organizations._id" : organization._id,
             notes : notes.val()
         };
         var save = function () {
