@@ -20,6 +20,7 @@ module.exports = function (mongoose) {
         var populate = {
             path : "organizations._id",
             select : "name description",
+            match : {active : true},
             populate : {
                 path : "media._id",
                 select : "type directory description",
