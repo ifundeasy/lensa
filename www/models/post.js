@@ -234,24 +234,48 @@ module.exports = function (mongoose) {
                 ]
             },
             {
-                path : "statuses.procedure._id",
-                select : "name description steps categories._id",
+                //path : "statuses.procedure._id",
+                //select : "name description steps categories._id",
+                //match : {active : true},
+                //populate : {
+                //    path : "categories._id",
+                //    select : "name description organizations._id",
+                //    match : {active : true},
+                //    populate : {
+                //        path : "organizations._id",
+                //        select : "name description",
+                //        match : {active : true},
+                //        populate : {
+                //            path : "media._id",
+                //            select : "type directory description",
+                //            match : {active : true}
+                //        }
+                //    }
+                //}
+                path : "statuses.steps._id",
+                select : "name  description  stepNumber duration procedures._id",
                 match : {active : true},
                 populate : {
-                    path : "categories._id",
-                    select : "name description organizations._id",
+                    path : "procedures._id",
+                    select : "name description categories._id",
                     match : {active : true},
                     populate : {
-                        path : "organizations._id",
-                        select : "name description",
+                        path : "categories._id",
+                        select : "name description organizations._id",
                         match : {active : true},
                         populate : {
-                            path : "media._id",
-                            select : "type directory description",
-                            match : {active : true}
+                            path : "organizations._id",
+                            select : "name description",
+                            match : {active : true},
+                            populate : {
+                                path : "media._id",
+                                select : "type directory description",
+                                match : {active : true}
+                            }
                         }
                     }
                 }
+
             }
         ];
         return mongoose.nested(populate, nestIdx)

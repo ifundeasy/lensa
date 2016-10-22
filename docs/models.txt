@@ -136,7 +136,7 @@ LEGENDS
 }
 (S) status = {
     users._id : (R) <users> ObjectId,
-    procedures._id : (R) <procedures> ObjectId,
+    steps._id : (R) <steps> ObjectId,
     createdAt : Date,
     active : Boolean
 }
