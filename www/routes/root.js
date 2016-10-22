@@ -59,7 +59,16 @@ module.exports = function (args, app) {
                     next(e)
                 })
             })
-        } else next(req.params);
+        } else {
+            var error = ("collname|String").split("|");
+            var Err = new Error([httpCode[404], collname].join(" : "))
+            Err.errors = {
+                require : error[0],
+                type : error[1],
+                founded : eval(error[0])
+            }
+            next(Err);
+        };
     });
     api.get('/:collection/:id', function (req, res, next) {
         var collname = (req.params.collection || "").toLowerCase();
@@ -84,7 +93,16 @@ module.exports = function (args, app) {
             .catch(function (e) {
                 next(e)
             })
-        } else next(req.params);
+        } else {
+            var error = ("req.params|String").split("|");
+            var Err = new Error([httpCode[404], id].join(" : "))
+            Err.errors = {
+                require : error[0],
+                type : error[1],
+                founded : eval(error[0])
+            }
+            next(Err);
+        };
     });
     api.post('/:collection', function (req, res, next) {
         //todo : auto gen phone verify code & email verify url if insert new user;
@@ -103,98 +121,184 @@ module.exports = function (args, app) {
             }).catch(function (e) {
                 next(e)
             });
-        } else next(req.params);
+        } else {
+            var error = ("req.params|String").split("|");
+            var Err = new Error([httpCode[404], id].join(" : "))
+            Err.errors = {
+                require : error[0],
+                type : error[1],
+                founded : eval(error[0])
+            }
+            next(Err);
+        };
     });
     api.put('/:collection/:id', function (req, res, next) {
-        var notError = true;
+        var err, notError = true;
         var collname = (req.params.collection || "").toLowerCase();
         var id = req.params.id;
-        //Validation block : start.
-        if (Collection.hasOwnProperty(collname) && id) {
-            var body = req.body;
-            if (body && req.hasOwnProperty("body")) {
-                if (body.constructor !== Object) notError = "body|Object";
-                else {
-                    if (body.docs && body.hasOwnProperty("docs")) {
-                        if (body.docs.constructor !== Object) notError = "body.docs|Object";
-                    } else notError = "body.docs|Object";
-                    //
-                    if (body.hasOwnProperty("nested")) {
-                        var nested = body.nested;
-                        if (nested.constructor !== Object) notError = "body.nested|Object";
-                        else {
-                            if (nested.key && nested.hasOwnProperty("key")) {
-                                if (nested.key.constructor !== String) notError = "nested.key|String";
-                                if (nested.value && nested.hasOwnProperty("value")) {
-                                    if (nested.value.constructor !== String) notError = "nested.value|String";
-                                } else notError = "nested.value|String";
-                            } else notError = "nested.key|String";
-                        }
+        var model = Collection[collname];
+        var isAllow = function (callback) {
+            model.findOne({_id : id, active : true})
+            .lean().then(function (docs) {
+                var row = mongoose.normalize(docs);
+                var code = null;
+                //
+                if (docs && docs.restricted) code = 403;
+                if (!docs) code = 404;
+                if (!code) {
+                    callback(row)
+                } else {
+                    var error = ("req.params|String").split("|");
+                    var Err = new Error([httpCode[code], id].join(" : "))
+                    Err.errors = {
+                        require : error[0],
+                        type : error[1],
+                        founded : eval(error[0])
                     }
+                    next(Err);
                 }
-            } else notError = "body|Object";
-        } else notError = "req.params|String";
-        //Validation block : end.
-        //
-        if (notError == true) {
-            var model = Collection[collname];
-            var selection = {_id : id, active : true};
-            var docs = req.body.docs;
-            var nested = req.body.nested;
-            if (nested) {
-                selection[nested.key] = nested.value;
-                var partial = {};
-                for (var key in docs) {
-                    if (key !== "active") {
-                        var parent = nested.key.substr(0, nested.key.lastIndexOf("."));
-                        var selected = [parent, key].join('.$.');
-                        partial[selected] = docs[key];
-                    }
-                }
-                docs = partial;
-            } else delete docs["active"];
-            //
-            model.update(selection, {$set : docs}, {runValidators : true}).then(function (docs) {
-                var rows = mongoose.normalize(docs);
-                res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : rows
-                })
-            }).catch(function (e) {
+            })
+            .catch(function (e) {
                 next(e)
             });
+        };
+        if (Collection.hasOwnProperty(collname) && id) {
+            isAllow(function (row) {
+                //Validation block : start.
+                var body = req.body;
+                if (body && req.hasOwnProperty("body")) {
+                    if (body.constructor !== Object) notError = "body|Object";
+                    else {
+                        if (body.docs && body.hasOwnProperty("docs")) {
+                            if (body.docs.constructor !== Object) notError = "body.docs|Object";
+                        } else notError = "body.docs|Object";
+                        //
+                        if (body.hasOwnProperty("nested")) {
+                            var nested = body.nested;
+                            if (nested.constructor !== Object) notError = "body.nested|Object";
+                            else {
+                                if (nested.key && nested.hasOwnProperty("key")) {
+                                    if (nested.key.constructor !== String) notError = "nested.key|String";
+                                    if (nested.value && nested.hasOwnProperty("value")) {
+                                        if (nested.value.constructor !== String) notError = "nested.value|String";
+                                    } else notError = "nested.value|String";
+                                } else notError = "nested.key|String";
+                            }
+                        }
+                    }
+                } else notError = "body|Object";
+                //Validation block : end.
+                //
+                if (notError == true) {
+                    var selection = {_id : id, active : true, restricted : false};
+                    var docs = req.body.docs;
+                    var nested = req.body.nested;
+                    if (nested) {
+                        selection[nested.key] = nested.value;
+                        var partial = {};
+                        for (var key in docs) {
+                            if (key !== "active") {
+                                var parent = nested.key.substr(0, nested.key.lastIndexOf("."));
+                                var selected = [parent, key].join('.$.');
+                                partial[selected] = docs[key];
+                            }
+                        }
+                        docs = partial;
+                    } else {
+                        delete docs["active"];
+                        delete docs["restricted"];
+                    }
+                    //
+                    model.update(selection, {$set : docs}, {runValidators : true}).then(function (docs) {
+                        var rows = mongoose.normalize(docs);
+                        res.send({
+                            status : 200,
+                            message : httpCode[200],
+                            error : null,
+                            data : rows
+                        })
+                    }).catch(function (e) {
+                        next(e)
+                    });
+                } else {
+                    var error = notError.split("|");
+                    var Err = new Error([httpCode[400], id].join(" : "))
+                    Err.errors = {
+                        require : error[0],
+                        type : error[1],
+                        founded : eval(error[0])
+                    }
+                    next(Err);
+                }
+            });
         } else {
-            var errs = notError.split("|");
-            var what = {
-                require : errs[0],
-                type : errs[1],
-                founded : eval(errs[0])
-            };
-            next({errors : what})
+            var error = ("req.params|String").split("|");
+            var Err = new Error([httpCode[404], id].join(" : "))
+            Err.errors = {
+                require : error[0],
+                type : error[1],
+                founded : eval(error[0])
+            }
+            next(Err);
         }
     });
     api.delete('/:collection/:id', function (req, res, next) {
+        var err = undefined;
         var collname = (req.params.collection || "").toLowerCase();
         var id = req.params.id;
-        if (Collection.hasOwnProperty(collname) && id) {
-            var model = Collection[collname];
-            model.update(
-                {_id : id, active : true, restricted : false},
-                {$set : {active : false}}
-            ).then(function (docs) {
-                var rows = mongoose.normalize(docs);
-                res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : rows
-                })
-            }).catch(function (e) {
+        var model = Collection[collname];
+        var isAllow = function (callback) {
+            model.findOne({_id : id, active : true})
+            .lean().then(function (docs) {
+                var row = mongoose.normalize(docs);
+                var code = null;
+                //
+                if (docs && docs.restricted) code = 403;
+                if (!docs) code = 404;
+                if (!code) {
+                    callback(row)
+                } else {
+                    var error = ("req.params|String").split("|");
+                    var Err = new Error([httpCode[code], id].join(" : "))
+                    Err.errors = {
+                        require : error[0],
+                        type : error[1],
+                        founded : eval(error[0])
+                    }
+                    next(Err);
+                }
+            })
+            .catch(function (e) {
                 next(e)
             });
-        } else next(req.params);
+        };
+        if (Collection.hasOwnProperty(collname) && id) {
+            isAllow(function (row) {
+                model.update(
+                    {_id : id, active : true, restricted : false},
+                    {$set : {active : false}}
+                ).then(function (docs) {
+                    var rows = mongoose.normalize(docs);
+                    res.send({
+                        status : 200,
+                        message : httpCode[200],
+                        error : null,
+                        data : rows
+                    })
+                }).catch(function (e) {
+                    next(e)
+                });
+            });
+        } else {
+            var error = ("req.params|String").split("|");
+            var Err = new Error([httpCode[404], id].join(" : "))
+            Err.errors = {
+                require : error[0],
+                type : error[1],
+                founded : eval(error[0])
+            }
+            next(Err);
+        };
     });
     //
     page.use(function (req, res, next) {
