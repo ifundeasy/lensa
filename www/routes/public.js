@@ -17,11 +17,74 @@ module.exports = function (args, app) {
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
-
-    var publicOrganizationId = "580b731cdcba0f490c72c7a9";
-    var publicGroupId = "580a24727709cb078b9fe176";
-
     //
+    var publicOrganizationId = "580b731cdcba0f490c72c7a9"; //todo : query ke db ya, find by name == public
+    var publicGroupId = "580a24727709cb078b9fe176"; //todo : query ke db ya, find by name == public
+    //
+    api.refreshToken = function (oldToken, cb) {
+        var User = Collection['users'];
+        User.findOne({token : oldToken}).then(function (doc) {
+            var factory = 7;
+            // generate a salt
+            bcrypt.genSalt(factory, function (error, salt) {
+                if (error) {
+                    cb(true);
+                } else {
+                    var tokenString = doc.username + Math.random().toString(36).substr(2, 5);
+                    // hash the token using our new salt
+                    bcrypt.hash(tokenString, salt, function (errorhash, hash) {
+                        doc.token = hash;
+                        doc.save().then(function (doc) {
+                            cb(null, hash);
+                        }).catch(function (e) {
+                            cb(true);
+                        });
+                    });
+                }
+            });
+        }).catch(function (e) {
+            cb(true);
+        });
+    }
+    // token checking
+    api.use(function (req, res, next) {
+        // some api does not require token
+        var excludedApis = ["user/create", "login", "logout"];
+        if (excludedApis.indexOf(req.header("Class")) == -1) {
+            if (req.header("Token")) {
+                var token = req.header("Token");
+                var User = Collection['users'];
+                User.findOne({token : token}).then(function (doc) {
+                    if (doc !== null) {
+                        console.log("token valid");
+                        req.loggedUser = doc;
+                        next();
+                    } else {
+                        console.log("token invalid");
+                        var body = {
+                            "status" : 0,
+                            "message" : "Authorization token invalid or has been resetted"
+                        };
+                        res.status(403).send(body);
+                    }
+                }).catch(function (e) {
+                    var body = {
+                        "status" : 0,
+                        "message" : e
+                    };
+                    res.status(500).send(body);
+                });
+            } else {
+                var body = {
+                    "status" : 0,
+                    "message" : "Authorization token required"
+                };
+                res.status(403).send(body);
+            }
+        } else {
+            next();
+        }
+    });
     api.post('/', function (req, res, next) {
         var class_route = req.header("Class");
         switch (class_route) {
@@ -83,53 +146,52 @@ module.exports = function (args, app) {
                 break;
             case 'login':
                 var User = Collection['users'];
-                User.findOne({username : req.body.username, active : true}).then(function(doc){
-                    if(doc!==null){
-                        doc.pwdCheck(req.body.password, function(err, success){
-                            if(err){
+                User.findOne({username : req.body.username, active : true}).then(function (doc) {
+                    if (doc !== null) {
+                        doc.pwdCheck(req.body.password, function (err, success) {
+                            if (err) {
                                 var body = {
                                     "status" : 0,
                                     "message" : err
                                 };
-                                res.status(500).send(body); 
+                                res.status(500).send(body);
                             } else {
-                                if(success){
+                                if (success) {
                                     var factory = 7;
                                     // generate a salt
                                     bcrypt.genSalt(factory, function (error, salt) {
-                                        if (error){
+                                        if (error) {
                                             var body = {
                                                 "status" : 0,
                                                 "message" : error
                                             };
-                                            res.status(500).send(body);   
+                                            res.status(500).send(body);
                                         } else {
                                             var tokenString = req.body.username + Math.random().toString(36).substr(2, 5);
                                             // hash the token using our new salt
                                             bcrypt.hash(tokenString, salt, function (errorhash, hash) {
-                                                if(!errorhash){
+                                                if (!errorhash) {
                                                     var body = {
                                                         "status" : 0,
                                                         "message" : errorhash
                                                     };
-                                                    res.status(500).send(body); 
+                                                    res.status(500).send(body);
                                                 } else {
                                                     doc.token = hash;
-                                                    doc.save().then(function(doc){
+                                                    doc.save().then(function (doc) {
                                                         var body = {
                                                             "status" : 1,
                                                             "token" : hash
                                                         };
-                                                        res.status(200).send(body); 
-                                                    }).catch(function(e){
+                                                        res.status(200).send(body);
+                                                    }).catch(function (e) {
                                                         var body = {
                                                             "status" : 0,
                                                             "message" : e
                                                         };
-                                                        res.status(500).send(body);  
-                                                    });    
+                                                        res.status(500).send(body);
+                                                    });
                                                 }
-                                                
                                             });
                                         }
                                     });
@@ -138,7 +200,7 @@ module.exports = function (args, app) {
                                         "status" : 0,
                                         "message" : "invalid username password combination"
                                     };
-                                    res.status(500).send(body); 
+                                    res.status(500).send(body);
                                 }
                             }
                         });
@@ -149,7 +211,7 @@ module.exports = function (args, app) {
                         };
                         res.status(500).send(body);
                     }
-                }).catch(function(e){
+                }).catch(function (e) {
                     var body = {
                         "status" : 0,
                         "message" : e
@@ -160,9 +222,8 @@ module.exports = function (args, app) {
             case 'logout':
                 break;
             case 'report/all':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -176,25 +237,23 @@ module.exports = function (args, app) {
                             var body = {
                                 "status" : 1,
                                 "data" : docs,
-                                "nextToken": newToken
+                                "nextToken" : newToken
                             };
                             res.status(200).send(body);
                         }).catch(function (e) {
                             var body = {
                                 "status" : 0,
                                 "message" : e,
-                                "nextToken": newToken
+                                "nextToken" : newToken
                             };
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'report/get':
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -207,14 +266,14 @@ module.exports = function (args, app) {
                                 var body = {
                                     "status" : 1,
                                     "data" : doc,
-                                    "nextToken": newToken
+                                    "nextToken" : newToken
                                 };
                                 res.status(200).send(body);
                             } else {
                                 var body = {
                                     "status" : 0,
                                     "message" : "invalid report id",
-                                    "nextToken": newToken
+                                    "nextToken" : newToken
                                 };
                                 res.status(500).send(body);
                             }
@@ -222,26 +281,23 @@ module.exports = function (args, app) {
                             var body = {
                                 "status" : 0,
                                 "message" : e,
-                                "nextToken": newToken
+                                "nextToken" : newToken
                             };
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'report/create':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
                         };
                         res.status(500).send(body);
                     } else {
-                        var Post = Collection['posts'];                
+                        var Post = Collection['posts'];
                         var postobj = {
                             text : req.body.text,
                             "users._id" : req.loggedUser._id,
@@ -269,14 +325,11 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'report/delete':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -284,7 +337,7 @@ module.exports = function (args, app) {
                         res.status(500).send(body);
                     } else {
                         var Post = Collection['posts'];
-                        Post.findOne({_id : req.body._id, "users._id": req.loggedUser._id}).remove().then(function (doc) {
+                        Post.findOne({_id : req.body._id, "users._id" : req.loggedUser._id}).remove().then(function (doc) {
                             if (doc !== null) {
                                 var body = {
                                     "status" : 1,
@@ -309,14 +362,11 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'comment/create':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -365,13 +415,11 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'comment/delete':
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -416,14 +464,11 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'user/get':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -456,14 +501,11 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'user/update':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -519,14 +561,11 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
             case 'organization/get':
-
-                var nextToken = page.refreshToken(req.header('Token'), function(errortoken, newToken){
-                    if(errortoken){
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
                         var body = {
                             "status" : 0,
                             "message" : "failed to get new token. Please login again.",
@@ -559,92 +598,21 @@ module.exports = function (args, app) {
                             res.status(500).send(body);
                         });
                     }
-                    
                 });
                 break;
-
         }
     })
-
     //
-
-    /*page.use(function(req, res, next){
-        var group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");
-        if (group !== namescape) next(group)
-        else next();
-    });*/
-
-    // token checking
-    page.use(function(req, res, next){
-        // some api does not require token
-        var excludedApis = ["user/create", "login", "logout"];
-        if(excludedApis.indexOf(req.header("Class"))==-1){
-            if(req.header("Token")){
-                var token = req.header("Token");
-                var User = Collection['users'];
-                User.findOne({ token : token}).then(function(doc){
-                    if (doc !== null){
-                        console.log("token valid");
-                        req.loggedUser = doc;
-                        next();
-                    } else {
-                        console.log("token invalid");
-                        var body = {
-                            "status" : 0,
-                            "message" : "Authorization token invalid or has been resetted"
-                        };
-                        res.status(403).send(body);
-                    }
-
-                }).catch(function(e){
-                    var body = {
-                        "status" : 0,
-                        "message" : e
-                    };
-                    res.status(500).send(body);
-                });
-            } else {
-                var body = {
-                    "status" : 0,
-                    "message" : "Authorization token required"
-                };
-                res.status(403).send(body);
-            }
-        } else {
-            next();
+    page.use('/!', api);
+    page.use(function (req, res, next) {
+        var paths = req._parsedUrl.pathname.split("/").slice(1);
+        if (paths[0] == "!" && paths[1]) next();
+        else {
+            var group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");
+            if (group !== namescape) next(group)
+            else next();
         }
     });
-
-    //token refresh
-    page.refreshToken = function(oldToken, cb){
-
-        var User = Collection['users'];
-        User.findOne({ token: oldToken}).then(function(doc){
-            var factory = 7;
-            // generate a salt
-            bcrypt.genSalt(factory, function (error, salt) {
-                if (error){
-                    cb(true);
-                } else {
-                    var tokenString = doc.username + Math.random().toString(36).substr(2, 5);
-                    // hash the token using our new salt
-                    bcrypt.hash(tokenString, salt, function (errorhash, hash) {
-                        doc.token = hash;
-                        doc.save().then(function(doc){
-                            cb(null, hash);
-                        }).catch(function(e){
-                            cb(true);  
-                        });
-                    });
-                }
-            });
-        }).catch(function(e){
-            cb(true);
-        });
-
-    }
-
-    page.use('/!', api);
     page.get('/', function (req, res, next) {
         locals.www = {
             name : global.name,
