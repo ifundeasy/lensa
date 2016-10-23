@@ -84,6 +84,7 @@ module.exports = function (mongoose, opts) {
         restricted : {type : Boolean, default : false},
         notes : String,
         createdAt : {type : Date, default : Date.now},
+        token: {type : String, required: false},
         active : {type : Boolean, default : true}
     });
     //
