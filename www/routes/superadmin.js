@@ -17,11 +17,11 @@ Authorize.finder = function (NESTED, CALLBACK, FALLBACK) {
     var me = Authorize;
     var stat = me.static;
     var temp = {};
-    var recursive = function (nested, parent, callback, fallback) {
+    var recursive = function (nested, callback, fallback) {
         if (nested.constructor == Array) {
             var loop = function (i, cb) {
                 if (i < nested.length) {
-                    recursive(nested[i], null, function () {
+                    recursive(nested[i], function () {
                         loop(i + 1, cb)
                     }, fallback)
                 } else {
@@ -36,7 +36,7 @@ Authorize.finder = function (NESTED, CALLBACK, FALLBACK) {
                 //console.log("..", name)
                 if (nested.populate) {
                     if (nested.populate.constructor == Array) {
-                        recursive(nested.populate, nested, callback, fallback)
+                        recursive(nested.populate, callback, fallback)
                     } else {
                         var pop = {
                             path : nested.populate["path"],
@@ -65,7 +65,7 @@ Authorize.finder = function (NESTED, CALLBACK, FALLBACK) {
                                     })
                                 }
                             }
-                            recursive(nested.populate, nested, callback, fallback)
+                            recursive(nested.populate, callback, fallback)
                         })
                     }
                 } else callback(NESTED);
@@ -75,12 +75,12 @@ Authorize.finder = function (NESTED, CALLBACK, FALLBACK) {
                     nested.match = nested.match || {};
                     nested.match[k] = stat[name][k];
                 }
-                if (nested.populate) recursive(nested.populate, nested, callback, fallback)
+                if (nested.populate) recursive(nested.populate, callback, fallback)
                 else callback(NESTED);
             }
         }
     };
-    recursive(NESTED, null, CALLBACK, FALLBACK)
+    recursive(NESTED, CALLBACK, FALLBACK)
 }
 Authorize.setStatic = function (orgId) {
     return {
@@ -89,6 +89,10 @@ Authorize.setStatic = function (orgId) {
         },
         organizations : {
             "_id" : orgId
+        },
+        posts : {
+            "organizations._id" : orgId,
+            "assignTo.users._id" : { $exists: false }
         },
         categories : null,
         roles : null,
@@ -238,7 +242,7 @@ module.exports = function (args, app) {
             });
         } else {
             model.find(query)
-            .sort({[sortBy] : direction}).skip(skip).limit(limit)
+            .sort({[sortBy] : direction}).skip(skip).limit(limit) //TODO
             .populate(populate).lean().then(function (docs) {
                 var rows = mongoose.normalize(docs).filter(function (doc) {
                     if (Authorize.isCorrect(doc)) return 1;
@@ -344,7 +348,6 @@ module.exports = function (args, app) {
             });
         };
         if (id) {
-
             isAllow(function (row) {
                 //Validation block : start.
                 var body = req.body;
