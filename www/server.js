@@ -30,7 +30,7 @@ module.exports = function (global, worker, db) {
         regEx : global.regEx
     });
     //
-    var auth = require(global.home + 'auth');
+    var authenticate = require(global.home + 'authenticate');
     var store = connectMongo(expressSession);
     var session = {
         secret : global.name,
@@ -106,7 +106,7 @@ module.exports = function (global, worker, db) {
     /** **************************************************************************
      ** session, authorizing and authentication
      ** **************************************************************************/
-    app.use(expressSession(session), auth(global, locals, models.user), function (req, res, next) {
+    app.use(expressSession(session), authenticate(global, locals, models.user), function (req, res, next) {
         if (req.logged) req.logged.user = mongoose.normalize(req.logged.user);
         next();
     });
@@ -175,7 +175,7 @@ module.exports = function (global, worker, db) {
                                     var message = "";
                                     var smtp = nodemailer.createTransport({
                                         service : 'Gmail',
-                                        auth : sender
+                                        authenticate : sender
                                     });
                                     var mailOptions = {
                                         from : sender.user,
