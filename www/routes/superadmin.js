@@ -2,125 +2,6 @@ var namescape = "superadmin";
 var page = require('express').Router();
 var api = require('express').Router();
 var httpCode = require('http').STATUS_CODES;
-var Collection, Authorize = function (orgId, populate, callback, fallback) {
-    var me = Authorize;
-    me.static = me.setStatic(orgId);
-    if (populate) me.finder(populate, callback, fallback);
-    return;
-};
-Authorize.clean = function (str) {
-    var cols = str.split(".");
-    return cols[cols.length - 2];
-    //return str.replace("._ids", "").replace("._id", "");
-};
-Authorize.finder = function (NESTED, CALLBACK, FALLBACK) {
-    var me = Authorize;
-    var stat = me.static;
-    var temp = {};
-    var recursive = function (nested, callback, fallback) {
-        if (nested.constructor == Array) {
-            var loop = function (i, cb) {
-                if (i < nested.length) {
-                    recursive(nested[i], function () {
-                        loop(i + 1, cb)
-                    }, fallback)
-                } else {
-                    cb(NESTED)
-                }
-            }
-            loop(0, callback);
-        } else {
-            var name = me.clean(nested.path);
-            //console.log(">>", name)
-            if (!stat[name]) {
-                //console.log("..", name)
-                if (nested.populate) {
-                    if (nested.populate.constructor == Array) {
-                        recursive(nested.populate, callback, fallback)
-                    } else {
-                        var pop = {
-                            path : nested.populate["path"],
-                            select : nested.populate["select"],
-                            match : nested.populate["match"]
-                        };
-                        var nme = me.clean(pop.path);
-                        if (stat[nme]) {
-                            for (var k in stat[nme]) {
-                                pop.match = pop.match || {};
-                                pop.match[k] = stat[nme][k];
-                            }
-                        }
-                        Collection[name].find({active : true}).populate(pop).lean()
-                        .catch(function (e) {
-                            fallback(e)
-                        })
-                        .then(function (docs) {
-                            var ids = docs.map(function (doc) {
-                                return doc._id
-                            });
-                            if (ids.length) {
-                                nested.match._id = {
-                                    $in : docs.map(function (doc) {
-                                        return doc._id
-                                    })
-                                }
-                            }
-                            recursive(nested.populate, callback, fallback)
-                        })
-                    }
-                } else callback(NESTED);
-            } else {
-                //console.log("  ", name)
-                for (var k in stat[name]) {
-                    nested.match = nested.match || {};
-                    nested.match[k] = stat[name][k];
-                }
-                if (nested.populate) recursive(nested.populate, callback, fallback)
-                else callback(NESTED);
-            }
-        }
-    };
-    recursive(NESTED, CALLBACK, FALLBACK)
-}
-Authorize.setStatic = function (orgId) {
-    return {
-        groups : {
-            "name" : {"$nin" : ["Root", "Public"]}
-        },
-        organizations : {
-            "_id" : orgId
-        },
-        posts : {
-            "organizations._id" : orgId,
-            "assignTo.users._id" : { $exists: false }
-        },
-        categories : null,
-        roles : null,
-        procedures : null,
-        steps : null,
-        users : null
-    }
-};
-Authorize.isCorrect = function (row) {
-    var is = true;
-    var recursive = function (obj) {
-        for (var o in obj) {
-            if (obj[o]) {
-                if (obj[o].constructor == Object) {
-                    if (obj[o].hasOwnProperty("_id") && !obj[o]._id) {
-                        is = false;
-                        break;
-                    }
-                    recursive(obj[o]);
-                } else if (obj[o].constructor == Array) recursive(obj[o]);
-            }
-        }
-    };
-    if (row) {
-        if (row.constructor == Object) recursive(row);
-    }
-    return is;
-};
 //
 module.exports = function (args, app) {
     var global = args.global;
@@ -128,13 +9,19 @@ module.exports = function (args, app) {
     var worker = args.worker;
     var account = args.account;
     var mongoose = args.mongoose;
+    var home = global.home;
+    //
     var maxLimit = 50;
-    Collection = (function () {
+    var Authorize = require(home + "authorize");
+    var Collection = (function () {
         var o = {};
         var models = mongoose.models;
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
+    var authorize = new Authorize({
+        models : Collection
+    });
     //
     /** **************************************************************************
      ** http data resource
@@ -145,8 +32,24 @@ module.exports = function (args, app) {
         var orgId = org._id;
         var collname = (pathname.split("/")[1] || "").toLowerCase();
         if (Collection.hasOwnProperty(collname)) {
-            var allowedFor = Authorize.setStatic(orgId)
-            if (allowedFor.hasOwnProperty(collname)) {
+            var rule = authorize.setRule({
+                groups : {
+                    "name" : {"$nin" : ["Root", "Public"]}
+                },
+                organizations : {
+                    "_id" : orgId
+                },
+                posts : {
+                    "organizations._id" : orgId,
+                    "assignTo.users._id" : { $exists: false }
+                },
+                categories : null,
+                roles : null,
+                procedures : null,
+                steps : null,
+                users : null
+            });
+            if (rule.hasOwnProperty(collname)) {
                 var model = Collection[collname];
                 var popQuery = (function () {
                     if (model.getPopQuery) {
@@ -164,7 +67,8 @@ module.exports = function (args, app) {
                     })();
                     next();
                 } else {
-                    Authorize(orgId, popQuery, function (nested) {
+                    authorize.setPopulation(popQuery);
+                    authorize.init(function (nested) {
                         req.logged.populate = nested;
                         next();
                     }, function (e) {
@@ -217,11 +121,12 @@ module.exports = function (args, app) {
         var model = Collection[collname];
         var query = {active : true};
         if (collname == "organizations" || collname == "groups") {
-            query = Authorize.setStatic(orgId)[collname];
+            console.log(authorize.rule)
+            query = authorize.rule[collname];
             model.find(query)
             .populate(populate).lean().then(function (docs) {
                 var rows = mongoose.normalize(docs).filter(function (doc) {
-                    if (Authorize.isCorrect(doc)) return 1;
+                    if (authorize.isCorrect(doc)) return 1;
                     return 0
                 });
                 res.send({
@@ -245,7 +150,7 @@ module.exports = function (args, app) {
             .sort({[sortBy] : direction}).skip(skip).limit(limit) //TODO
             .populate(populate).lean().then(function (docs) {
                 var rows = mongoose.normalize(docs).filter(function (doc) {
-                    if (Authorize.isCorrect(doc)) return 1;
+                    if (authorize.isCorrect(doc)) return 1;
                     return 0
                 });
                 res.send({
@@ -275,7 +180,7 @@ module.exports = function (args, app) {
         model.findOne({_id : id, active : true})
         .populate(populate).lean().then(function (docs) {
             var row = mongoose.normalize(docs);
-            var is = Authorize.isCorrect(row);
+            var is = authorize.isCorrect(row);
             if (is) {
                 res.send({
                     status : 200,
@@ -326,7 +231,7 @@ module.exports = function (args, app) {
             model.findOne({_id : id, active : true})
             .populate(populate).lean().then(function (docs) {
                 var row = mongoose.normalize(docs);
-                var is = Authorize.isCorrect(row);
+                var is = authorize.isCorrect(row);
                 var code = null;
                 //
                 if (!docs || !is) code = 404;
@@ -436,7 +341,7 @@ module.exports = function (args, app) {
             model.findOne({_id : id, active : true})
             .populate(populate).lean().then(function (docs) {
                 var row = mongoose.normalize(docs);
-                var is = Authorize.isCorrect(row);
+                var is = authorize.isCorrect(row);
                 var code = null;
                 //
                 if (!docs || !is) code = 404;

@@ -19,7 +19,7 @@ module.exports = function (args, app) {
     //
     page.use(function(req, res, next){
         var group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");
-        if (group !== namescape) next(group)
+        if (group !== namescape) next(group);
         else next();
     });
     page.use('/!', api);
