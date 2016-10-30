@@ -45,7 +45,7 @@ module.exports = function (args, app) {
         }).catch(function (e) {
             cb(true);
         });
-    }
+    };
     // token checking
     api.use(function (req, res, next) {
         // some api does not require token

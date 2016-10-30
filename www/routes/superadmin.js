@@ -20,7 +20,7 @@ module.exports = function (args, app) {
         return o;
     })();
     var authorize = new Authorize({
-        models : Collection
+        models: Collection
     });
     //
     /** **************************************************************************
@@ -33,21 +33,25 @@ module.exports = function (args, app) {
         var collname = (pathname.split("/")[1] || "").toLowerCase();
         if (Collection.hasOwnProperty(collname)) {
             var rule = authorize.setRule({
-                groups : {
-                    "name" : {"$nin" : ["Root", "Public"]}
+                groups: {
+                    "name": {
+                        "$nin": ["Root", "Public"]
+                    }
                 },
-                organizations : {
-                    "_id" : orgId
+                organizations: {
+                    "_id": orgId
                 },
-                posts : {
-                    "organizations._id" : orgId,
-                    "assignTo.users._id" : { $exists: false }
+                posts: {
+                    "organizations._id": orgId,
+                    "assignTo.users._id": {
+                        $exists: false
+                    }
                 },
-                categories : null,
-                roles : null,
-                procedures : null,
-                steps : null,
-                users : null
+                categories: null,
+                roles: null,
+                procedures: null,
+                steps: null,
+                users: null
             });
             if (rule.hasOwnProperty(collname)) {
                 var model = Collection[collname];
@@ -72,39 +76,39 @@ module.exports = function (args, app) {
                         req.logged.populate = nested;
                         next();
                     }, function (e) {
-                        next(e)
+                        next(e);
                     });
                 }
             } else {
                 var error = ("collname|String").split("|");
-                var Err = new Error([httpCode[403], collname].join(" : "))
+                var Err = new Error([httpCode[403], collname].join(" : "));
                 Err.errors = {
-                    require : error[0],
-                    type : error[1],
-                    founded : eval(error[0])
-                }
+                    require: error[0],
+                    type: error[1],
+                    founded: eval(error[0])
+                };
                 next(Err);
             }
         } else if (!collname) {
             next();
         } else {
             var error = ("collname|String").split("|");
-            var Err = new Error([httpCode[404], collname].join(" : "))
+            var Err = new Error([httpCode[404], collname].join(" : "));
             Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
-            }
+                require: error[0],
+                type: error[1],
+                founded: eval(error[0])
+            };
             next(Err);
         }
     })
     api.all('/', function (req, res) {
         res.send({
-            status : 200,
-            message : httpCode[200],
-            error : null,
-            data : req.logged.user
-        })
+            status: 200,
+            message: httpCode[200],
+            error: null,
+            data: req.logged.user
+        });
     });
     api.get('/:collection', function (req, res, next) {
         var populate = req.logged.populate;
@@ -119,56 +123,63 @@ module.exports = function (args, app) {
         var skip = (page - 1) * limit;
         //
         var model = Collection[collname];
-        var query = {active : true};
+        var query = {
+            active: true
+        };
         if (collname == "organizations" || collname == "groups") {
-            console.log(authorize.rule)
             query = authorize.rule[collname];
             model.find(query)
-            .populate(populate).lean().then(function (docs) {
-                var rows = mongoose.normalize(docs).filter(function (doc) {
-                    if (authorize.isCorrect(doc)) return 1;
-                    return 0
-                });
-                res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : {
-                        limit : limit,
-                        page : page,
-                        sort : {[sortBy] : direction},
-                        total : rows.length,
-                        rows : rows
-                    }
+                .populate(populate).lean().then(function (docs) {
+                    var rows = mongoose.normalize(docs).filter(function (doc) {
+                        if (authorize.isCorrect(doc)) return 1;
+                        return 0;
+                    });
+                    res.send({
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: {
+                            limit: limit,
+                            page: page,
+                            sort: {
+                                [sortBy]: direction
+                            },
+                            total: rows.length,
+                            rows: rows
+                        }
+                    })
                 })
-            })
-            .catch(function (e) {
-                next(e)
-            });
+                .catch(function (e) {
+                    next(e);
+                });
         } else {
             model.find(query)
-            .sort({[sortBy] : direction}).skip(skip).limit(limit) //TODO
-            .populate(populate).lean().then(function (docs) {
-                var rows = mongoose.normalize(docs).filter(function (doc) {
-                    if (authorize.isCorrect(doc)) return 1;
-                    return 0
-                });
-                res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : {
-                        limit : limit,
-                        page : page,
-                        sort : {[sortBy] : direction},
-                        total : rows.length,
-                        rows : rows
-                    }
+                .sort({
+                    [sortBy]: direction
+                }).skip(skip).limit(limit) //TODO
+                .populate(populate).lean().then(function (docs) {
+                    var rows = mongoose.normalize(docs).filter(function (doc) {
+                        if (authorize.isCorrect(doc)) return 1;
+                        return 0;
+                    });
+                    res.send({
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: {
+                            limit: limit,
+                            page: page,
+                            sort: {
+                                [sortBy]: direction
+                            },
+                            total: rows.length,
+                            rows: rows
+                        }
+                    });
                 })
-            })
-            .catch(function (e) {
-                next(e)
-            })
+                .catch(function (e) {
+                    next(e);
+                });
         }
     });
     api.get('/:collection/:id', function (req, res, next) {
@@ -177,31 +188,34 @@ module.exports = function (args, app) {
         var id = req.params.id;
         var pop = Number(req.query.pop) || 1;
         var model = Collection[collname];
-        model.findOne({_id : id, active : true})
-        .populate(populate).lean().then(function (docs) {
-            var row = mongoose.normalize(docs);
-            var is = authorize.isCorrect(row);
-            if (is) {
-                res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : row
-                })
-            } else {
-                var error = ("req.params|String").split("|");
-                var Err = new Error([httpCode[403], id].join(" : "))
-                Err.errors = {
-                    require : error[0],
-                    type : error[1],
-                    founded : eval(error[0])
+        model.findOne({
+                _id: id,
+                active: true
+            })
+            .populate(populate).lean().then(function (docs) {
+                var row = mongoose.normalize(docs);
+                var is = authorize.isCorrect(row);
+                if (is) {
+                    res.send({
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: row
+                    });
+                } else {
+                    var error = ("req.params|String").split("|");
+                    var Err = new Error([httpCode[403], id].join(" : "));
+                    Err.errors = {
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
+                    };
+                    next(Err);
                 }
-                next(Err);
-            }
-        })
-        .catch(function (e) {
-            next(e)
-        });
+            })
+            .catch(function (e) {
+                next(e);
+            });
     });
     api.post('/:collection', function (req, res, next) {
         var collname = (req.params.collection || "").toLowerCase();
@@ -211,13 +225,13 @@ module.exports = function (args, app) {
         data.save().then(function (docs) {
             var rows = mongoose.normalize(docs);
             res.send({
-                status : 200,
-                message : httpCode[200],
-                error : null,
-                data : rows
+                status: 200,
+                message: httpCode[200],
+                error: null,
+                data: rows
             });
         }).catch(function (e) {
-            next(e)
+            next(e);
         });
     });
     api.put('/:collection/:id', function (req, res, next) {
@@ -228,29 +242,43 @@ module.exports = function (args, app) {
         var pop = Number(req.query.pop) || 1;
         var model = Collection[collname];
         var isAllow = function (callback) {
-            model.findOne({_id : id, active : true})
-            .populate(populate).lean().then(function (docs) {
-                var row = mongoose.normalize(docs);
-                var is = authorize.isCorrect(row);
-                var code = null;
-                //
-                if (!docs || !is) code = 404;
-                else if (docs.restricted) code = 403;
-                //
-                if (code) {
-                    var error = ("req.params|String").split("|");
-                    var Err = new Error([httpCode[code], id].join(" : "))
-                    Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+            model.findOne({
+                    _id: id,
+                    // "$or" : [
+                    //     {restricted : {"$exists" : false}},
+                    //     {restricted : {"$ne" : true}}
+                    // ],
+                    restricted: {"$ne" : true},
+                    active: true
+                })
+                .populate(populate).lean().then(function (docs) {
+                    console.log(docs)
+                    var row = mongoose.normalize(docs);
+                    var is = authorize.isCorrect(row);
+                    var code = null;
+                    //
+                    if (!docs || !is) code = 404;
+                    else if (docs.restricted) code = 403;
+                    //
+                    if (code) {
+                        var error = ("req.params|String").split("|");
+                        var Err = new Error([httpCode[code], id].join(" : "));
+                        Err.errors = {
+                            require: error[0],
+                            type: error[1],
+                            founded: eval(error[0])
+                        };
+                        next(Err);
+                        return 0;
+                    } else {
+                        callback(row);
+                        return 0;
                     }
-                    next(Err);
-                } else callback(row);
-            })
-            .catch(function (e) {
-                next(e)
-            });
+                })
+                .catch(function (e) {
+                    callback(e);
+                    return 0;
+                });
         };
         if (id) {
             isAllow(function (row) {
@@ -279,8 +307,11 @@ module.exports = function (args, app) {
                 } else notError = "body|Object";
                 //Validation block : end.
                 //
-                if (notError == true) {
-                    var selection = {_id : id, active : true, restricted : false};
+                if (notError === true) {
+                    var selection = {
+                        _id: id,
+                        active: true
+                    };
                     var docs = req.body.docs;
                     var nested = req.body.nested;
                     if (nested) {
@@ -299,36 +330,40 @@ module.exports = function (args, app) {
                         delete docs["restricted"];
                     }
                     //
-                    model.update(selection, {$set : docs}, {runValidators : true}).then(function (docs) {
+                    model.update(selection, {
+                        $set: docs
+                    }, {
+                        runValidators: true
+                    }).then(function (docs) {
                         var rows = mongoose.normalize(docs);
                         res.send({
-                            status : 200,
-                            message : httpCode[200],
-                            error : null,
-                            data : rows
-                        })
+                            status: 200,
+                            message: httpCode[200],
+                            error: null,
+                            data: rows
+                        });
                     }).catch(function (e) {
-                        next(e)
+                        next(e);
                     });
                 } else {
                     var error = notError.split("|");
-                    var Err = new Error([httpCode[400], id].join(" : "))
+                    var Err = new Error([httpCode[400], id].join(" : "));
                     Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
-                    }
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
+                    };
                     next(Err);
                 }
-            })
+            });
         } else {
             var error = ("req.params|String").split("|");
-            var Err = new Error([httpCode[404], id].join(" : "))
+            var Err = new Error([httpCode[404], id].join(" : "));
             Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
-            }
+                require: error[0],
+                type: error[1],
+                founded: eval(error[0])
+            };
             next(Err);
         }
     });
@@ -338,42 +373,61 @@ module.exports = function (args, app) {
         var id = req.params.id;
         var model = Collection[collname];
         var isAllow = function (callback) {
-            model.findOne({_id : id, active : true})
-            .populate(populate).lean().then(function (docs) {
-                var row = mongoose.normalize(docs);
-                var is = authorize.isCorrect(row);
-                var code = null;
-                //
-                if (!docs || !is) code = 404;
-                else if (docs.restricted) code = 403;
-                //
-                if (code) {
-                    var error = ("req.params|String").split("|");
-                    var Err = new Error([httpCode[code], id].join(" : "))
-                    Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+            console.log(populate)
+            model.findOne({
+                    _id: id,
+                    // "$or" : [
+                    //     {restricted : {"$exists" : false}},
+                    //     {restricted : {"$ne" : true}}
+                    // ],
+                    restricted: {"$ne" : true},
+                    active: true
+                })
+                .populate(populate).lean().then(function (docs) {
+                    console.log(docs)
+                    var row = mongoose.normalize(docs);
+                    var is = authorize.isCorrect(row);
+                    var code = null;
+                    //
+                    if (!docs || !is) code = 404;
+                    else if (docs.restricted) code = 403;
+                    //
+                    if (code) {
+                        var error = ("req.params|String").split("|");
+                        var Err = new Error([httpCode[code], id].join(" : "));
+                        Err.errors = {
+                            require: error[0],
+                            type: error[1],
+                            founded: eval(error[0])
+                        };
+                        next(Err);
+                        return 0;
+                    } else {
+                        callback(row);
+                        return 0;
                     }
-                    next(Err);
-                } else callback(row)
-            })
-            .catch(function (e) {
-                next(e)
-            });
+                })
+                .catch(function (e) {
+                    next(e);
+                    return 0;
+                });
         };
         if (id) {
             isAllow(function (row) {
-                model.update(
-                    {_id : id, active : true, restricted : false},
-                    {$set : {active : false}}
-                ).then(function (docs) {
+                model.update({
+                    _id: id,
+                    active: true
+                }, {
+                    $set: {
+                        active: false
+                    }
+                }).then(function (docs) {
                     var rows = mongoose.normalize(docs);
                     res.send({
-                        status : 200,
-                        message : httpCode[200],
-                        error : null,
-                        data : rows
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: rows
                     });
                 }).catch(function (e) {
                     next(e);
@@ -381,12 +435,12 @@ module.exports = function (args, app) {
             });
         } else {
             var error = ("req.params|String").split("|");
-            var Err = new Error([httpCode[404], id].join(" : "))
+            var Err = new Error([httpCode[404], id].join(" : "));
             Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
-            }
+                require: error[0],
+                type: error[1],
+                founded: eval(error[0])
+            };
             next(Err);
         }
     });
@@ -402,10 +456,10 @@ module.exports = function (args, app) {
     page.use('/!', api);
     page.get('/', function (req, res, next) {
         locals.www = {
-            name : global.name,
-            description : global.description,
-            activePage : req.url, //todo : buat apa lih?
-            version : global.version
+            name: global.name,
+            description: global.description,
+            activePage: req.url, //todo : buat apa lih?
+            version: global.version
         };
         res.render(namescape, locals.www);
     });

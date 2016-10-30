@@ -19,25 +19,30 @@ $(document).ready(function () {
     var notes = $('#notes');
     //
     var modal = new Modal({
-        title : "Prompt",
-        backdrop : true,
-        handler : {
-            OK : {class : "btn-success"},
-            Cancel : {class : "btn-default", dismiss : true}
+        title: "Prompt",
+        backdrop: true,
+        handler: {
+            OK: {
+                class: "btn-success"
+            },
+            Cancel: {
+                class: "btn-default",
+                dismiss: true
+            }
         }
     });
     var toastmsg = false;
     var twowew = function (obj) {
         obj.type = obj.type || "error";
         toastr.options = {
-            closeButton : true,
-            progressBar : true,
-            newestOnTop : true,
-            showMethod : 'slideDown',
-            timeOut : obj.time || 10000
+            closeButton: true,
+            progressBar: true,
+            newestOnTop: true,
+            showMethod: 'slideDown',
+            timeOut: obj.time || 10000
         };
         toastr[obj.type](obj.message, obj.title);
-    }
+    };
     var init = function () {
         save.on('click', saving);
         reset.on('click', function () {
@@ -48,15 +53,15 @@ $(document).ready(function () {
     };
     var getting = function () {
         $.ajax({
-            method : "GET",
-            dataType : "json",
-            url : url
+            method: "GET",
+            dataType: "json",
+            url: url
         }).error(function (jqXHR, is, message) {
             twowew({
-                type : "error",
-                title : "GET",
-                message : jqXHR.responseJSON.message,
-                time : 0
+                type: "error",
+                title: "GET",
+                message: jqXHR.responseJSON.message,
+                time: 0
             });
             console.error("GET", jqXHR.responseJSON);
         }).success(function (res) {
@@ -90,8 +95,9 @@ $(document).ready(function () {
                 }
             }
         });
-    }
+    };
     var saving = function () {
+        var method = "PUT";
         var data = {
             "name": name.val(),
             "pic": pic.val(),
@@ -102,28 +108,29 @@ $(document).ready(function () {
             "location.lat": lat.val(),
             "location.long": long.val(),
             "phone.value": phone.val(),
-            "email.value": email.val()
+            "email.value": email.val(),
+            "notes": notes.val()
         };
         $.ajax({
-            method : "PUT",
-            dataType : "json",
-            data : data,
-            url : url + id
+            method: method,
+            dataType: "json",
+            data: {docs:data},
+            url: url + id
         }).error(function (jqXHR, is, message) {
             toastmsg = jqXHR.responseJSON.message;
-            console.error(method, jqXHR.responseJSON)
+            console.error(method, jqXHR.responseJSON);
         }).success(function (res) {
             getting();
         }).complete(function () {
             twowew({
-                type : toastmsg ? "error" : "success",
-                title : method.toUpperCase(),
-                message : toastmsg || "success",
-                time : toastmsg ? 0 : 3000
-            })
+                type: toastmsg ? "error" : "success",
+                title: method.toUpperCase(),
+                message: toastmsg || "success",
+                time: toastmsg ? 0 : 3000
+            });
             toastmsg = false;
         });
     };
     //
     init();
-})
+});

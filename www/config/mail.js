@@ -14,4 +14,4 @@ module.exports = {
         user : "lensa.reporting@gmail.com",
         pass : "5pasienter"
     }
-}
+};
