@@ -1,6 +1,6 @@
 module.exports = {
-    _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-    encode : function (e) {
+    _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+    encode: function (e) {
         var t = "";
         var n, r, i, s, o, u, a;
         var f = 0;
@@ -22,7 +22,7 @@ module.exports = {
         }
         return t
     },
-    decode : function (e) {
+    decode: function (e) {
         var t = "";
         var n, r, i;
         var s, o, u, a;
@@ -46,7 +46,8 @@ module.exports = {
         }
         t = this._utf8_decode(t);
         return t
-    }, _utf8_encode : function (e) {
+    },
+    _utf8_encode: function (e) {
         e = e.replace(/rn/g, "n");
         var t = "";
         for (var n = 0; n < e.length; n++) {
@@ -63,7 +64,8 @@ module.exports = {
             }
         }
         return t
-    }, _utf8_decode : function (e) {
+    },
+    _utf8_decode: function (e) {
         var t = "";
         var n = 0;
         var r = c1 = c2 = 0;
