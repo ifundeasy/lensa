@@ -1,6 +1,8 @@
 $(document).ready(function(){
 
     var dashboardData = {};
+    var markers = [];
+    var map = '';
 	// modal detail 
 	var modal = new Modal({
         title : "Prompt",
@@ -109,17 +111,15 @@ $(document).ready(function(){
         });
     });
 
-    $('#dashboard-maps-filter').on('change', function(){
-        alert($(this).val());
-    });
-    var bandung = {lat: -6.909920, lng: 107.608136};
-    var map = new google.maps.Map($('#dashboard-maps')[0], {
+
+    var bandung = {lat: -6.909920, lng: 107.608136}; //TODO: do not hardcode. cari dari organizations._id
+    map = new google.maps.Map($('#dashboard-maps')[0], {
         zoom: 12,
         center: bandung
     });
 
 
-    // test api
+    // get all dashboard data
     $.ajax({
         method: 'GET',
         url: '/moderator/!/alldashboarddata',
@@ -130,6 +130,28 @@ $(document).ready(function(){
                 $('#assignedcount').html(dashboardData.assignedreportltlng.length);
                 $('#returnedcount').html(dashboardData.returnedreportltlng.length);
                 $('#rejectedcount').html(dashboardData.rejectedreportltlng.length);
+
+                reloadMarkers(dashboardData.allreportltlng);
+
+                $('#dashboard-maps-filter').off('change');
+                $('#dashboard-maps-filter').on('change', function(){
+                    var selection = $(this).val();
+                    switch (selection){
+                        case 'Semua Laporan':
+                            reloadMarkers(dashboardData.allreportltlng);
+                            break;
+                        case 'Pending':
+                            reloadMarkers(dashboardData.unassignedreportltlng);
+                            break;
+                        case 'On Progress':
+                            reloadMarkers(dashboardData.assignedreportltlng);
+                            break;
+                        case 'Selesai':
+                            reloadMarkers([]); //TODO: belum dibuat query yg laporan selesai
+                            break;
+                    }
+                    console.log("changed");
+                });
 
             } else {
                 var r = confirm("Gagal memuat data dashboard. Muat ulang halaman?");
@@ -144,4 +166,26 @@ $(document).ready(function(){
 
         }
     });
+
+    function reloadMarkers(latLongArray){
+        for (var x = 0; x < markers.length; x++) {
+            markers[x].setMap(null);
+        }
+        markers = [];
+
+        for(var i = 0; i<latLongArray.length; i++){
+            var newLatLong = new google.maps.LatLng(latLongArray[i].lat, latLongArray[i].long);
+            var newMarker = new google.maps.Marker({
+                position: newLatLong,
+                map: map,
+                icon: '/img/pin.png',
+                name: latLongArray[i].text.substring(0, 100)
+            });
+            
+            google.maps.event.addListener(newMarker, 'click', function() {
+                //$('#myModal').modal('show'); //TODO: buat modalnya yaaaaaaa
+            });
+            markers.push(newMarker);
+        }
+    }
 });
