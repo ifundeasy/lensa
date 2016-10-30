@@ -1,5 +1,6 @@
 $(document).ready(function(){
 
+    var dashboardData = {};
 	// modal detail 
 	var modal = new Modal({
         title : "Prompt",
@@ -32,7 +33,7 @@ $(document).ready(function(){
 		    axisLabelFontSizePixels: 12,
 		    axisLabelFontFamily: 'Verdana, Arial',
 		    axisLabelPadding: 10,
-		    ticks: [[0, "Januari"], [1, "Februari"], [2, "Maret"], [3, "April"],[4, "Mei"], [5, "Juni"], [6, "Juli"], [7, "Agustus"], [8, "September"], [9, "Oktober"], [10, "November"], [11, "Desember"]]
+		    ticks: [[0, "Jan"], [1, "Feb"], [2, "Mar"], [3, "Apr"],[4, "Mei"], [5, "Jun"], [6, "Jul"], [7, "Ags"], [8, "Sep"], [9, "Okt"], [10, "Nov"], [11, "Des"]]
 		},
 		yaxis: {
 		    axisLabel: "Jumlah Laporan",
@@ -106,5 +107,41 @@ $(document).ready(function(){
         modal.$buttons.OK.on("click", function () {
             console.log("olalaaaa");
         });
+    });
+
+    $('#dashboard-maps-filter').on('change', function(){
+        alert($(this).val());
+    });
+    var bandung = {lat: -6.909920, lng: 107.608136};
+    var map = new google.maps.Map($('#dashboard-maps')[0], {
+        zoom: 12,
+        center: bandung
+    });
+
+
+    // test api
+    $.ajax({
+        method: 'GET',
+        url: '/moderator/!/alldashboarddata',
+        success: function(data, status, xhr){
+            if(data.status===1){
+                dashboardData = data.data;
+                $('#totalcount').html(dashboardData.allreportltlng.length);
+                $('#assignedcount').html(dashboardData.assignedreportltlng.length);
+                $('#returnedcount').html(dashboardData.returnedreportltlng.length);
+                $('#rejectedcount').html(dashboardData.rejectedreportltlng.length);
+
+            } else {
+                var r = confirm("Gagal memuat data dashboard. Muat ulang halaman?");
+                if (r == true) {
+                    location.reload();   
+                }
+            }
+            console.log(data);
+            
+        },
+        error: function(xhr, status, err){
+
+        }
     });
 });
