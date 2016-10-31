@@ -28,6 +28,7 @@ module.exports = function (args, app) {
             // generate a salt
             bcrypt.genSalt(factory, function (error, salt) {
                 if (error) {
+                    console.log("cannot find matching token");
                     cb(true);
                 } else {
                     var tokenString = doc.username + Math.random().toString(36).substr(2, 5);
@@ -37,6 +38,7 @@ module.exports = function (args, app) {
                         doc.save().then(function (doc) {
                             cb(null, hash);
                         }).catch(function (e) {
+                            console.log(e);
                             cb(true);
                         });
                     });
@@ -600,6 +602,154 @@ module.exports = function (args, app) {
                     }
                 });
                 break;
+
+            //// from this point on, for testing purposes only ////
+            case 'category/create':
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status" : 0,
+                            "message" : "failed to get new token. Please login again.",
+                        };
+                        res.status(500).send(body);
+                    } else {
+                        var Category = Collection['categories'];
+                        var catObj = {
+                            name: req.body.name,
+                            description: req.body.description,
+                            "organizations._id": publicOrganizationId,
+                            notes: req.body.notes
+                        };
+                        var newCat = new Category(catObj);
+                        newCat.save().then(function(doc){
+                            var body = {
+                                "status" : 1,
+                                "message" : 'new category created',
+                                "nextToken": newToken
+                            };
+                            res.status(200).send(body);
+                        }).catch(function(e){
+                            var body = {
+                                "status" : 0,
+                                "message" : 'error',
+                                "nextToken": newToken
+                            };
+                            res.status(500).send(body);
+                        });
+                    }
+                });
+                break;
+
+            case 'role/create':
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status" : 0,
+                            "message" : "failed to get new token. Please login again.",
+                        };
+                        res.status(500).send(body);
+                    } else {
+                        var Role = Collection['roles'];
+                        var roleObj = {
+                            name: req.body.name,
+                            description: req.body.description,
+                            "organizations._id": publicOrganizationId,
+                            notes: req.body.notes
+                        };
+                        var newRole = new Role(roleObj);
+                        newRole.save().then(function(doc){
+                            var body = {
+                                "status" : 1,
+                                "message" : 'new role created',
+                                "nextToken": newToken
+                            };
+                            res.status(200).send(body);
+                        }).catch(function(e){
+                            var body = {
+                                "status" : 0,
+                                "message" : 'error',
+                                "nextToken": newToken
+                            };
+                            res.status(500).send(body);
+                        });
+                    }
+                });
+                break;
+
+            case 'procedure/create':
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status" : 0,
+                            "message" : "failed to get new token. Please login again.",
+                        };
+                        res.status(500).send(body);
+                    } else {
+                        var Procedure = Collection['procedures'];
+                        var procObj = {
+                            name: req.body.name,
+                            description: req.body.description,
+                            "roles._id": req.body.rolesid,
+                            "categories._id": req.body.categoriesid,
+                            notes: req.body.notes
+                        };
+                        var newProcedure = new Procedure(procObj);
+                        newProcedure.save().then(function(doc){
+                            var body = {
+                                "status" : 1,
+                                "message" : 'new procedure created',
+                                "nextToken": newToken
+                            };
+                            res.status(200).send(body);
+                        }).catch(function(e){
+                            var body = {
+                                "status" : 0,
+                                "message" : 'error',
+                                "nextToken": newToken
+                            };
+                            res.status(500).send(body);
+                        });
+                    }
+                });
+                break;
+
+            case 'step/create':
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status" : 0,
+                            "message" : "failed to get new token. Please login again.",
+                        };
+                        res.status(500).send(body);
+                    } else {
+                        var Step = Collection['steps'];
+                        var stepObj = {
+                            name: req.body.name,
+                            description: req.body.description,
+                            stepNumber: req.body.stepNumber,
+                            duration: req.body.duration,
+                            "procedures._id": req.body.proceduresid,
+                            notes: req.body.notes
+                        };
+                        var newStep = new Step(stepObj);
+                        newStep.save().then(function(doc){
+                            var body = {
+                                "status" : 1,
+                                "message" : 'new step created',
+                                "nextToken": newToken
+                            };
+                            res.status(200).send(body);
+                        }).catch(function(e){
+                            var body = {
+                                "status" : 0,
+                                "message" : 'error',
+                                "nextToken": newToken
+                            };
+                            res.status(500).send(body);
+                        });
+                    }
+                });
+                break;
         }
     })
     //
@@ -622,5 +772,6 @@ module.exports = function (args, app) {
         };
         res.render(namescape, locals.www);
     });
+
     return page;
 };

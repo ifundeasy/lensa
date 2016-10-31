@@ -79,7 +79,7 @@ module.exports = function (mongoose) {
                 type: Schema.Types.ObjectId,
                 required: false
             },
-            createdAt : {type : Date, default : Date.now}
+            createdAt : {type : Date}
         },
         assignTo : {
             "users._id" :  {
@@ -87,7 +87,7 @@ module.exports = function (mongoose) {
                 type: Schema.Types.ObjectId,
                 required: false
             },
-            createdAt : {type : Date, default : Date.now}
+            createdAt : {type : Date}
         },
         lat : {
             type : String,
@@ -102,6 +102,9 @@ module.exports = function (mongoose) {
             type : Schema.Types.ObjectId
         },
         createdAt : {type : Date, default : Date.now},
+        returned: {type: Boolean, default: false},
+        rejected: {type: Boolean, default: false},
+        static: {type: Boolean, default: false},
         active : {type : Boolean, default : true}
     });
     //
