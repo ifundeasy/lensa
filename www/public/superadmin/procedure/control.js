@@ -9,6 +9,8 @@ $(document).ready(function () {
     var tcontainer = $('#table');
     //
     var name = $('#name');
+    var category = $('#category');
+    var role = $('#role');
     var description = $('#description');
     var notes = $('#notes');
     //
@@ -40,7 +42,9 @@ $(document).ready(function () {
             '<th></th>' +
             '<th>Name</th>' +
             '<th>Description</th>' +
-            '<th>Notes</th>' +
+            '<th>Category</th>' +
+            '<th>Department</th>' +
+            '<th>Steps</th>' +
             '</tr>' +
             '</thead>' +
             '<tbody></tbody>' +
@@ -60,8 +64,59 @@ $(document).ready(function () {
             description.val("");
             notes.val("");
         });
+        gettingCategory();
+        gettingRoles();
         getting();
     }
+    var gettingCategory = function () {
+        $.ajax({
+            method : "GET",
+            dataType : "json",
+            async : false,
+            url : "!/categories?" + $.param({limit : 1000})
+        }).error(function (jqXHR, is, message) {
+            twowew({
+                type : "error",
+                title : "GET",
+                message : jqXHR.responseJSON.message,
+                time : 0
+            });
+            console.error("GET", jqXHR.responseJSON);
+        }).success(function (res) {
+            if (res.data.total) {
+                var rows = res.data.rows;
+                rows.forEach(function (row) {
+                    category.append('<option value="' + row._id + '">' + row.name + '</option>');
+                });
+            }
+            category.chosen({no_results_text : "Oops, nothing found!", width : "100%"});
+        });
+    };
+    var gettingRoles = function () {
+        $.ajax({
+            method : "GET",
+            dataType : "json",
+            async : false,
+            url : "!/roles?" + $.param({limit : 1000})
+        }).error(function (jqXHR, is, message) {
+            twowew({
+                type : "error",
+                title : "GET",
+                message : jqXHR.responseJSON.message,
+                time : 0
+            });
+            console.error("GET", jqXHR.responseJSON);
+        }).success(function (res) {
+            console.log(res)
+            if (res.data.total) {
+                var rows = res.data.rows;
+                rows.forEach(function (row) {
+                    role.append('<option value="' + row._id + '">' + row.name + '</option>');
+                });
+            }
+            role.chosen({no_results_text : "Oops, nothing found!", width : "100%"});
+        });
+    };
     var getting = function () {
         var table = setTable();
         var putEmpty = function () {
@@ -90,14 +145,20 @@ $(document).ready(function () {
                 rows.forEach(function (row) {
                     var tr = $('<tr>');
                     var action = $('<td>');
-                    var deleteBtn = $("<button type='button' class='btn btn-xs btn-danger'><i class='fa fa-times'></i></button>")
+                    var detail = $('<td>');
+                    var actionBtn = $("<button type='button' class='btn btn-xs btn-danger'><i class='fa fa-times'></i></button>");
+                    var detailBtn = $("<button type='button' class='btn btn-xs btn-primary'>show</button>");
                     row.notes = row.notes || "";
+                    action.append(actionBtn);
+                    detail.append(detailBtn);
+                    //
                     tr.data(row);
-                    tr.append(action)
+                    tr.append(action);
                     tr.append("<td>" + row.name + "</td>")
                     tr.append("<td>" + row.description + "</td>")
-                    tr.append("<td>" + row.notes + "</td>")
-                    action.append(deleteBtn);
+                    tr.append("<td>" + row.categories.name + "</td>")
+                    tr.append("<td>" + row.roles.name + "</td>");
+                    tr.append(detail);
                     tr.on("click", function (ev) {
                         var is = ev.target.nodeName;
                         var data = $(this).data();
@@ -107,15 +168,17 @@ $(document).ready(function () {
                             infoname.text("\"" + data.name + "\"");
                             name.val(data.name);
                             description.val(data.description);
+                            role.val(data.roles._id).trigger("chosen:updated");
+                            category.val(data.categories._id).trigger("chosen:updated");
                             notes.val(data.notes);
                             isUpdate = data._id;
                         }
                     });
-                    deleteBtn.data({
+                    actionBtn.data({
                         id : row._id,
                         name : row.name
                     });
-                    deleteBtn.on("click", function () {
+                    actionBtn.on("click", function () {
                         modal
                         .setTitle("Delete : " + $(this).data('name'))
                         .setBody("Are you sure want to remove these?")
@@ -161,46 +224,51 @@ $(document).ready(function () {
         var method = "POST";
         var url_ = url;
         var data = {
-            name : name.val(),
-            notes : notes.val(),
-            routes : routes.val() || []
+            name: name.val(),
+            "roles._id": role.val(),
+            "categories._id": category.val(),
+            description: description.val(),
+            notes: notes.val()
         };
         var save = function () {
             $.ajax({
-                method : method,
-                dataType : "json",
-                data : data,
-                url : url_
+                method: method,
+                dataType: "json",
+                data: data,
+                url: url_
             }).error(function (jqXHR, is, message) {
                 toastmsg = jqXHR.responseJSON.message;
-                console.error(method, jqXHR.responseJSON)
+                console.error(method, jqXHR.responseJSON);
             }).success(function (res) {
                 reset.click();
                 getting();
             }).complete(function () {
                 twowew({
-                    type : toastmsg ? "error" : "success",
-                    title : method.toUpperCase(),
-                    message : toastmsg || "success",
-                    time : toastmsg ? 0 : 3000
-                })
+                    type: toastmsg ? "error" : "success",
+                    title: method.toUpperCase(),
+                    message: toastmsg || "success",
+                    time: toastmsg ? 0 : 3000
+                });
                 toastmsg = false;
             });
-        }
+        };
         if (isUpdate) {
             method = "PUT";
             url_ = url + isUpdate;
-            data = {docs : data};
+            data = {
+                docs: data
+            };
         }
+        console.log(data);
         if (method == "PUT") {
             modal.setBody("Are you sure want to save these changes?").show();
             modal.$buttons.OK.off("click");
             modal.$buttons.OK.on("click", function () {
                 modal.hide();
-                save()
+                save();
             });
         } else {
-            save()
+            save();
         }
     };
     //

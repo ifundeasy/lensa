@@ -11,12 +11,16 @@
     }
     if (start) {
         var time = (new Date()).getTime().toString(36);
+        var clusterScript = document.createElement("script");
         var script = document.createElement("script");
+        clusterScript.type = "text/javascript";
+        clusterScript.src = "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js?id=" + time;
         script.type = "text/javascript";
         script.src = src + time;
         script.setAttribute("async", "");
         script.setAttribute("defer", "");
         document.getElementsByTagName("head")[0].appendChild(script);
+        document.getElementsByTagName("head")[0].appendChild(clusterScript);
         window[time] = function () {
             window.googlemaps = function (cb) {
                 var me = this;

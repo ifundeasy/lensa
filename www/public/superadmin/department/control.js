@@ -227,7 +227,6 @@ $(document).ready(function () {
                 docs: data
             };
         }
-        console.log(data);
         if (method == "PUT") {
             modal.setBody("Are you sure want to save these changes?").show();
             modal.$buttons.OK.off("click");

@@ -1,62 +1,78 @@
 <div class="row">
-	<div class="col-lg-4">
-		<div class="ibox float-e-margins">
-			<div class="ibox-title">
-				<h5>
-					<span id="info">Create</span>
-					<small id="info-name"></small>
-				</h5>
-			</div>
-			<div class="ibox-content">
-				<div class="row">
-					<div class="col-sm-12">
-						<form id="form" role="form">
-							<div class="form-group">
-								<label>Name</label>
-								<input id="name" type="text" placeholder="" class="form-control">
-							</div>
-							<div class="form-group">
-								<label>Description</label>
-								<input id="description" type="text" placeholder="" class="form-control">
-							</div>
-							<div class="form-group">
-								<label>Notes</label>
-								<input id="notes" type="text" placeholder="" class="form-control">
-							</div>
-							<div class="pull-right">
-								<button id="reset" type="button" class="btn btn-sm btn-default m-t-n-xs">
-									<strong>Reset</strong>
-								</button>
-								<button id="save" type="button" class="btn btn-sm btn-success m-t-n-xs">
-									<strong>Save</strong>
-								</button>
-							</div>
-							<!--<div class="switch">
-								<div class="onoffswitch">
-									<input type="checkbox" checked class="onoffswitch-checkbox" id="active">
-									<label class="onoffswitch-label" for="active">
-										<span class="onoffswitch-inner"></span>
-										<span class="onoffswitch-switch"></span>
-									</label>
-								</div>
-							</div>-->
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-lg-8">
-		<div class="ibox float-e-margins">
-			<div class="ibox-title">
-				<h5>Current data </h5>
-			</div>
-			<div class="ibox-content">
-				<div id="table" class="table-responsive">
-					<!---->
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="col-lg-4">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>
+                    <span id="info">Create</span>
+                    <small id="info-name"></small>
+                </h5>
+            </div>
+            <div class="ibox-content">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <form id="form" role="form">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input id="name" type="text" placeholder="" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Procedure category</label>
+                                <div>
+                                    <select id="category" data-placeholder="Choose category" class="chosen-select" style="">
+                                        <!---->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Procedure departement</label>
+                                <div>
+                                    <select id="role" data-placeholder="Choose category" class="chosen-select" style="">
+                                        <!---->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input id="description" type="text" placeholder="" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <input id="notes" type="text" placeholder="" class="form-control">
+                            </div>
+                            <div class="pull-right">
+                                <button id="reset" type="button" class="btn btn-sm btn-default m-t-n-xs">
+                                    <strong>Reset</strong>
+                                </button>
+                                <button id="save" type="button" class="btn btn-sm btn-success m-t-n-xs">
+                                    <strong>Save</strong>
+                                </button>
+                            </div>
+                            <!--<div class="switch">
+                                <div class="onoffswitch">
+                                    <input type="checkbox" checked class="onoffswitch-checkbox" id="active">
+                                    <label class="onoffswitch-label" for="active">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                            </div>-->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>Current data </h5>
+            </div>
+            <div class="ibox-content">
+                <div id="table" class="table-responsive">
+                    <!---->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script type="application/javascript" src="/superadmin/procedure/control.js"></script>
