@@ -252,7 +252,6 @@ module.exports = function (args, app) {
                     active: true
                 })
                 .populate(populate).lean().then(function (docs) {
-                    console.log(docs)
                     var row = mongoose.normalize(docs);
                     var is = authorize.isCorrect(row);
                     var code = null;
@@ -373,7 +372,6 @@ module.exports = function (args, app) {
         var id = req.params.id;
         var model = Collection[collname];
         var isAllow = function (callback) {
-            console.log(populate)
             model.findOne({
                     _id: id,
                     // "$or" : [
@@ -384,7 +382,6 @@ module.exports = function (args, app) {
                     active: true
                 })
                 .populate(populate).lean().then(function (docs) {
-                    console.log(docs)
                     var row = mongoose.normalize(docs);
                     var is = authorize.isCorrect(row);
                     var code = null;
