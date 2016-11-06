@@ -10,21 +10,21 @@
                     </a>
                 </div>
             </div>
-            <div class="ibox-content">
+            <div class="ibox-content" style="display: none;">
                 <div class="row">
                     <div class="col-md-5">
-                        <h3>Banjir di daerah Pasteur</h3>
-                        <div class='avatar-name'><i class="fa fa-user" aria-hidden="true"></i>&nbsp;<span>Wahidin</span></div>
-                        <small>2 menit yang lalu</small>
+                        <h3 id="report-title">Memuat Judul..</h3>
+                        <div class='avatar-name'><i class="fa fa-user" aria-hidden="true"></i>&nbsp;<span id="report-author"></span></div>
+                        <small id="report-date"></small>
                         <div>&nbsp;</div>
                     </div>
                     
                     <div class="col-md-7">
                         <div class="btn-group-container" style="text-align:center;">
                             <div class="btn-group">
-                                <button type="button" class="btn btn-primary"><i class="fa fa-share" aria-hidden="true"></i> Disposisi</button>
-                                <button type="button" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Tolak Laporan</button>
-                                <button type="button" class="btn btn-warning"><i class="fa fa-files-o" aria-hidden="true"></i> Tandai Duplikat</button>
+                                <button type="button" id="btn-disposisi" class="btn btn-primary" disabled><i class="fa fa-share" aria-hidden="true"></i> Disposisi</button>
+                                <button type="button" id="btn-reject" class="btn btn-danger" disabled><i class="fa fa-times" aria-hidden="true"></i> Tolak Laporan</button>
+                                <button type="button" id="btn-duplicate" class="btn btn-warning" disabled><i class="fa fa-files-o" aria-hidden="true"></i> Tandai Duplikat</button>
                             </div>
 
                         </div>
@@ -58,9 +58,8 @@
                     </div>
 
                     <div class="col-md-7">
-                        <p class="report-content" style="font-family: 'open sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 26px;">
-                        Jadi beginilah suasana banjir di daerah Pasteur kota Bandung. Mohon untuk pak Walikota Bandung diurus supaya tidak terjadi lagi hal-hal seperti ini .Parah di daerah penghubung kota Bandung bisa seperti ini.
-                        </p>
+                        <p id="report-content" style="font-family: 'open sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 26px;">
+                        Memuat isi laporan..</p>
                     </div>
                 </div>
             </div>
@@ -85,6 +84,7 @@
                 <table id="table-list-report" class="table-responsive table table-striped table-bordered table-hover">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Judul</th>
                             <th>Deskripsi</th>
                             <th>Pelapor</th>

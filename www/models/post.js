@@ -103,6 +103,7 @@ module.exports = function (mongoose) {
         },
         createdAt : {type : Date, default : Date.now},
         returned: {type: Boolean, default: false},
+        notes: { type: String, required: false },
         rejected: {type: Boolean, default: false},
         static: {type: Boolean, default: false},
         active : {type : Boolean, default : true}

@@ -46,7 +46,7 @@ module.exports = function (args, app) {
             // unassigned reports
             Post.find({ 
                 $and: [
-                    { "organizations._id" : req.logged.user.organizations._id},
+                    { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
                     {active: true, "assignTo.users._id" : { $exists: false }},
                     { $or: [{returned: false}, {returned: { $exists: false }}] },
                     { $or: [{rejected: false}, {rejected: { $exists: false }}] }
@@ -112,9 +112,292 @@ module.exports = function (args, app) {
         });
     });
 
-    api.get('/monthlyreportcount', function(req, res, next){
+    api.get('/allroles', function(req, res, next){
+        var Role = Collection['roles'];
 
+        Role.find({ "organizations._id": req.logged.user.organizations._id })
+        .then(function(docs){
+            var body = {
+                "status" : 1,
+                "data" : docs,
+            };
+            res.status(200).send(body);
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
     });
+
+    api.get('/alladminroles', function(req, res, next){
+        var roleid = req.param('roleid');
+        console.log(roleid);
+        var User = Collection['users'];
+        User.find({ 
+            $and: [
+                { "organizations._id" : req.logged.user.organizations._id },
+                { "roles._id" : { $exists: true} },
+                { "roles._id" : roleid }
+            ]
+        })
+        .then(function(docs){
+            var body = {
+                "status" : 1,
+                "data" : docs,
+            };
+            res.status(200).send(body);
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });    
+
+    api.get('/allreports', function(req, res, next){
+        var Post = Collection['posts'];
+        Post.find({ "organizations._id" : req.logged.user.organizations._id }, 'title text users._id createdAt media._ids')
+        .populate({ path: 'users._id', select: 'name' })
+        .then(function(docs){
+            var body = {
+                "status" : 1,
+                "data" : docs,
+            };
+            res.status(200).send(body);
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
+    api.get('/reportdetail', function(req, res, next){
+        var postid = req.param('postid');
+        var Post = Collection['posts'];
+        Post.findOne({ "organizations._id" : req.logged.user.organizations._id, _id: postid })
+        .then(function(doc){
+            var body = {
+                "status" : 1,
+                "data" : doc,
+            };
+            res.status(200).send(body);
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
+    api.get('/nextreport', function(req, res, next){
+        var Post = Collection['posts'];
+        Post.count({ 
+            $and: [
+                { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
+                {active: true, "assignTo.users._id" : { $exists: false }},
+                { $or: [{returned: false}, {returned: { $exists: false }}] },
+                { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+            ]
+
+        }).then(function(num){
+            var minSkip = 0;
+            var maxSkip = num; // TODO: buat skema di mana antara satu moderator dengan moderator lainnya gak akan buka laporan yang sama (untuk disposisi)
+            var randomSkip = Math.floor(Math.random() * (maxSkip - minSkip)) + minSkip;
+            Post.find({ 
+                $and: [
+                    { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
+                    {active: true, "assignTo.users._id" : { $exists: false }},
+                    { $or: [{returned: false}, {returned: { $exists: false }}] },
+                    { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                ]
+            }).populate({ path: 'users._id', select: 'name' }).skip(randomSkip).limit(1)
+            .then(function(doc){
+                var body = {
+                    "status" : 1,
+                    "data" : doc,
+                };
+                res.status(200).send(body);
+            })
+            .catch(function(e){
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body);
+            });
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
+    api.post('/assign', function(req, res, next){
+        var User = Collection['users'];
+        var postid = req.body.postid;
+        var userid = req.body.userid;
+        // cek benarkah user ini di organisasi ini dengan role ini
+        User.findOne({ _id: userid, "organizations._id": req.logged.user.organizations._id })
+        .then(function(doc){
+            if(doc!==null){
+                var Post = Collection['posts'];
+                Post.findOne({ _id: postid})
+                .then(function(doc2){
+                    if(doc2!==null){
+                        doc2.assignTo.users._id = userid;
+                        doc2.save()
+                        .then(function(result){
+                            var body = {
+                                "status" : 1,
+                                "message" : "post has been assigned",
+                            };
+                            res.status(200).send(body);
+                        })
+                        .catch(function(e){
+                            var body = {
+                                "status" : 0,
+                                "message" : e,
+                            };
+                            res.status(500).send(body);
+                        });
+                    } else {
+                        var body = {
+                            "status" : 0,
+                            "message" : "post not found",
+                        };
+                        res.status(500).send(body);
+                    }
+                })
+                .catch(function(e){
+                    var body = {
+                        "status" : 0,
+                        "message" : e,
+                    };
+                    res.status(500).send(body);
+                });
+            } else {
+                var body = {
+                    "status" : 0,
+                    "message" : "user not found",
+                };
+                res.status(500).send(body);
+            }
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+        
+    });
+
+    api.post('/markduplicate', function(req, res, next){
+        var postid = req.body.postid;
+        var duplicateid = req.body.duplicateid;
+
+        var Post = Collection['posts'];
+        Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
+        .then(function(doc){
+            doc.posts._id = duplicateid;
+            doc.save()
+            .then(function(doc){
+                var body = {
+                    "status" : 1,
+                    "message" : "report has been marked as duplicate",
+                };
+                res.status(200).send(body);
+            })
+            .catch(function(e){
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body);
+            });
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
+    api.post('/markreject', function(req, res, next){
+        var postid = req.body.postid;
+        var reasonText = req.body.reason;
+
+        var Post = Collection['posts'];
+        Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
+        .then(function(doc){
+            doc.rejected = true;
+            doc.notes = reasonText;
+            doc.save()
+            .then(function(doc){
+                var body = {
+                    "status" : 1,
+                    "message" : "report has been marked as rejected",
+                };
+                res.status(200).send(body);
+            })
+            .catch(function(e){
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body);
+            });
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
+    api.get('/timeline', function(req, res, next){
+        var start = req.param('start');
+        var limit = req.param('limit');
+
+        var Post = Collection['posts'];
+        Post.find({
+            "organizations._id": req.logged.user.organizations._id,
+            active: true
+        }).skip(start).limit(limit)
+        .then(function(docs){
+            var body = {
+                "status" : 1,
+                "data" : docs,
+            };
+            res.status(200).send(body);
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
 
 
     page.use(function(req, res, next){
