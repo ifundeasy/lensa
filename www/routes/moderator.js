@@ -374,14 +374,15 @@ module.exports = function (args, app) {
     });
 
     api.get('/timeline', function(req, res, next){
-        var start = req.param('start');
-        var limit = req.param('limit');
+        var start = parseInt(req.param('start'));
+        var limit = parseInt(req.param('limit'));
 
         var Post = Collection['posts'];
         Post.find({
             "organizations._id": req.logged.user.organizations._id,
             active: true
-        }).skip(start).limit(limit)
+        }).populate({ path: 'users._id', select: 'name' }).skip(start).limit(limit)
+        .populate({ path: 'media._ids', select: 'type directory' })
         .then(function(docs){
             var body = {
                 "status" : 1,

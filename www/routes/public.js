@@ -750,6 +750,44 @@ module.exports = function (args, app) {
                     }
                 });
                 break;
+
+            case 'media/create':
+
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status" : 0,
+                            "message" : "failed to get new token. Please login again.",
+                        };
+                        res.status(500).send(body);
+                    } else {
+                        var Media = Collection['media'];
+                        var mediaObj = {
+                            type: req.body.type,
+                            directory: req.body.directory,
+                            description: req.body.description,
+                            notes: req.body.notes,
+                        };
+                        var newMedia = new Media(mediaObj);
+                        newMedia.save().then(function(doc){
+                            var body = {
+                                "status" : 1,
+                                "message" : 'new media created',
+                                "nextToken": newToken
+                            };
+                            res.status(200).send(body);
+                        }).catch(function(e){
+                            var body = {
+                                "status" : 0,
+                                "message" : 'error',
+                                "nextToken": newToken
+                            };
+                            res.status(500).send(body);
+                        });
+                    }
+                });
+                break;
+
         }
     })
     //

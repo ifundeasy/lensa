@@ -16,10 +16,10 @@ function getNextReport(){
         url:'/moderator/!/nextreport',
         success: function(data, status, xhr){
             if(data.data.length == 0){
-                $('.ibox-content').eq(0).html('<h1>Tidak ada laporan masuk</h1>');
+                $('.ibox-content').eq(0).html('<h1>No incoming reports</h1>');
             } else {
                 var nextreport = data.data[0];
-                var reportTitle = 'Laporan Tanpa Judul';
+                var reportTitle = 'Untitled Report';
                 var reportAuthor = nextreport.users._id.name.first;
                 if(nextreport.users._id.name.hasOwnProperty('last') && nextreport.users._id.name.last != null){
                     reportAuthor = nextreport.users._id.name.first + ' ' + nextreport.users._id.name.last;
@@ -53,9 +53,9 @@ function getNextReport(){
                 $('#btn-reject').on('click', function(){
                     
                     // modal creation
-                    modal.setTitle('Tolak Laporan'); 
+                    modal.setTitle('Reject Report'); 
 
-                    var modalBody = '<h2>Alasan laporan ditolak:</h2>'+
+                    var modalBody = '<h2>Reason :</h2>'+
                                     '<textarea class="form-control" rows="3" id="reject-reason"></textarea>';
                     modal.setBody(modalBody).show();
 
@@ -71,16 +71,16 @@ function getNextReport(){
                     // modal creation
                     modal.setTitle('Laporan Duplikat'); 
                     
-                    var modalBody = '<h2>Pilih laporan terdahulu:</h2>'+
+                    var modalBody = '<h2>Select Previous Report :</h2>'+
                                     '<table id="duplicate-list-report" class="table-responsive table table-striped table-bordered table-hover">'+
                                         '<thead>'+
                                             '<tr>'+
                                                 '<th>ID</th>'+
-                                                '<th>Judul</th>'+
-                                                '<th>Deskripsi</th>'+
-                                                '<th>Pelapor</th>'+
-                                                '<th>Tanggal</th>'+
-                                                '<th>Pilih</th>'+
+                                                '<th>Title</th>'+
+                                                '<th>Description</th>'+
+                                                '<th>Author</th>'+
+                                                '<th>Date</th>'+
+                                                '<th>Select</th>'+
                                             '</tr>'+
                                         '</thead>'+
                                         '<tbody>'+
@@ -92,7 +92,7 @@ function getNextReport(){
                     setTimeout(function(){
                         var tabelRows = '';
                         for(i=0; i<reportdata.length; i++){
-                            var reportTitle = 'Laporan Tanpa Judul';
+                            var reportTitle = 'Untitled Report';
                             if(reportdata[i].hasOwnProperty('title')){
                                 reportTitle = reportdata[i].title;
                             }
@@ -123,7 +123,7 @@ function getNextReport(){
                             //console.log( $( this ).text() );
                             var data = $('#duplicate-list-report').dataTable().fnGetData(this);
                             console.log(data);
-                            if (confirm("Pilih laporan ini sebagai duplikasi dari laporan yang baru?") == true) {
+                            if (confirm("Choose this report as a duplicate to a new one?") == true) {
                                 setDuplicate(nextreportid, data[0]);
                             }
                         });
@@ -153,20 +153,20 @@ function getAllRoles(){
             console.log(roleData);
 
             // modal creation
-            modal.setTitle('Disposisi Laporan');
+            modal.setTitle('Assign Report');
 
-            var roleOptions = '<option value="0"> -- Pilih Divisi -- </option>';
+            var roleOptions = '<option value="0"> -- Select Division -- </option>';
             for(x=0; x<roleData.length; x++){
                 roleOptions += '<option value="'+roleData[x]._id+'">'+roleData[x].name+'</option>';
             }
 
-            var modalBody = '<h2>Pilih Disivi</h2>'+
+            var modalBody = '<h2>Select Division</h2>'+
                             '<select id="role-select">' +
                                 roleOptions +
                             '</select>'+
-                            '<h2>Pilih Admin</h2>'+
+                            '<h2>Select Admin</h2>'+
                             '<select id="admin-select">' +
-                                '<option value="0"> -- Pilih Admin -- </option>' +
+                                '<option value="0"> -- Select Admin -- </option>' +
                             '</select>';
             modal.setBody(modalBody).show();
 
@@ -228,7 +228,7 @@ function getAllreports(){
 
                 var tabelRows = '';
                 for(i=0; i<reportdata.length; i++){
-                    var reportTitle = 'Laporan Tanpa Judul';
+                    var reportTitle = 'Untitled Report';
                     if(reportdata[i].hasOwnProperty('title')){
                         reportTitle = reportdata[i].title;
                     }
@@ -262,7 +262,7 @@ function getAllreports(){
                 });
 
             } else {
-                var r = confirm("Gagal memuat data laporan. Muat ulang halaman?");
+                var r = confirm("Failed to load report data. Reload page?");
                 if (r == true) {
                     location.reload();   
                 }
@@ -285,7 +285,7 @@ function setAssign(postId, userId){
         },
         success: function(data, status, xhr){
             if(data.status!==1){
-                alert("Gagal men-disposisi laporan!");
+                alert("Failed to assign report!");
             } else {
                 location.reload();
             }
@@ -306,7 +306,7 @@ function setReject(postId, reason){
         },
         success: function(data, status, xhr){
             if(data.status!==1){
-                alert("Gagal mengubah status laporan!");
+                alert("Failed to update report status!");
             } else {
                 location.reload();
             }
@@ -330,11 +330,11 @@ function setDuplicate(postId, duplicateId){
             if(data.status==1){
                 location.reload();
             } else {
-                alert("aggal menandai duplikasi laporan!");
+                alert("Failed to mark report as duplicate!");
                 $( "#duplicate-list-report tbody" ).on( "click", "tr", function() {
                     //console.log( $( this ).text() );
                     var data = $('#duplicate-list-report').dataTable().fnGetData(this);
-                    if (confirm("Pilih laporan ini sebagai duplikasi dari laporan yang baru?") == true) {
+                    if (confirm("Select this report as a duplicate to a new one?") == true) {
                         setDuplicate(nextreportid, data[0]);
                     }
                 });

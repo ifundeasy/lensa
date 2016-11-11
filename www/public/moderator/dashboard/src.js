@@ -30,7 +30,7 @@ $(document).ready(function(){
             }
         },
 		xaxis: {
-		    axisLabel: "Bulan",
+		    axisLabel: "Month",
 		    axisLabelUseCanvas: true,
 		    axisLabelFontSizePixels: 12,
 		    axisLabelFontFamily: 'Verdana, Arial',
@@ -38,7 +38,7 @@ $(document).ready(function(){
 		    ticks: [[0, "Jan"], [1, "Feb"], [2, "Mar"], [3, "Apr"],[4, "Mei"], [5, "Jun"], [6, "Jul"], [7, "Ags"], [8, "Sep"], [9, "Okt"], [10, "Nov"], [11, "Des"]]
 		},
 		yaxis: {
-		    axisLabel: "Jumlah Laporan",
+		    axisLabel: "Report count",
 		    axisLabelUseCanvas: true,
 		    axisLabelFontSizePixels: 12,
 		    axisLabelFontFamily: 'Verdana, Arial',
@@ -60,7 +60,7 @@ $(document).ready(function(){
         },
         tooltip: true,
         tooltipOpts: {
-            content: "%y laporan"
+            content: "%y report(s)"
         }
     };
     var barData = {
@@ -84,9 +84,9 @@ $(document).ready(function(){
 		        bindto: '#pie-detail',
 		        data:{
 		            columns: [
-		                ['Umum', 30],
-		                ['Kemacetan', 120],
-		                ['Kesehatan', 68]
+		                ['General', 30],
+		                ['Traffic', 120],
+		                ['Health', 68]
 		            ],
 		            colors:{
 		                //data1: '#1ab394',
@@ -137,16 +137,16 @@ $(document).ready(function(){
                 $('#dashboard-maps-filter').on('change', function(){
                     var selection = $(this).val();
                     switch (selection){
-                        case 'Semua Laporan':
+                        case 'All Reports':
                             reloadMarkers(dashboardData.allreportltlng);
                             break;
-                        case 'Pending':
+                        case 'Pending Reports':
                             reloadMarkers(dashboardData.unassignedreportltlng);
                             break;
-                        case 'On Progress':
+                        case 'Report On Progress':
                             reloadMarkers(dashboardData.assignedreportltlng);
                             break;
-                        case 'Selesai':
+                        case 'Finished':
                             reloadMarkers([]); //TODO: belum dibuat query yg laporan selesai
                             break;
                     }
@@ -154,7 +154,7 @@ $(document).ready(function(){
                 });
 
             } else {
-                var r = confirm("Gagal memuat data dashboard. Muat ulang halaman?");
+                var r = confirm("Failed to load dashboard data. reload page?");
                 if (r == true) {
                     location.reload();   
                 }
