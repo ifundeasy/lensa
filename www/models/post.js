@@ -105,6 +105,7 @@ module.exports = function (mongoose) {
         returned: {type: Boolean, default: false},
         notes: { type: String, required: false },
         rejected: {type: Boolean, default: false},
+        rejectedDate: {type : Date, required: false },
         static: {type: Boolean, default: false},
         active : {type : Boolean, default : true}
     });

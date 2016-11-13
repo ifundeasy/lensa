@@ -134,12 +134,16 @@ function loadTimeline(){
 
 
             }
-            start = start+10;
-            $(this).toggleClass('disabled');
+            if(reportData.length === 0){
+                $('#btn-loadmore').html('No More Feeds');    
+            } else {
+                start = start+limit;        
+                $('#btn-loadmore').toggleClass('disabled');
+            }
         },
         error: function(xhr, status, err){
             // TODO
-            $(this).toggleClass('disabled');
+            $('#btn-loadmore').toggleClass('disabled');
         }
     });
 }

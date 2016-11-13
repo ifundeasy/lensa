@@ -46,7 +46,7 @@ function getNextReport(){
                 console.log(nextreport);
                 $('#btn-disposisi').on('click', function(){
                     $(this).attr('disabled', '');
-                    getAllRoles();
+                    getAllRolesAndCategories();
                     
                 });
 
@@ -75,7 +75,7 @@ function getNextReport(){
                                     '<table id="duplicate-list-report" class="table-responsive table table-striped table-bordered table-hover">'+
                                         '<thead>'+
                                             '<tr>'+
-                                                '<th>ID</th>'+
+                                                '<th hidden>ID</th>'+
                                                 '<th>Title</th>'+
                                                 '<th>Description</th>'+
                                                 '<th>Author</th>'+
@@ -143,24 +143,32 @@ function getNextReport(){
     });
 }
 
-function getAllRoles(){
+function getAllRolesAndCategories(){
     $.ajax({
-        url:'/moderator/!/allroles',
+        url:'/moderator/!/allrolesandcategories',
         success: function(data, status, xhr){
             $('#btn-disposisi').removeAttr('disabled');
-            var roleData = data.data;
-            console.log("all roles: ");
-            console.log(roleData);
-
+            var roleData = data.roledata;
+            var categoryData = data.categorydata;
+            console.log(data);
             // modal creation
             modal.setTitle('Assign Report');
+
+            var categoryOptions = '<option value="0"> -- Select Category -- </option>';
+            for(x=0; x<categoryData.length; x++){
+                categoryOptions += '<option value="'+categoryData[x]._id+'">'+categoryData[x].name+'</option>';
+            }
 
             var roleOptions = '<option value="0"> -- Select Division -- </option>';
             for(x=0; x<roleData.length; x++){
                 roleOptions += '<option value="'+roleData[x]._id+'">'+roleData[x].name+'</option>';
             }
 
-            var modalBody = '<h2>Select Division</h2>'+
+            var modalBody = '<h2>Select Category</h2>'+
+                            '<select id="category-select">' +
+                                categoryOptions +
+                            '</select>'+
+                            '<h2>Select Division</h2>'+
                             '<select id="role-select">' +
                                 roleOptions +
                             '</select>'+
@@ -174,6 +182,7 @@ function getAllRoles(){
                 $('#role-select').off('change');
                 $('#role-select').on('change', function(){
                     if($(this).val() !== '0'){
+                        $('#admin-select').html('<option value="0"> Loading admin data.. </option>');
                         getAllAdminRoles($(this).val());
                     } else {
                         $('#admin-select').html('');
@@ -186,7 +195,15 @@ function getAllRoles(){
                 if($('#admin-select').val() == '0' || $('#admin-select').val() == null){
                     alert("Invalid Admin ID");
                 } else {
-                    setAssign(nextreportid, $('#admin-select').val());
+                    if($('#role-select').val() == '0' || $('#role-select').val() == null){
+                        alert("Invalid Role ID");
+                    } else {
+                        if($('#category-select').val() == '0' || $('#category-select').val() == null){
+                            alert("Invalid Category ID");
+                        } else {
+                            setAssign(nextreportid, $('#admin-select').val(), $('#category-select').val());
+                        }
+                    }
                 }
             });
             
@@ -275,13 +292,14 @@ function getAllreports(){
     });
 }
 
-function setAssign(postId, userId){
+function setAssign(postId, userId, categoryId){
     $.ajax({
         method: 'POST',
         url: '/moderator/!/assign',
         data: {
             postid: postId,
-            userid: userId
+            userid: userId,
+            categoryid: categoryId
         },
         success: function(data, status, xhr){
             if(data.status!==1){

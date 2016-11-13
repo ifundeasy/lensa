@@ -86,11 +86,54 @@ module.exports = function (args, app) {
                             ]
                         }, 'text lat long').then(function(doc4){
                             data.rejectedreportltlng = doc4;
+                            var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
+                            var currentYear = new Date();
+                            // TODO: monthly reports
+                            Post.aggregate([
+                                { 
+                                    $match : { 
+                                        $and: [
+                                            { active: true },
+                                            { "organizations._id" : orgid }
+                                        ] 
+                                    } 
+                                }, 
+                                {
+                                    $group: {
+                                        _id:  { year: { $year: currentYear }, month: { $month: "$createdAt" } },
+                                        sum: {$sum: 1}
+                                    }
+                                }   
+                            ])
+                            .then(function(doc5){
+                                var aggData = [];
+                                // before injecting the data, set other month values with 0
 
-                            // monthly reports
-                            finalfunc();
+                                // loop through months
+                                for(m=1; m<=12; m++){
+                                    var monthExist = doc5.filter(function( obj ) {
+                                        return obj._id.month == m;
+                                    });
+                                    if(monthExist.length === 0){
+                                        aggData.push({
+                                            _id: {
+                                                month: m,
+                                                year: currentYear.getFullYear()
+                                            },
+                                            sum: 0
+                                        });
+                                    } else {
+                                        aggData.push(monthExist[0]);
+                                    }
+                                }
+                                data.monthlyreports = aggData;
+
+                                finalfunc();
+
+                            }).catch(function(e){
+                                errfunc(e);
+                            });
                             
-                        
                         }).catch(function(e){
                             errfunc(e);
                         });
@@ -112,16 +155,26 @@ module.exports = function (args, app) {
         });
     });
 
-    api.get('/allroles', function(req, res, next){
+    api.get('/allrolesandcategories', function(req, res, next){
         var Role = Collection['roles'];
-
-        Role.find({ "organizations._id": req.logged.user.organizations._id })
+        var Category = Collection['categories'];
+        Role.find({ "organizations._id": req.logged.user.organxizations._id })
         .then(function(docs){
-            var body = {
-                "status" : 1,
-                "data" : docs,
-            };
-            res.status(200).send(body);
+            Category.find({ "organizations._id": req.logged.user.organizations._id })
+            .then(function(docs2){
+                var body = {
+                    "status" : 1,
+                    "roledata" : docs,
+                    "categorydata" : docs2
+                };
+                res.status(200).send(body);
+            }).catch(function(e){
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body);
+            });
         })
         .catch(function(e){
             var body = {
@@ -199,6 +252,33 @@ module.exports = function (args, app) {
         });
     });
 
+    api.get('/monthlyreports', function(req, res, next){
+        var currentYear = new Date().getFullYear();
+        var m = parseInt(req.param('m'));
+        var Post = Collection['posts'];
+        var query = {
+            "organizations._id" : req.logged.user.organizations._id, 
+            active: true,
+            "createdAt": {"$gte": new Date(Date.UTC(currentYear, m, 1, 0, 0, 0)), "$lt": new Date(Date.UTC(currentYear, (m+1), 1, 0, 0, 0))}
+        };
+        Post.find(query)
+        .populate({ path: 'users._id', select: 'name' })
+        .then(function(docs){
+            var body = {
+                "status" : 1,
+                "data" : docs,
+                "query": query
+            };
+            res.status(200).send(body);
+        }).catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+
     api.get('/nextreport', function(req, res, next){
         var Post = Collection['posts'];
         Post.count({ 
@@ -249,6 +329,7 @@ module.exports = function (args, app) {
         var User = Collection['users'];
         var postid = req.body.postid;
         var userid = req.body.userid;
+        var categoryid = req.body.categoryid;
         // cek benarkah user ini di organisasi ini dengan role ini
         User.findOne({ _id: userid, "organizations._id": req.logged.user.organizations._id })
         .then(function(doc){
@@ -258,6 +339,7 @@ module.exports = function (args, app) {
                 .then(function(doc2){
                     if(doc2!==null){
                         doc2.assignTo.users._id = userid;
+                        doc2.categories._id = categoryid;
                         doc2.save()
                         .then(function(result){
                             var body = {
@@ -347,6 +429,7 @@ module.exports = function (args, app) {
         Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
         .then(function(doc){
             doc.rejected = true;
+            doc.rejectedDate = new Date();
             doc.notes = reasonText;
             doc.save()
             .then(function(doc){
