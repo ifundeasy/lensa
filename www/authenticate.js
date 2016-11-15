@@ -5,7 +5,9 @@ module.exports = function (global, locals, user) {
     var popQuery = "";
     if (user.getPopQuery) {
         popQuery = user.getPopQuery();
-        if (!Object.keys(popQuery).length) popQuery = "";
+        if (!Object.keys(popQuery).length) {
+            popQuery = "";
+        }
     }
     return function (req, res, next) {
         var method = req.method;
@@ -21,112 +23,113 @@ module.exports = function (global, locals, user) {
         //
         locals.loginMsg = locals.loginMsg || [];
         if (cookieId) {
-            if (path == '/logout') {
-                res.clearCookie(global.name);
-                res.redirect('/');
-            } else {
-                var userdata = undefined;
-                var usrhash = cookieId.substr(cookieId.indexOf('/') + 1);
-                var usr = base64.decode(usrhash);
-                //
-                if (!usr) locals.loginMsg.push({
+            var userdata = undefined;
+            var usrhash = cookieId.substr(cookieId.indexOf('/') + 1);
+            var usr = base64.decode(usrhash);
+            //
+            if (!usr) {
+                locals.loginMsg.push({
                     'nobody\'s cookie': cookieId
                 });
-                if (locals.loginMsg.length) {
-                    locals.loginMsgTxt = 'Session fail #1';
-                    res.clearCookie(global.name);
-                    res.redirect('/login');
-                } else {
-                    user
-                        .findOne({
-                            username: usr,
-                            active: true
-                        })
-                        .populate(popQuery).lean()
-                        .then(function (data) {
-                            userdata = data;
-                            if (!userdata) {
+            }
+            if (locals.loginMsg.length) {
+                locals.loginMsgTxt = 'Session fail #1';
+                res.clearCookie(global.name);
+                res.redirect('/login');
+            } else {
+                user
+                .findOne({
+                    username: usr,
+                    active: true
+                })
+                .populate(popQuery).lean()
+                .then(function (data) {
+                    userdata = data;
+                    if (!userdata) {
+                        locals.loginMsg.push({
+                            'invalid username': usr
+                        });
+                    } else {
+                        if (!userdata.organizations._id) {
+                            locals.loginMsg.push({
+                                'invalid organization': usr
+                            });
+                        }
+                        if (!userdata.groups._id) {
+                            locals.loginMsg.push({
+                                'invalid group': usr
+                            });
+                        }
+                    }
+                })
+                .catch(function (err) {
+                    locals.loginMsg.push({
+                        'Error 001': err
+                    });
+                })
+                .finally(function () {
+                    if (locals.loginMsg.length) {
+                        locals.loginMsgTxt = 'Session fail #2';
+                        res.clearCookie(global.name);
+                        res.redirect('/login');
+                    } else {
+                        store.get(cookieId, function (err, s) {
+                            if (!err && s) {
+                                var now = new Date().getTime();
+                                var until = new Date(s.expires).getTime() + s.originalMaxAge;
+                                if (until <= now) {
+                                    locals.loginMsg.push({
+                                        'expired cookie': cookieId
+                                    });
+                                    //todo : some code here (if you wanna destroy this session on db)
+                                    //store.destroy(cookieId)
+                                }
+                            } else if (!s) {
                                 locals.loginMsg.push({
-                                    'invalid username': usr
+                                    'invalid cookie': cookieId
                                 });
                             } else {
-                                if (!userdata.organizations._id) locals.loginMsg.push({
-                                    'invalid organization': usr
-                                });
-                                if (!userdata.groups._id) locals.loginMsg.push({
-                                    'invalid group': usr
+                                locals.loginMsg.push({
+                                    'Error 002': err
                                 });
                             }
-                        })
-                        .catch(function (err) {
-                            locals.loginMsg.push({
-                                'Error 001': err
-                            });
-                        })
-                        .finally(function () {
+                            //
                             if (locals.loginMsg.length) {
-                                locals.loginMsgTxt = 'Session fail #2';
+                                locals.loginMsgTxt = 'Session fail #3';
                                 res.clearCookie(global.name);
                                 res.redirect('/login');
                             } else {
-                                store.get(cookieId, function (err, s) {
-                                    if (!err && s) {
-                                        var now = new Date().getTime();
-                                        var until = new Date(s.expires).getTime() + s.originalMaxAge;
-                                        if (until <= now) {
-                                            locals.loginMsg.push({
-                                                'expired cookie': cookieId
-                                            });
-                                            //todo : some code here (if you wanna destroy this session on db)
-                                            //store.destroy(cookieId)
-                                        }
-                                    } else if (!s) {
-                                        locals.loginMsg.push({
-                                            'invalid cookie': cookieId
-                                        });
-                                    } else {
-                                        locals.loginMsg.push({
-                                            'Error 002': err
-                                        });
-                                    }
-                                    //
+                                //extending session time
+                                store.set(cookieId, session.cookie, function (err) {
+                                    if (err) locals.loginMsg.push({
+                                        'Error 003': err
+                                    });
                                     if (locals.loginMsg.length) {
-                                        locals.loginMsgTxt = 'Session fail #3';
+                                        locals.loginMsgTxt = 'Session fail #4';
                                         res.clearCookie(global.name);
                                         res.redirect('/login');
                                     } else {
-                                        //extending session time
-                                        store.set(cookieId, session.cookie, function (err) {
-                                            if (err) locals.loginMsg.push({
-                                                'Error 003': err
-                                            });
-                                            if (locals.loginMsg.length) {
-                                                locals.loginMsgTxt = 'Session fail #4';
-                                                res.clearCookie(global.name);
-                                                res.redirect('/login');
-                                            } else {
-                                                //success login here..
-                                                res.cookie(global.name, cookieId, session.cookie);
-                                                req.logged = {
-                                                    user: userdata,
-                                                    cookie: {
-                                                        id: cookieId,
-                                                        path: session.cookie.path,
-                                                        originalMaxAge: session.cookie.originalMaxAge,
-                                                        httpOnly: session.cookie.httpOnly,
-                                                        expires: session.cookie._expires
-                                                    }
-                                                };
-                                                if (path == '/login' || path == "/registration" || path == "/forgot") {
-                                                    res.redirect('/');
-                                                } else next();
+                                        //success login here..
+                                        res.cookie(global.name, cookieId, session.cookie);
+                                        req.logged = {
+                                            user: userdata,
+                                            cookie: {
+                                                id: cookieId,
+                                                path: session.cookie.path,
+                                                originalMaxAge: session.cookie.originalMaxAge,
+                                                httpOnly: session.cookie.httpOnly,
+                                                expires: session.cookie._expires
                                             }
-                                        });
+                                        };
+                                        if (path == '/login' || path == "/registration" || path == "/forgot") {
+                                            res.redirect('/');
+                                        } else next();
                                     }
                                 });
                             }
                         });
-                }
+                    }
+                });
             }
         } else {
             if (method == 'POST' && path == '/signin') {

@@ -208,7 +208,7 @@ module.exports = function (global, worker, db) {
                 next();
             }
         } else next();
-    })
+    });
     app.get('/verify/:mode', function (req, res, next) {
         var mode = (req.params.mode || "").toLowerCase();
         var code = req.query.q || "";
@@ -273,6 +273,10 @@ module.exports = function (global, worker, db) {
         console.log('> Login', JSON.stringify(message.login));
         locals.loginMsg = [];
         locals.loginMsgTxt = '';
+    });
+    app.all('/logout', function (req, res, next) {
+        res.clearCookie(global.name);
+        res.redirect('/');
     });
     /** **************************************************************************
      ** http request error handling
