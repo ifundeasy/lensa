@@ -21,13 +21,17 @@ function loadTimeline(){
                 var timeline_el = '';
                 var author = reportData[q].users._id.name.last===null? reportData[q].users._id.name.first : reportData[q].users._id.name.first + ' ' + reportData[q].users._id.name.last;
                 var reportStatus = '';
-                if(reportData[q].assignTo.hasOwnProperty('users')){
-                    if(reportData[q].hasOwnProperty('returned') && reportData[q].returned){
-                        // returned
-                        reportStatus = '<span class="badge badge-warning">Returned</span>';
-                    } else {
-                        reportStatus = '<span class="badge badge-success">On Progress</span>';
+                if(reportData[q].hasOwnProperty('assignTo')){ 
+                    if(reportData[q].assignTo.hasOwnProperty('users')){
+                    
+                        if(reportData[q].hasOwnProperty('returned') && reportData[q].returned){
+                            // returned
+                            reportStatus = '<span class="badge badge-warning">Returned</span>';
+                        } else {
+                            reportStatus = '<span class="badge badge-success">On Progress</span>';
+                        }
                     }
+                    
                 } else {
                     if(reportData[q].hasOwnProperty('rejected') && reportData[q].rejected){
                         // rejected
@@ -49,13 +53,33 @@ function loadTimeline(){
                                 '<div class="carousel-inner">';
                     for(lol=0; lol<reportData[q].media._ids.length; lol++){
                         if(lol==0){
-                            medias += '<div class="item active">'+
-                                            '<img alt="image" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
+                            if(reportData[q].media._ids[lol].type === "video/mp4"){
+                                medias += '<div class="item active">'+
+                                            '<video width="400" controls style="padding-left: 100px; padding-right: 100px;">'+
+                                              '<source src="/img/post/'+reportData[q].media._ids[lol].directory+'" type="video/mp4">'+
+                                              'Your browser does not support HTML5 video.'+
+                                            '</video>'+
                                         '</div>';
+                            } else {
+                                medias += '<div class="item active">'+
+                                            '<img alt="image" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
+                                        '</div>';  
+                            }
+                            
                         } else {
-                            medias += '<div class="item">'+
+                            if(reportData[q].media._ids[lol].type === "video/mp4"){
+                                medias += '<div class="item">'+
+                                            '<video width="400" controls style="padding-left: 100px; padding-right: 100px;">'+
+                                              '<source src="/img/post/'+reportData[q].media._ids[lol].directory+'" type="video/mp4">'+
+                                              'Your browser does not support HTML5 video.'+
+                                            '</video>'+
+                                        '</div>';
+                            } else {
+                                medias += '<div class="item">'+
                                             '<img alt="image" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
                                         '</div>';
+                            }
+                            
                         }
                     }
 

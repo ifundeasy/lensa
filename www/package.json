@@ -41,6 +41,7 @@
     "express": "",
     "express-session": "",
     "file-stream-rotator": "",
+    "multer": "",
     "minimist": "",
     "mongoose": "",
     "morgan": "",

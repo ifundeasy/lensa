@@ -3,6 +3,8 @@ var page = require('express').Router();
 var api = require('express').Router();
 var httpCode = require('http').STATUS_CODES;
 var bcrypt = require('bcrypt');
+var multer = require("multer");
+var path = require('path');
 //
 module.exports = function (args, app) {
     var global = args.global;
@@ -17,6 +19,23 @@ module.exports = function (args, app) {
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
+    var mediadirpath = './public/img/post';
+    var allowedExtensions = ['jpg','jpeg','png','mp4','3gp','mov'];
+    var storage	=	multer.diskStorage({
+        destination: function (req, file, callback) {
+            callback(null, mediadirpath);
+        },
+        filename: function (req, file, callback) {
+            callback(null, req.loggedUser._id + '-' + Date.now() + path.extname(file.originalname));
+        },
+        fileFilter: function (req, file, cb) {
+            if (allowedExtensions.indexOf(path.extension(file.originalname).substr(1)) === -1){
+                return cb(new Error('file format not supported'))
+            }
+            cb(null, true)
+        }
+    });
+    var upload = multer({ storage : storage}).single('postmedia');
     //
     var publicOrganizationId = "580b731cdcba0f490c72c7a9"; //todo : query ke db ya, find by name == public
     var publicGroupId = "580a24727709cb078b9fe176"; //todo : query ke db ya, find by name == public
@@ -299,11 +318,16 @@ module.exports = function (args, app) {
                         };
                         res.status(500).send(body);
                     } else {
+                        var medias = [];
+                        if(req.body.hasOwnProperty('medias')){
+                            medias = JSON.parse(req.body.medias);
+                        }
                         var Post = Collection['posts'];
                         var postobj = {
                             text : req.body.text,
                             "users._id" : req.loggedUser._id,
                             "organizations._id" : publicOrganizationId, // default : PUBLIC organization
+                            "media._ids" : medias,
                             statuses : [],
                             comments : [],
                             lat : req.body.lat,
@@ -761,29 +785,45 @@ module.exports = function (args, app) {
                         };
                         res.status(500).send(body);
                     } else {
-                        var Media = Collection['media'];
-                        var mediaObj = {
-                            type: req.body.type,
-                            directory: req.body.directory,
-                            description: req.body.description,
-                            notes: req.body.notes,
-                        };
-                        var newMedia = new Media(mediaObj);
-                        newMedia.save().then(function(doc){
-                            var body = {
-                                "status" : 1,
-                                "message" : 'new media created',
-                                "nextToken": newToken
-                            };
-                            res.status(200).send(body);
-                        }).catch(function(e){
-                            var body = {
-                                "status" : 0,
-                                "message" : 'error',
-                                "nextToken": newToken
-                            };
-                            res.status(500).send(body);
-                        });
+                        
+                        upload(req,res,function(err) {
+                    		if(err) {
+                    			var body = {
+                                    "status" : 0,
+                                    "message" : 'error uploading file',
+                                    "err" : err,
+                                    "nextToken": newToken
+                                };
+                                res.status(500).send(body);
+                    		} else {
+                    		    console.log("req.file :");
+                    		    console.log(req.file);
+                    		    var Media = Collection['media'];
+                                var mediaObj = {
+                                    type: req.file.mimetype,
+                                    directory: req.file.filename,
+                                    description: req.body.description || '',
+                                    notes: req.body.notes || '',
+                                };
+                                var newMedia = new Media(mediaObj);
+                                newMedia.save().then(function(doc){
+                                    var body = {
+                                        "status" : 1,
+                                        "message" : 'new media created',
+                                        "mediaid" : doc._id,
+                                        "nextToken": newToken
+                                    };
+                                    res.status(200).send(body);
+                                }).catch(function(e){
+                                    var body = {
+                                        "status" : 0,
+                                        "message" : 'error',
+                                        "nextToken": newToken
+                                    };
+                                    res.status(500).send(body);
+                                });
+                    		}
+                    	});
                     }
                 });
                 break;
