@@ -55,28 +55,28 @@ function loadTimeline(){
                         if(lol==0){
                             if(reportData[q].media._ids[lol].type === "video/mp4"){
                                 medias += '<div class="item active">'+
-                                            '<video width="400" controls style="padding-left: 100px; padding-right: 100px;">'+
+                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
                                               '<source src="/img/post/'+reportData[q].media._ids[lol].directory+'" type="video/mp4">'+
                                               'Your browser does not support HTML5 video.'+
                                             '</video>'+
                                         '</div>';
                             } else {
                                 medias += '<div class="item active">'+
-                                            '<img alt="image" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
+                                            '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
                                         '</div>';  
                             }
                             
                         } else {
                             if(reportData[q].media._ids[lol].type === "video/mp4"){
                                 medias += '<div class="item">'+
-                                            '<video width="400" controls style="padding-left: 100px; padding-right: 100px;">'+
+                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
                                               '<source src="/img/post/'+reportData[q].media._ids[lol].directory+'" type="video/mp4">'+
                                               'Your browser does not support HTML5 video.'+
                                             '</video>'+
                                         '</div>';
                             } else {
                                 medias += '<div class="item">'+
-                                            '<img alt="image" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
+                                            '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+reportData[q].media._ids[lol].directory+'">'+
                                         '</div>';
                             }
                             

@@ -158,7 +158,7 @@ module.exports = function (args, app) {
     api.get('/allrolesandcategories', function(req, res, next){
         var Role = Collection['roles'];
         var Category = Collection['categories'];
-        Role.find({ "organizations._id": req.logged.user.organxizations._id })
+        Role.find({ "organizations._id": req.logged.user.organizations._id })
         .then(function(docs){
             Category.find({ "organizations._id": req.logged.user.organizations._id })
             .then(function(docs2){
@@ -236,6 +236,7 @@ module.exports = function (args, app) {
         var postid = req.param('postid');
         var Post = Collection['posts'];
         Post.findOne({ "organizations._id" : req.logged.user.organizations._id, _id: postid })
+        .populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' })
         .then(function(doc){
             var body = {
                 "status" : 1,
@@ -300,7 +301,7 @@ module.exports = function (args, app) {
                     { $or: [{returned: false}, {returned: { $exists: false }}] },
                     { $or: [{rejected: false}, {rejected: { $exists: false }}] }
                 ]
-            }).populate({ path: 'users._id', select: 'name' }).skip(randomSkip).limit(1)
+            }).populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' }).skip(randomSkip).limit(1)
             .then(function(doc){
                 var body = {
                     "status" : 1,
@@ -338,7 +339,10 @@ module.exports = function (args, app) {
                 Post.findOne({ _id: postid})
                 .then(function(doc2){
                     if(doc2!==null){
+                        doc2.assignFrom.users._id = req.logged.user._id;
+                        doc2.assignFrom.createdAt = new Date();
                         doc2.assignTo.users._id = userid;
+                        doc2.assignTo.createdAt = new Date();
                         doc2.categories._id = categoryid;
                         doc2.save()
                         .then(function(result){
@@ -481,6 +485,85 @@ module.exports = function (args, app) {
             res.status(500).send(body);
         });
     });
+    
+    api.get('/reportcountbycategory', function(req, res, next) {
+        var datatype = req.param('type');
+        var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
+        var Post = Collection['posts'];
+        var queryMatch = {};
+        switch (datatype){
+            case "1":
+                queryMatch = { 
+                    $and: [
+                        { active: true },
+                        { "organizations._id" : orgid }
+                    ] 
+                };
+                break;
+            case "2":
+                queryMatch = { 
+                    $and: [
+                        { "organizations._id" : orgid},
+                        {active: true}, 
+                        {"assignTo.users._id" : { $exists: true }},
+                        { $or: [{returned: false}, {returned: { $exists: false }}] },
+                        { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                    ] 
+                };
+                break;
+            case "3":
+                queryMatch = { 
+                    $and: [
+                        { "organizations._id" : orgid },
+                        { active: true },
+                        { returned: true },
+                        { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                    ] 
+                };
+                break;
+            case "4":
+                queryMatch = { 
+                    $and: [
+                        { "organizations._id" : orgid },
+                        { active: true },
+                        { $or: [{returned: false}, {returned: { $exists: false }}] },
+                        { rejected: true }
+                    ] 
+                };
+                break;
+        }
+        Post.aggregate([
+            { 
+                $match :  queryMatch
+            }, 
+            {
+                $group: {
+                    _id:  '$categories._id',
+                    sum: {$sum: 1}
+                }
+            },
+            { 
+                $lookup: {
+                    "from": "categories",
+                    "localField": "_id",
+                    "foreignField": "_id",
+                    "as": "category"
+                }
+            },
+        ]).then(function(doc){
+            var body = {
+                "status" : 1,
+                "data" : doc,
+            };
+            res.status(200).send(body);
+        }).catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    })
 
 
 

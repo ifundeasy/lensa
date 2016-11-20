@@ -11,6 +11,22 @@ var modal = new Modal({
         Cancel : {class : "btn-default", dismiss : true}
     }
 });
+var modal2 = new Modal({
+    title : "Prompt",
+    backdrop : true,
+    handler : {
+        OK : {class : "btn-success"},
+        Cancel : {class : "btn-default", dismiss : true}
+    }
+});
+var modal3 = new Modal({
+    title : "Prompt",
+    backdrop : true,
+    handler : {
+        OK : {class : "btn-success"},
+        Cancel : {class : "btn-default", dismiss : true}
+    }
+});
 
 function reloadMarkers(latLongArray){
     for (var x = 0; x < markers.length; x++) {
@@ -160,39 +176,57 @@ function setDetailButtonEvent(){
     $('a[detailbtn]').off('click');
     $('a[detailbtn]').on('click', function(){
         var title = $(this).children().last().children().last().html();
+        var datatype = $(this).children().last().children().last().attr('datatype');
         modal.setTitle('Detail ' + title);
-        modal.setBody('<div id="pie-detail"></div>').show();
-
-        // pie chart
-        setTimeout(function(){
-            c3.generate({
-                bindto: '#pie-detail',
-                data:{
-                    columns: [
-                        ['General', 30],
-                        ['Traffic', 120],
-                        ['Health', 68]
-                    ],
-                    colors:{
-                        //data1: '#1ab394',
-                        //data2: '#BABABA'
-                    },
-                    type : 'pie'
-                },
-                pie: {
-                    label: {
-                        format: function(value, ratio, id) {
-                            return value;
-                      }
+        modal.setBody('<div id="pie-detail">Loading chart..</div>').show();
+    
+        $.ajax({
+            url:'/moderator/!/reportcountbycategory?type='+datatype,
+            success: function(data, status, xhr){
+                console.log(data);
+                var aggData = data.data;
+                var colData = [];
+                var col = [];
+                for(i=0; i<aggData.length; i++){
+                    if(aggData[i]._id === null){
+                        col = ["unassigned", aggData[i].sum];
+                    } else {
+                        col = [aggData[i].category[0].name, aggData[i].sum];
                     }
+                    colData.push(col);
                 }
-            });
-            console.log("rendered");
-        }, 300);
-        // pie chart done
+                // pie chat init
+                c3.generate({
+                    bindto: '#pie-detail',
+                    data:{
+                        columns: colData,
+                        colors:{
+                            //data1: '#1ab394',
+                            //data2: '#BABABA'
+                        },
+                        type : 'pie',
+                        onclick: function (d, i) { 
+                            console.log(d);
+                        },
+                    },
+                    pie: {
+                        label: {
+                            format: function(value, ratio, id) {
+                                return value;
+                          }
+                        }
+                    }
+                });
+            },
+            error: function(xhr, status, err){
+                //TODO
+                console.log(err);
+            }
+        });
+
         modal.$buttons.OK.off("click");
         modal.$buttons.OK.on("click", function () {
-            console.log("olalaaaa");
+           
         });
     });
 }
@@ -264,8 +298,101 @@ function setBarChartClickEvent(){
 
                         $( "#monthly-list-report tbody" ).on( "click", "tr", function() {
                             //console.log( $( this ).text() );
-                            var data = $('#monthly-list-report').dataTable().fnGetData(this);
-                            console.log(data);
+                            var rowdata = $('#monthly-list-report').dataTable().fnGetData(this);
+                            console.log(rowdata);
+                            //asdf
+                            $.get('/.assets/html/reportdetail.html')
+                             .success(function(eldata) {
+                                var bodyel = eldata;
+                                modal2.setTitle('Report Detail');
+                                modal2.setBody(bodyel).show();
+                                modal2.$buttons.OK.off("click");
+                                modal2.$buttons.OK.on("click", function () {    
+                                });
+                                var modalselector = '#'+modal2.id;
+                                $(modalselector + ' .modal-dialog').css("width", "80%");
+                                $.ajax({
+                                    url:'/moderator/!/reportdetail?postid='+rowdata[0],
+                                    success: function(data, status, xhr){
+                                        console.log(data);
+                                        if(data.status !==0){
+                                            var nextreport = data.data;
+                                            var reportTitle = 'Untitled Report';
+                                            var reportAuthor = nextreport.users._id.name.first;
+                                            if(nextreport.users._id.name.hasOwnProperty('last') && nextreport.users._id.name.last != null){
+                                                reportAuthor = nextreport.users._id.name.first + ' ' + nextreport.users._id.name.last;
+                                            }
+                                            if(nextreport.hasOwnProperty('title')){
+                                                reportTitle = nextreport.title;
+                                            }
+                            
+                                            $(modalselector + ' .report-title').html(reportTitle);
+                                            $(modalselector + ' .report-author').html(reportAuthor);
+                                            $(modalselector + ' .report-date').html(nextreport.createdAt.substr(0, nextreport.createdAt.indexOf('T')) + " " + nextreport.createdAt.substr(nextreport.createdAt.indexOf('T')+1, 8));
+                                            $(modalselector + ' .report-content').html(nextreport.text);
+                                            if(nextreport.hasOwnProperty('media')){
+                                                if(nextreport.media._ids.length > 0){
+                                                    $(modalselector + ' .carousel-laporan .carousel-inner').html('');
+                                                    var medias = '';
+                                                    for(i=0; i<nextreport.media._ids.length; i++){
+                                                        if(i==0){
+                                                            if(nextreport.media._ids[i].type === "video/mp4"){
+                                                                medias += '<div class="item active">'+
+                                                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
+                                                                              '<source src="/img/post/'+nextreport.media._ids[i].directory+'" type="video/mp4">'+
+                                                                              'Your browser does not support HTML5 video.'+
+                                                                            '</video>'+
+                                                                        '</div>';
+                                                            } else {
+                                                                medias += '<div class="item active">'+
+                                                                            '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+nextreport.media._ids[i].directory+'">'+
+                                                                        '</div>';  
+                                                            }
+                                                            
+                                                        } else {
+                                                            if(nextreport.media._ids[i].type === "video/mp4"){
+                                                                medias += '<div class="item">'+
+                                                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
+                                                                              '<source src="/img/post/'+nextreport.media._ids[i].directory+'" type="video/mp4">'+
+                                                                              'Your browser does not support HTML5 video.'+
+                                                                            '</video>'+
+                                                                        '</div>';
+                                                            } else {
+                                                                medias += '<div class="item">'+
+                                                                            '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+nextreport.media._ids[i].directory+'">'+
+                                                                        '</div>';
+                                                            }
+                                                            
+                                                        }
+                                                    }
+                                                    $(modalselector + ' .carousel-laporan .carousel-inner').html(medias);
+                                                }
+                                            }
+                                            $(modalselector + ' .pr-timeline-btn').off('click');
+                                            $(modalselector + ' .pr-timeline-btn').on('click', function(e){
+                                                $.get('/.assets/html/timeline.html')
+                                                .success(function(eldata2) {
+                                                    var bodyel2 = eldata2;
+                                                    modal3.setTitle('Progress Timeline');
+                                                    modal3.setBody(bodyel2).show();
+                                                    modal3.$buttons.OK.off("click");
+                                                    modal3.$buttons.OK.on("click", function () {    
+                                                    });
+                                                });
+                                            });
+                                        } else {
+                                            //TODO
+                                            console.log(data);
+                                        }
+                                        
+                                    },
+                                    error: function(xhr, status, err){
+                                        //TODO
+                                        console.log(err);
+                                    }
+                                });
+                             });
+
                         });
                     } else {
                         alert('failed to get monthly report');

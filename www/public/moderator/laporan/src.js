@@ -7,8 +7,26 @@ var modal = new Modal({
         Cancel : {class : "btn-default", dismiss : true}
     }
 });
+var modal2 = new Modal({
+    title : "Prompt",
+    backdrop : true,
+    handler : {
+        OK : {class : "btn-success"},
+        Cancel : {class : "btn-default", dismiss : true}
+    }
+});
+var modal3 = new Modal({
+    title : "Prompt",
+    backdrop : true,
+    handler : {
+        OK : {class : "btn-success"},
+        Cancel : {class : "btn-default", dismiss : true}
+    }
+});
+
 var reportdata = {};
 var nextreportid = '';
+
 
 function getNextReport(){
     $.ajax({
@@ -32,6 +50,44 @@ function getNextReport(){
                 $('#report-author').html(reportAuthor);
                 $('#report-date').html(nextreport.createdAt.substr(0, nextreport.createdAt.indexOf('T')) + " " + nextreport.createdAt.substr(nextreport.createdAt.indexOf('T')+1, 8));
                 $('#report-content').html(nextreport.text);
+                if(nextreport.hasOwnProperty('media')){
+                    if(nextreport.media._ids.length > 0){
+                        $('#carousel-laporan .carousel-inner').html('');
+                        var medias = '';
+                        for(i=0; i<nextreport.media._ids.length; i++){
+                            if(i==0){
+                                if(nextreport.media._ids[i].type === "video/mp4"){
+                                    medias += '<div class="item active">'+
+                                                '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
+                                                  '<source src="/img/post/'+nextreport.media._ids[i].directory+'" type="video/mp4">'+
+                                                  'Your browser does not support HTML5 video.'+
+                                                '</video>'+
+                                            '</div>';
+                                } else {
+                                    medias += '<div class="item active">'+
+                                                '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+nextreport.media._ids[i].directory+'">'+
+                                            '</div>';  
+                                }
+                                
+                            } else {
+                                if(nextreport.media._ids[i].type === "video/mp4"){
+                                    medias += '<div class="item">'+
+                                                '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
+                                                  '<source src="/img/post/'+nextreport.media._ids[i].directory+'" type="video/mp4">'+
+                                                  'Your browser does not support HTML5 video.'+
+                                                '</video>'+
+                                            '</div>';
+                                } else {
+                                    medias += '<div class="item">'+
+                                                '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+nextreport.media._ids[i].directory+'">'+
+                                            '</div>';
+                                }
+                                
+                            }
+                        }
+                        $('#carousel-laporan .carousel-inner').html(medias);
+                    }
+                }
 
                 $('#btn-disposisi').off('click');
                 $('#btn-reject').off('click');
@@ -274,8 +330,100 @@ function getAllreports(){
 
                 $( "#table-list-report tbody" ).on( "click", "tr", function() {
                     //console.log( $( this ).text() );
-                    var data = $('#table-list-report').dataTable().fnGetData(this);
-                    console.log(data);
+                    var rowdata = $('#table-list-report').dataTable().fnGetData(this);
+                    console.log(rowdata);
+                    //asdf
+                    $.get('/.assets/html/reportdetail.html')
+                     .success(function(eldata) {
+                        var bodyel = eldata;
+                        modal2.setTitle('Report Detail');
+                        modal2.setBody(bodyel).show();
+                        modal2.$buttons.OK.off("click");
+                        modal2.$buttons.OK.on("click", function () {    
+                        });
+                        var modalselector = '#'+modal2.id;
+                        $(modalselector + ' .modal-dialog').css("width", "80%");
+                        $.ajax({
+                            url:'/moderator/!/reportdetail?postid='+rowdata[0],
+                            success: function(detaildata, status, xhr){
+                                console.log(detaildata);
+                                if(detaildata.status !==0){
+                                    var detailreport = detaildata.data;
+                                    var reportTitle = 'Untitled Report';
+                                    var reportAuthor = detailreport.users._id.name.first;
+                                    if(detailreport.users._id.name.hasOwnProperty('last') && detailreport.users._id.name.last != null){
+                                        reportAuthor = detailreport.users._id.name.first + ' ' + detailreport.users._id.name.last;
+                                    }
+                                    if(detailreport.hasOwnProperty('title')){
+                                        reportTitle = detailreport.title;
+                                    }
+                    
+                                    $(modalselector + ' .report-title').html(reportTitle);
+                                    $(modalselector + ' .report-author').html(reportAuthor);
+                                    $(modalselector + ' .report-date').html(detailreport.createdAt.substr(0, detailreport.createdAt.indexOf('T')) + " " + detailreport.createdAt.substr(detailreport.createdAt.indexOf('T')+1, 8));
+                                    $(modalselector + ' .report-content').html(detailreport.text);
+                                    if(detailreport.hasOwnProperty('media')){
+                                        if(detailreport.media._ids.length > 0){
+                                            $(modalselector + ' .carousel-laporan .carousel-inner').html('');
+                                            var medias = '';
+                                            for(i=0; i<detailreport.media._ids.length; i++){
+                                                if(i==0){
+                                                    if(detailreport.media._ids[i].type === "video/mp4"){
+                                                        medias += '<div class="item active">'+
+                                                                    '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
+                                                                      '<source src="/img/post/'+detailreport.media._ids[i].directory+'" type="video/mp4">'+
+                                                                      'Your browser does not support HTML5 video.'+
+                                                                    '</video>'+
+                                                                '</div>';
+                                                    } else {
+                                                        medias += '<div class="item active">'+
+                                                                    '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+detailreport.media._ids[i].directory+'">'+
+                                                                '</div>';  
+                                                    }
+                                                    
+                                                } else {
+                                                    if(detailreport.media._ids[i].type === "video/mp4"){
+                                                        medias += '<div class="item">'+
+                                                                    '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
+                                                                      '<source src="/img/post/'+detailreport.media._ids[i].directory+'" type="video/mp4">'+
+                                                                      'Your browser does not support HTML5 video.'+
+                                                                    '</video>'+
+                                                                '</div>';
+                                                    } else {
+                                                        medias += '<div class="item">'+
+                                                                    '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+detailreport.media._ids[i].directory+'">'+
+                                                                '</div>';
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            $(modalselector + ' .carousel-laporan .carousel-inner').html(medias);
+                                        }
+                                    }
+                                    $(modalselector + ' .pr-timeline-btn').off('click');
+                                    $(modalselector + ' .pr-timeline-btn').on('click', function(e){
+                                        $.get('/.assets/html/timeline.html')
+                                        .success(function(eldata2) {
+                                            var bodyel2 = eldata2;
+                                            modal3.setTitle('Progress Timeline');
+                                            modal3.setBody(bodyel2).show();
+                                            modal3.$buttons.OK.off("click");
+                                            modal3.$buttons.OK.on("click", function () {    
+                                            });
+                                        });
+                                    });
+                                } else {
+                                    //TODO
+                                    console.log(detaildata);
+                                }
+                                
+                            },
+                            error: function(xhr, status, err){
+                                //TODO
+                                console.log(err);
+                            }
+                        });
+                     });
                 });
 
             } else {
