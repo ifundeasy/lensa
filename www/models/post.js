@@ -97,15 +97,30 @@ module.exports = function (mongoose) {
             type : String,
             required : false
         },
-        "posts._id" : {
-            ref : 'post',
-            type : Schema.Types.ObjectId
+        posts : {
+            _id: {
+                ref : 'post',
+                type : Schema.Types.ObjectId
+            },
+            "users._id" :  {
+                ref: 'user',
+                type: Schema.Types.ObjectId,
+                required: false
+            },
+            createdAt : {type : Date}
         },
         createdAt : {type : Date, default : Date.now},
         returned: {type: Boolean, default: false},
         notes: { type: String, required: false },
-        rejected: {type: Boolean, default: false},
-        rejectedDate: {type : Date, required: false },
+        rejected: {
+            "users._id" :  {
+                ref: 'user',
+                type: Schema.Types.ObjectId,
+                required: false
+            },
+            createdAt : {type : Date}
+        },
+        finished: {type: Boolean, default: false},
         static: {type: Boolean, default: false},
         active : {type : Boolean, default : true}
     });

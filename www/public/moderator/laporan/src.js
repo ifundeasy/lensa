@@ -497,13 +497,6 @@ function setDuplicate(postId, duplicateId){
                 location.reload();
             } else {
                 alert("Failed to mark report as duplicate!");
-                $( "#duplicate-list-report tbody" ).on( "click", "tr", function() {
-                    //console.log( $( this ).text() );
-                    var data = $('#duplicate-list-report').dataTable().fnGetData(this);
-                    if (confirm("Select this report as a duplicate to a new one?") == true) {
-                        setDuplicate(nextreportid, data[0]);
-                    }
-                });
             }
         },
         error: function(xhr, status, err){

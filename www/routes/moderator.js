@@ -49,7 +49,7 @@ module.exports = function (args, app) {
                     { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
                     {active: true, "assignTo.users._id" : { $exists: false }},
                     { $or: [{returned: false}, {returned: { $exists: false }}] },
-                    { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                    { rejected: { $exists: false } }
                 ]
             }, 'text lat long').then(function(doc2){
                 data.unassignedreportltlng = doc2;
@@ -60,7 +60,7 @@ module.exports = function (args, app) {
                         { "organizations._id" : req.logged.user.organizations._id},
                         {active: true, "assignTo.users._id" : { $exists: true }},
                         { $or: [{returned: false}, {returned: { $exists: false }}] },
-                        { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                        { rejected: { $exists: false } }
                     ]
                 }, 'text lat long').then(function(doc3){
                     data.assignedreportltlng = doc3;
@@ -71,7 +71,7 @@ module.exports = function (args, app) {
                             { "organizations._id" : req.logged.user.organizations._id },
                             { active: true },
                             { returned: true },
-                            { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                            { rejected: { $exists: false } }
                         ]
                     }, 'text lat long').then(function(doc4){
                         data.returnedreportltlng = doc4;
@@ -82,7 +82,7 @@ module.exports = function (args, app) {
                                 { "organizations._id" : req.logged.user.organizations._id },
                                 { active: true },
                                 { $or: [{returned: false}, {returned: { $exists: false }}] },
-                                { rejected: true }
+                                { rejected: { $exists: true } }
                             ]
                         }, 'text lat long').then(function(doc4){
                             data.rejectedreportltlng = doc4;
@@ -287,7 +287,7 @@ module.exports = function (args, app) {
                 { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
                 {active: true, "assignTo.users._id" : { $exists: false }},
                 { $or: [{returned: false}, {returned: { $exists: false }}] },
-                { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                { rejected: { $exists: false } }
             ]
 
         }).then(function(num){
@@ -299,7 +299,7 @@ module.exports = function (args, app) {
                     { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
                     {active: true, "assignTo.users._id" : { $exists: false }},
                     { $or: [{returned: false}, {returned: { $exists: false }}] },
-                    { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                    { rejected: { $exists: false } }
                 ]
             }).populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' }).skip(randomSkip).limit(1)
             .then(function(doc){
@@ -400,6 +400,7 @@ module.exports = function (args, app) {
         Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
         .then(function(doc){
             doc.posts._id = duplicateid;
+            doc.posts.users._id = req.logged.user._id;
             doc.save()
             .then(function(doc){
                 var body = {
@@ -432,8 +433,10 @@ module.exports = function (args, app) {
         var Post = Collection['posts'];
         Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
         .then(function(doc){
-            doc.rejected = true;
-            doc.rejectedDate = new Date();
+            doc.rejected = {
+                createdAt : new Date(),
+                "users._id" :  req.logged.user._id
+            };
             doc.notes = reasonText;
             doc.save()
             .then(function(doc){
@@ -504,10 +507,10 @@ module.exports = function (args, app) {
                 queryMatch = { 
                     $and: [
                         { "organizations._id" : orgid},
-                        {active: true}, 
-                        {"assignTo.users._id" : { $exists: true }},
+                        { active: true}, 
+                        { "assignTo.users._id" : { $exists: true }},
                         { $or: [{returned: false}, {returned: { $exists: false }}] },
-                        { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                        { rejected: { $exists: false } }
                     ] 
                 };
                 break;
@@ -517,7 +520,7 @@ module.exports = function (args, app) {
                         { "organizations._id" : orgid },
                         { active: true },
                         { returned: true },
-                        { $or: [{rejected: false}, {rejected: { $exists: false }}] }
+                        { rejected: { $exists: false } }
                     ] 
                 };
                 break;
@@ -527,7 +530,7 @@ module.exports = function (args, app) {
                         { "organizations._id" : orgid },
                         { active: true },
                         { $or: [{returned: false}, {returned: { $exists: false }}] },
-                        { rejected: true }
+                        { rejected: { $exists: true } }
                     ] 
                 };
                 break;

@@ -142,7 +142,7 @@ function loadDashboardData(){
                         case 'Report On Progress':
                             reloadMarkers(dashboardData.assignedreportltlng);
                             break;
-                        case 'Finished':
+                        case 'Report Finished':
                             reloadMarkers([]); //TODO: belum dibuat query yg laporan selesai
                             break;
                     }
