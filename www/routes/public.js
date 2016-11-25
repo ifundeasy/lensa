@@ -70,8 +70,9 @@ module.exports = function (args, app) {
     // token checking
     api.use(function (req, res, next) {
         // some api does not require token
-        var excludedApis = ["user/create", "login", "logout"];
-        if (excludedApis.indexOf(req.header("Class")) == -1) {
+        var excludedApis = ["user/create", "login", "logout", "register"];
+       
+        if (excludedApis.indexOf(req.header("Class")) === -1) {
             if (req.header("Token")) {
                 var token = req.header("Token");
                 var User = Collection['users'];
@@ -168,9 +169,12 @@ module.exports = function (args, app) {
             case 'login':
                 var User = Collection['users'];
                 User.findOne({username : req.body.username, active : true}).then(function (doc) {
+                    console.log("finished checking username");
                     if (doc !== null) {
+                        console.log("user found!");
                         doc.pwdCheck(req.body.password, function (err, success) {
                             if (err) {
+                                console.log("error at checking password");
                                 var body = {
                                     "status" : 0,
                                     "message" : err
@@ -178,45 +182,57 @@ module.exports = function (args, app) {
                                 res.status(500).send(body);
                             } else {
                                 if (success) {
+                                    console.log("success checking the password");
                                     var factory = 7;
                                     // generate a salt
                                     bcrypt.genSalt(factory, function (error, salt) {
                                         if (error) {
+                                            console.log("error at generating salt");
                                             var body = {
                                                 "status" : 0,
                                                 "message" : error
                                             };
                                             res.status(500).send(body);
                                         } else {
+                                            console.log("success generating salt");
                                             var tokenString = req.body.username + Math.random().toString(36).substr(2, 5);
+                                            console.log(tokenString);
                                             // hash the token using our new salt
                                             bcrypt.hash(tokenString, salt, function (errorhash, hash) {
                                                 if (!errorhash) {
-                                                    var body = {
-                                                        "status" : 0,
-                                                        "message" : errorhash
-                                                    };
-                                                    res.status(500).send(body);
-                                                } else {
+                                                    console.log("success creating hash");
                                                     doc.token = hash;
                                                     doc.save().then(function (doc) {
+                                                         console.log("success saving the hash");
                                                         var body = {
-                                                            "status" : 1,
-                                                            "token" : hash
-                                                        };
+                                                            status: 1,
+                                                            token: hash,
+                                                            userid: doc._id
+                                                        }
                                                         res.status(200).send(body);
                                                     }).catch(function (e) {
+                                                        console.log("error at saving the hash");
                                                         var body = {
                                                             "status" : 0,
                                                             "message" : e
                                                         };
                                                         res.status(500).send(body);
                                                     });
+                                                } else {
+                                                    console.log("error at creating hash");
+                                                    console.log(errorhash);
+                                                    console.log(hash);
+                                                    var body = {
+                                                        "status" : 0,
+                                                        "message" : errorhash
+                                                    };
+                                                    res.status(500).send(body);
                                                 }
                                             });
                                         }
                                     });
                                 } else {
+                                    console.log("wrong password");
                                     var body = {
                                         "status" : 0,
                                         "message" : "invalid username password combination"
