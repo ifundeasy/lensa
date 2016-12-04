@@ -40,15 +40,19 @@ module.exports = function (args, app) {
         
         // all reports
 
-        Post.find({ "organizations._id" : req.logged.user.organizations._id, active: true }, 'text lat long').then(function(doc){
+        Post.find({ 
+            "organizations._id" : req.logged.user.organizations._id, 
+            active: true 
+        }, 'text lat long')
+        .then(function(doc){
             data.allreportltlng = doc;
 
             // unassigned reports
             Post.find({ 
                 $and: [
                     { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
-                    {active: true, "assignTo.users._id" : { $exists: false }},
-                    { $or: [{returned: false}, {returned: { $exists: false }}] },
+                    { active: true, "assignTo.users._id" : { $exists: false }},
+                    { returned: { $exists: false } },
                     { rejected: { $exists: false } }
                 ]
             }, 'text lat long').then(function(doc2){
@@ -58,8 +62,8 @@ module.exports = function (args, app) {
                 Post.find({
                     $and: [
                         { "organizations._id" : req.logged.user.organizations._id},
-                        {active: true, "assignTo.users._id" : { $exists: true }},
-                        { $or: [{returned: false}, {returned: { $exists: false }}] },
+                        { active: true, "assignTo.users._id" : { $exists: true }},
+                        { returned: { $exists: false } },
                         { rejected: { $exists: false } }
                     ]
                 }, 'text lat long').then(function(doc3){
@@ -70,7 +74,7 @@ module.exports = function (args, app) {
                         $and: [
                             { "organizations._id" : req.logged.user.organizations._id },
                             { active: true },
-                            { returned: true },
+                            { returned: { $exists: true } },
                             { rejected: { $exists: false } }
                         ]
                     }, 'text lat long').then(function(doc4){
@@ -81,7 +85,7 @@ module.exports = function (args, app) {
                             $and: [
                                 { "organizations._id" : req.logged.user.organizations._id },
                                 { active: true },
-                                { $or: [{returned: false}, {returned: { $exists: false }}] },
+                                { returned: { $exists: false } },
                                 { rejected: { $exists: true } }
                             ]
                         }, 'text lat long').then(function(doc4){
@@ -193,7 +197,8 @@ module.exports = function (args, app) {
             $and: [
                 { "organizations._id" : req.logged.user.organizations._id },
                 { "roles._id" : { $exists: true} },
-                { "roles._id" : roleid }
+                { "roles._id" : roleid },
+                { "groups._id" : "580a24727709cb078b9fe179" } // this is "Admin" group id. // TODO: set a reference
             ]
         })
         .then(function(docs){
@@ -286,7 +291,7 @@ module.exports = function (args, app) {
             $and: [
                 { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
                 {active: true, "assignTo.users._id" : { $exists: false }},
-                { $or: [{returned: false}, {returned: { $exists: false }}] },
+                { returned: { $exists: false } },
                 { rejected: { $exists: false } }
             ]
 
@@ -298,7 +303,7 @@ module.exports = function (args, app) {
                 $and: [
                     { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
                     {active: true, "assignTo.users._id" : { $exists: false }},
-                    { $or: [{returned: false}, {returned: { $exists: false }}] },
+                    { returned: { $exists: false } },
                     { rejected: { $exists: false } }
                 ]
             }).populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' }).skip(randomSkip).limit(1)
@@ -428,23 +433,36 @@ module.exports = function (args, app) {
 
     api.post('/markreject', function(req, res, next){
         var postid = req.body.postid;
-        var reasonText = req.body.reason;
+        var reason = req.body.reason;
 
-        var Post = Collection['posts'];
-        Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
-        .then(function(doc){
-            doc.rejected = {
-                createdAt : new Date(),
-                "users._id" :  req.logged.user._id
+        if(reason.length < 10){
+            var body = {
+                "status" : 0,
+                "message" : "reason must be 10 characters minimum",
             };
-            doc.notes = reasonText;
-            doc.save()
+            res.status(500).send(body);
+        } else {
+            var Post = Collection['posts'];
+            Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true })
             .then(function(doc){
-                var body = {
-                    "status" : 1,
-                    "message" : "report has been marked as rejected",
-                };
-                res.status(200).send(body);
+                doc.rejected.users._id = req.logged.user._id;
+                doc.rejected.reason = reason;
+                doc.rejected.createdAt = new Date();
+                doc.save()
+                .then(function(doc){
+                    var body = {
+                        "status" : 1,
+                        "message" : "report has been marked as rejected",
+                    };
+                    res.status(200).send(body);
+                })
+                .catch(function(e){
+                    var body = {
+                        "status" : 0,
+                        "message" : e,
+                    };
+                    res.status(500).send(body);
+                });
             })
             .catch(function(e){
                 var body = {
@@ -453,14 +471,8 @@ module.exports = function (args, app) {
                 };
                 res.status(500).send(body);
             });
-        })
-        .catch(function(e){
-            var body = {
-                "status" : 0,
-                "message" : e,
-            };
-            res.status(500).send(body);
-        });
+        }
+        
     });
 
     api.get('/timeline', function(req, res, next){
@@ -509,7 +521,7 @@ module.exports = function (args, app) {
                         { "organizations._id" : orgid},
                         { active: true}, 
                         { "assignTo.users._id" : { $exists: true }},
-                        { $or: [{returned: false}, {returned: { $exists: false }}] },
+                        { returned: { $exists: false } },
                         { rejected: { $exists: false } }
                     ] 
                 };
@@ -519,7 +531,7 @@ module.exports = function (args, app) {
                     $and: [
                         { "organizations._id" : orgid },
                         { active: true },
-                        { returned: true },
+                        { returned: { $exists: true } },
                         { rejected: { $exists: false } }
                     ] 
                 };
@@ -529,7 +541,7 @@ module.exports = function (args, app) {
                     $and: [
                         { "organizations._id" : orgid },
                         { active: true },
-                        { $or: [{returned: false}, {returned: { $exists: false }}] },
+                        { returned: { $exists: false } },
                         { rejected: { $exists: true } }
                     ] 
                 };

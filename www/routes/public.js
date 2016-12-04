@@ -168,7 +168,10 @@ module.exports = function (args, app) {
                 break;
             case 'login':
                 var User = Collection['users'];
-                User.findOne({username : req.body.username, active : true}).then(function (doc) {
+                User.findOne({username : req.body.username, active : true})
+                .populate({ path: 'groups._id', select: 'name' })
+                .populate({ path: 'media._id', select: 'directory' })
+                .then(function (doc) {
                     console.log("finished checking username");
                     if (doc !== null) {
                         console.log("user found!");
@@ -203,12 +206,21 @@ module.exports = function (args, app) {
                                                     console.log("success creating hash");
                                                     doc.token = hash;
                                                     doc.save().then(function (doc) {
-                                                         console.log("success saving the hash");
+                                                        console.log("success saving the hash");
+                                                        var userObject = doc.toObject();
+                                                        var mediaDir = '/img/post/default.jpg';
+                                                        if(userObject.hasOwnProperty('media')){
+                                                            mediaDir = '/img/post/' + userObject.media._id.directory
+                                                        }
                                                         var body = {
                                                             status: 1,
                                                             token: hash,
-                                                            userid: doc._id
+                                                            userid: userObject._id,
+                                                            group: userObject.groups._id.name,
+                                                            media: mediaDir
                                                         }
+                                                        console.log(userObject.hasOwnProperty('media'));
+                                                        console.log(userObject);
                                                         res.status(200).send(body);
                                                     }).catch(function (e) {
                                                         console.log("error at saving the hash");
@@ -270,10 +282,18 @@ module.exports = function (args, app) {
                         var Post = Collection['posts'];
                         var start = parseInt(req.body.start);
                         var limit = parseInt(req.body.limit);
-                        Post.find().sort('createdAt').skip(start).limit(limit).then(function (docs) {
+                        Post.find({}).sort('createdAt').skip(start).limit(limit).then(function (docs) {
+                            var objArray = [];
+                            for(x=0; x<docs.length; x++){
+                                var postObject = docs[x].toObject();
+                                if(!postObject.hasOwnProperty('title')){
+                                    postObject.title = 'Untitled Report';
+                                }
+                                objArray.push(postObject);
+                            }
                             var body = {
                                 "status" : 1,
-                                "data" : docs,
+                                "data" : objArray,
                                 "nextToken" : newToken
                             };
                             res.status(200).send(body);
@@ -569,6 +589,7 @@ module.exports = function (args, app) {
                                 if (req.body.state) doc.state = req.body.state;
                                 if (req.body.zipcode) doc.zipcode = req.body.zipcode;
                                 if (req.body.birthDate) doc.birthDate = req.body.birthDate;
+                                if (req.body.avatar) doc.media._id = req.body.avatar;
                                 doc.save(function (err) {
                                     if (!err) {
                                         var body = {
@@ -605,6 +626,59 @@ module.exports = function (args, app) {
                     }
                 });
                 break;
+            
+            case 'user/update/avatar':
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status" : 0,
+                            "message" : "failed to get new token. Please login again.",
+                        };
+                        res.status(500).send(body);
+                    } else {
+                        
+                        upload(req,res,function(err) {
+                    		if(err) {
+                    			var body = {
+                                    "status" : 0,
+                                    "message" : 'error uploading file',
+                                    "err" : err,
+                                    "nextToken": newToken
+                                };
+                                res.status(500).send(body);
+                    		} else {
+                    		    console.log("req.file :");
+                    		    console.log(req.file);
+                    		    var Media = Collection['media'];
+                                var mediaObj = {
+                                    type: req.file.mimetype,
+                                    directory: req.file.filename,
+                                    description: req.body.description || '',
+                                    notes: req.body.notes || '',
+                                };
+                                var newMedia = new Media(mediaObj);
+                                newMedia.save().then(function(doc){
+                                    var body = {
+                                        "status" : 1,
+                                        "message" : 'new media created',
+                                        "mediaid" : doc._id,
+                                        "nextToken": newToken
+                                    };
+                                    res.status(200).send(body);
+                                }).catch(function(e){
+                                    var body = {
+                                        "status" : 0,
+                                        "message" : 'error',
+                                        "nextToken": newToken
+                                    };
+                                    res.status(500).send(body);
+                                });
+                    		}
+                    	});
+                    }
+                });
+                break;
+            
             case 'organization/get':
                 var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
                     if (errortoken) {

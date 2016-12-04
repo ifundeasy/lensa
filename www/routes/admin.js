@@ -53,7 +53,7 @@ module.exports = function (args, app) {
                     { "organizations._id" : req.logged.user.organizations._id },
                     { active: true },
                     { "assignTo.users._id" : req.logged.user._id },
-                    { returned: true }
+                    { returned: { $exists: true } }
                 ]
             }, 'text lat long').then(function(doc4){
                 data.returnedreportltlng = doc4;
@@ -190,7 +190,10 @@ module.exports = function (args, app) {
 
     api.get('/allreports', function(req, res, next){
         var Post = Collection['posts'];
-        Post.find({ "organizations._id" : req.logged.user.organizations._id, "assignTo.users._id" : req.logged.user._id }, 'title text users._id createdAt media._ids')
+        Post.find({
+            "organizations._id" : req.logged.user.organizations._id, 
+            "assignTo.users._id" : req.logged.user._id 
+        }, 'title text users._id createdAt media._ids')
         .populate({ path: 'users._id', select: 'name' })
         .then(function(docs){
             var body = {
@@ -211,16 +214,50 @@ module.exports = function (args, app) {
     api.get('/reportdetail', function(req, res, next){
         var postid = req.param('postid');
         var Post = Collection['posts'];
-        Post.findOne({ "organizations._id" : req.logged.user.organizations._id, _id: postid, "assignTo.users._id" : req.logged.user._id })
+        Post.findOne({ 
+            "organizations._id" : req.logged.user.organizations._id, 
+            _id: postid, 
+            "assignTo.users._id" : req.logged.user._id
+        })
         .populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' })
+        .populate({ path: 'statuses.steps._id', select: 'procedures._id name' })
         .then(function(doc){
-            var body = {
-                "status" : 1,
-                "data" : doc,
-            };
-            res.status(200).send(body);
+            if(doc.statuses.length>0){
+                var Step = Collection['steps'];
+                Step.find({
+                    "procedures._id": doc.statuses[0].steps._id.procedures._id
+                })
+                .populate({ path: 'procedures._id', select: 'name' })
+                .sort({ stepNumber: 1 })
+                .then(function(doc2){
+                    var body = {
+                        "status" : 1,
+                        "data" : doc,
+                        "steps" : doc2
+                    };
+                    res.status(200).send(body);   
+                })
+                .catch(function(e){
+                    console.log('error at step query');
+                    console.log(e);
+                    var body = {
+                        "status" : 0,
+                        "message" : e,
+                    };
+                    res.status(500).send(body);
+                });
+            } else {
+                var body = {
+                    "status" : 1,
+                    "data" : doc,
+                    "steps" : []
+                };
+                res.status(200).send(body);   
+            }
         })
         .catch(function(e){
+            console.log('error at post query');
+            console.log(e);
             var body = {
                 "status" : 0,
                 "message" : e,
@@ -257,20 +294,23 @@ module.exports = function (args, app) {
         });
     });
 
-    api.post('/markduplicate', function(req, res, next){
+    api.post('/markreturn', function(req, res, next){
         var postid = req.body.postid;
-        var duplicateid = req.body.duplicateid;
-
+        var reason = req.body.reason;
         var Post = Collection['posts'];
-        Post.findOne({ _id: postid, "organizations._id": req.logged.user.organizations._id, active: true, "assignTo.users._id" : req.logged.user._id })
+        Post.findOne({ 
+            _id: postid, 
+            "organizations._id": req.logged.user.organizations._id, 
+            active: true, 
+            "assignTo.users._id" : req.logged.user._id })
         .then(function(doc){
-            doc.posts._id = duplicateid;
-            doc.posts.users._id = req.logged.user._id;
+            doc.returned.reason = reason;
+            doc.returned.createdAt = new Date();
             doc.save()
             .then(function(doc){
                 var body = {
                     "status" : 1,
-                    "message" : "report has been marked as duplicate",
+                    "message" : "report has been marked as return",
                 };
                 res.status(200).send(body);
             })
@@ -340,7 +380,7 @@ module.exports = function (args, app) {
                         { "organizations._id" : orgid },
                         { active: true },
                         { "assignTo.users._id" : adminid },
-                        { returned: true },
+                        { returned: { $exists: false } },
                         { rejected: { $exists: false } }
                     ] 
                 };
@@ -387,7 +427,174 @@ module.exports = function (args, app) {
             };
             res.status(500).send(body);
         });
-    })
+    });
+    
+    api.get('/nextreport', function(req, res, next){
+        var Post = Collection['posts'];
+        Post.count({ 
+            $and: [
+                { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
+                {active: true, "assignTo.users._id" : req.logged.user._id },
+                { "assignTo.implementor" : { $exists: false } },
+                { returned: { $exists: false } },
+                { rejected: { $exists: false } }
+            ]
+
+        }).then(function(num){
+            var minSkip = 0;
+            var maxSkip = num; // TODO: buat skema di mana antara satu moderator dengan moderator lainnya gak akan buka laporan yang sama (untuk disposisi)
+            var randomSkip = Math.floor(Math.random() * (maxSkip - minSkip)) + minSkip;
+            Post.find({ 
+                $and: [
+                    { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
+                    {active: true, "assignTo.users._id" : req.logged.user._id },
+                    { "assignTo.implementor" : { $exists: false } },
+                    { returned: { $exists: false } },
+                    { rejected: { $exists: false } }
+                ]
+            }).populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' }).skip(randomSkip).limit(1)
+            .then(function(doc){
+                var body = {
+                    "status" : 1,
+                    "data" : doc,
+                };
+                res.status(200).send(body);
+            })
+            .catch(function(e){
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body);
+            });
+        })
+        .catch(function(e){
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+    
+    api.get('/sop', function(req, res, next){
+        var Post = Collection['posts'];
+        var postid = req.param('postid');
+        
+        Post.findOne({
+            "organizations._id" : req.logged.user.organizations._id, 
+            active: true,
+            "assignTo.users._id" : req.logged.user._id,
+            _id : postid
+        }).then(function(doc){
+            var Procedure = Collection['procedures'];
+            Procedure.find({
+                "roles._id" : req.logged.user.roles._id,
+                "categories._id" : doc.categories._id
+            }).then(function(docs){
+                var User = Collection['users'];
+                User.find({
+                    "organizations._id" : req.logged.user.organizations._id, 
+                    active: true,
+                    "roles._id" : req.logged.user.roles._id,
+                    "groups._id" : "580a24727709cb078b9fe17a" // this is implementor group ID. TODO: buat reference
+                }).then(function(docs2){
+                    var body = {
+                        "status" : 1,
+                        "sopdata" : docs,
+                        "implementordata" : docs2
+                    };
+                    res.status(200).send(body);
+                }).catch(function(e){
+                    console.log('error at user query');
+                    var body = {
+                        "status" : 0,
+                        "message" : e,
+                    };
+                    res.status(500).send(body); 
+                });
+                
+            }).catch(function(e){
+                console.log('error at procedure query');
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body); 
+            });
+        }).catch(function(e){
+            console.log('error at post query');
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
+    
+    api.post('/assignsop', function(req, res, next){
+        var postid = req.body.postid;
+        var userid = req.body.userid;
+        var sopid = req.body.sopid;
+        console.log('sopid:');
+        console.log(sopid);
+        var Post = Collection['posts'];
+        Post.findOne({
+            "organizations._id" : req.logged.user.organizations._id, 
+            active: true,
+            _id : postid
+        }).then(function(doc){
+            var Step = Collection['steps'];
+            Step.find({
+                "procedures._id": sopid
+            })
+            .sort({ stepNumber: 1 })
+            .then(function(docs2){
+                console.log(docs2);
+                ///////////////////
+                var newSteps = {
+                    "users._id" : userid,
+                    "steps._id" :   docs2[0]._id
+                };
+                doc.assignTo.implementor.users._id = userid;
+                doc.assignTo.implementor.createdAt = new Date();
+                doc.statuses.push(newSteps);
+                doc.save().then(function(result){
+                    var body = {
+                        "status" : 1,
+                        "message" : "Post has been assigned to an SOP",
+                    };
+                    res.status(200).send(body);
+                }).catch(function(e){
+                    console.log('error at update post query');
+                    console.log(e);
+                    var body = {
+                        "status" : 0,
+                        "message" : e,
+                    };
+                    res.status(500).send(body);
+                });
+                /////////////////
+            })
+            .catch(function(e){
+                console.log('error at steps query');
+                console.log(e);
+                var body = {
+                    "status" : 0,
+                    "message" : e,
+                };
+                res.status(500).send(body);
+            });
+        }).catch(function(e){
+            console.log('error at post query');
+            console.log(e);
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        });
+    });
     //
     page.use(function(req, res, next){
         var group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");

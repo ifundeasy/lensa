@@ -89,6 +89,14 @@ module.exports = function (mongoose) {
             },
             createdAt : {type : Date}
         },
+        implementor : {
+            "users._id" :  {
+                ref: 'user',
+                type: Schema.Types.ObjectId,
+                required: false
+            },
+            createdAt : {type : Date, required: false}
+        },
         lat : {
             type : String,
             required : false
@@ -110,15 +118,18 @@ module.exports = function (mongoose) {
             createdAt : {type : Date}
         },
         createdAt : {type : Date, default : Date.now},
-        returned: {type: Boolean, default: false},
+        returned: {
+            reason : {type : String, required : false },
+            createdAt : {type : Date, required : false }
+        },
         notes: { type: String, required: false },
         rejected: {
             "users._id" :  {
                 ref: 'user',
-                type: Schema.Types.ObjectId,
-                required: false
+                type: Schema.Types.ObjectId
             },
-            createdAt : {type : Date}
+            reason : {type : String, required : false },
+            createdAt : {type : Date, required : false }
         },
         finished: {type: Boolean, default: false},
         static: {type: Boolean, default: false},

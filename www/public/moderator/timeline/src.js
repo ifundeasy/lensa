@@ -104,7 +104,7 @@ function loadTimeline(){
                                     '</div>'+
                                     '<div class="social-avatar">'+
                                         '<a href="" class="pull-left">'+
-                                            '<img alt="image" src="img/a4.jpg">'+
+                                            '<img alt="image" src="img/a4.jpg">'+ // TODO: link ke avatar user
                                         '</a>'+
                                         '<div class="media-body">'+
                                             '<a href="#">'+
@@ -127,7 +127,7 @@ function loadTimeline(){
 
                                         '<div class="social-comment">'+
                                             '<a href="" class="pull-left">'+
-                                                '<img alt="image" src="img/a8.jpg">'+
+                                                '<img alt="image" src="img/a8.jpg">'+ // TODO: link ke avatar user
                                             '</a>'+
                                             '<div class="media-body">'+
                                                 '<a href="#">'+
@@ -141,7 +141,7 @@ function loadTimeline(){
 
                                         '<div class="social-comment">'+
                                             '<a href="" class="pull-left">'+
-                                                '<img alt="image" src="img/a3.jpg">'+
+                                                '<img alt="image" src="img/a3.jpg">'+ // TODO: link ke avatar user
                                             '</a>'+
                                             '<div class="media-body">'+
                                                 '<textarea class="form-control" placeholder="Write comment..."></textarea>'+

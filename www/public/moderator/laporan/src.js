@@ -111,13 +111,18 @@ function getNextReport(){
                     // modal creation
                     modal.setTitle('Reject Report'); 
 
-                    var modalBody = '<h2>Reason :</h2>'+
+                    var modalBody = '<h2 id="modal-reason-label">Reason :</h2>'+
                                     '<textarea class="form-control" rows="3" id="reject-reason"></textarea>';
                     modal.setBody(modalBody).show();
 
                     modal.$buttons.OK.off("click");
                     modal.$buttons.OK.on("click", function () {
-                        setReject(nextreportid, $('#reject-reason').val());
+                        if($('#reject-reason').val().length > 10){
+                            setReject(nextreportid, $('#reject-reason').val());
+                        } else {
+                            $( '<div class="panel panel-danger"><div class="panel-heading">Reason should not less than 10 characters</div></div>' ).insertAfter( "#modal-reason-label" );
+                        }
+                        
                     });
 
                 });
@@ -257,6 +262,8 @@ function getAllRolesAndCategories(){
                         if($('#category-select').val() == '0' || $('#category-select').val() == null){
                             alert("Invalid Category ID");
                         } else {
+                            modal.$buttons.OK.html('assigning..');
+                            modal.$buttons.OK.addClass('disabled');
                             setAssign(nextreportid, $('#admin-select').val(), $('#category-select').val());
                         }
                     }
@@ -452,12 +459,17 @@ function setAssign(postId, userId, categoryId){
         success: function(data, status, xhr){
             if(data.status!==1){
                 alert("Failed to assign report!");
+                modal.$buttons.OK.html('OK');
+                modal.$buttons.OK.removeClass('disabled');
             } else {
                 location.reload();
+                modal.$buttons.OK.html('Success. Reloading..');
             }
         },
         error: function(xhr, status, err){
-
+            //TODO
+            modal.$buttons.OK.html('OK');
+            modal.$buttons.OK.removeClass('disabled');
         }
     });
 }
