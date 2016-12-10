@@ -67,7 +67,7 @@ module.exports = function (args, app) {
             cb(true);
         });
     };
-    // token checking
+    // token checking section
     api.use(function (req, res, next) {
         // some api does not require token
         var excludedApis = ["user/create", "login", "logout", "register"];
