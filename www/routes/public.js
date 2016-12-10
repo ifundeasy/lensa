@@ -354,10 +354,13 @@ module.exports = function (args, app) {
                         };
                         res.status(500).send(body);
                     } else {
+                        console.log("mamat1");
                         var medias = [];
                         if(req.body.hasOwnProperty('medias')){
+                            console.log("mamat2");
                             medias = JSON.parse(req.body.medias);
                         }
+                        console.log("mamat3");
                         var Post = Collection['posts'];
                         var postobj = {
                             text : req.body.text,
@@ -369,9 +372,11 @@ module.exports = function (args, app) {
                             lat : req.body.lat,
                             long : req.body.long
                         };
+                        console.log("mamat4");
                         if (req.body.title) postobj.title = req.body.title;
                         var newPost = new Post(postobj);
                         newPost.save().then(function (doc) {
+                            console.log("mamat5");
                             var body = {
                                 "status" : 1,
                                 "message" : "new report has been posted",
@@ -379,6 +384,7 @@ module.exports = function (args, app) {
                             };
                             res.status(201).send(body);
                         }).catch(function (e) {
+                            console.log("mamat6");
                             var body = {
                                 "status" : 0,
                                 "message" : e,
