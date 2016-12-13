@@ -92,7 +92,7 @@ module.exports = function (args, app) {
                             data.rejectedreportltlng = doc4;
                             var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
                             var currentYear = new Date();
-                            // TODO: monthly reports
+                            
                             Post.aggregate([
                                 { 
                                     $match : { 

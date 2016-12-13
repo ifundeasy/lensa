@@ -27,6 +27,22 @@ module.exports = function (args, app) {
      ** http data resource
      ** **************************************************************************/
     api.use(function (req, res, next) {
+
+        var finalfunc = function(res, data){
+            var body = {
+                "status" : 1,
+                "data" : data,
+            };
+            res.status(200).send(body);
+        }
+        var errfunc = function(res, e){
+            console.log(e);
+            var body = {
+                "status" : 0,
+                "message" : e,
+            };
+            res.status(500).send(body);
+        }
         var pathname = req._parsedUrl.pathname;
         var org = req.logged.user.organizations;
         var orgId = org._id;
@@ -92,14 +108,218 @@ module.exports = function (args, app) {
         } else if (!collname) {
             next();
         } else {
-            var error = ("collname|String").split("|");
-            var Err = new Error([httpCode[404], collname].join(" : "));
-            Err.errors = {
-                require: error[0],
-                type: error[1],
-                founded: eval(error[0])
-            };
-            next(Err);
+            //custom APIs
+            
+            switch(collname){
+                case 'getsteps':
+                    var procId = req.param('procedure_id');
+                    var Procedure = Collection['procedures'];
+                    Procedure.findOne({
+                        "_id": procId
+                    }).then(function(doc){
+                        if(doc!==null){
+                            var Step = Collection['steps'];
+                            Step.find({
+                                "procedures._id": procId
+                            }).then(function(docs){
+                                var body = {
+                                    "status" : 1,
+                                    "data" : docs,
+                                };
+                                res.status(200).send(body);
+                            })
+                            .catch(function(e){
+                                console.log(e);
+                                var body = {
+                                    "status" : 0,
+                                    "message" : e,
+                                };
+                                res.status(500).send(body);
+                            });
+                            
+                        } else {
+                            var body = {
+                                "status" : 0,
+                                "message" : "invalid procedure id",
+                            };
+                            res.status(500).send(body);
+                        }
+                    }).catch(function(e){
+                        console.log(e);
+                        var body = {
+                            "status" : 0,
+                            "message" : e,
+                        };
+                        res.status(500).send(body);
+                    });
+            
+                    break;
+                    
+                case 'alldashboarddata':
+                    
+                    var Post = Collection['posts'];
+                    var data = {};
+                    
+                    // all incoming reports
+                    Post.find({ 
+                        "organizations._id" : req.logged.user.organizations._id, 
+                        active: true 
+                    }, 'text lat long')
+                    .then(function(docs){
+                        data.allreportltlng = docs;
+                        
+                        // finished reports
+                        Post.find({ 
+                            "organizations._id" : req.logged.user.organizations._id, 
+                            active: true,
+                            finished: true
+                        }, 'text lat long').then(function(docs2){
+                            data.finishedreportltlng = docs2;
+                            
+                            // reports on progress
+                            Post.find({ 
+                                "organizations._id" : req.logged.user.organizations._id, 
+                                active: true,
+                                finished: false,
+                                "assignTo" : { $exists: true },
+                                "assignTo.implementor" : { $exists: true },
+                                rejected: { $exists: false }
+                            }, 'text lat long').then(function(docs3){
+                                data.onprogressreportltlng = docs3;
+                                
+                                // accepted reports
+                                
+                                Post.find({ 
+                                    "organizations._id" : req.logged.user.organizations._id, 
+                                    active: true,
+                                    finished: false,
+                                    "assignTo" : { $exists: true },
+                                    "assignTo.implementor" : { $exists: false },
+                                    rejected: { $exists: false }
+                                }, 'text lat long').then(function(docs4){
+                                    data.acceptedreportltlng = docs4;
+                                    
+                                    // rejected reports
+                                    Post.find({ 
+                                        "organizations._id" : req.logged.user.organizations._id, 
+                                        active: true,
+                                        finished: false,
+                                        rejected: { $exists: true }
+                                    }, 'text lat long').then(function(docs5){
+                                        data.rejectedreportltlng = docs5;
+                                        var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
+                                        // aggregate by category
+                                        Post.aggregate([
+                                            { 
+                                                $match :  { 
+                                                    $and: [
+                                                        { active: true },
+                                                        { "organizations._id" : orgid }
+                                                    ] 
+                                                }
+                                            }, 
+                                            {
+                                                $group: {
+                                                    _id:  '$categories._id',
+                                                    sum: {$sum: 1}
+                                                }
+                                            },
+                                            { 
+                                                $lookup: {
+                                                    "from": "categories",
+                                                    "localField": "_id",
+                                                    "foreignField": "_id",
+                                                    "as": "category"
+                                                }
+                                            },
+                                        ]).then(function(docs6){
+                                            data.categoryagg = docs6;
+                                            
+                                            // aggregate by month
+                                            var currentYear = new Date();
+                            
+                                            Post.aggregate([
+                                                { 
+                                                    $match : { 
+                                                        $and: [
+                                                            { active: true },
+                                                            { "organizations._id" : orgid }
+                                                        ] 
+                                                    } 
+                                                }, 
+                                                {
+                                                    $group: {
+                                                        _id:  { year: { $year: currentYear }, month: { $month: "$createdAt" } },
+                                                        sum: {$sum: 1}
+                                                    }
+                                                }   
+                                            ])
+                                            .then(function(doc5){
+                                                var aggData = [];
+                                                // before injecting the data, set other month values with 0
+                
+                                                // loop through months
+                                                for(m=1; m<=12; m++){
+                                                    var monthExist = doc5.filter(function( obj ) {
+                                                        return obj._id.month == m;
+                                                    });
+                                                    if(monthExist.length === 0){
+                                                        aggData.push({
+                                                            _id: {
+                                                                month: m,
+                                                                year: currentYear.getFullYear()
+                                                            },
+                                                            sum: 0
+                                                        });
+                                                    } else {
+                                                        aggData.push(monthExist[0]);
+                                                    }
+                                                }
+                                                data.monthlyreports = aggData;
+                
+                                                finalfunc(res, data);
+                
+                                            }).catch(function(e){
+                                                console.log('error at query 7');
+                                            errfunc(res, e);
+                                            });
+                                            
+                                        }).catch(function(e){
+                                            console.log('error at query 6');
+                                            errfunc(res, e);
+                                        });
+                                    }).catch(function(e){
+                                        console.log('error at query 5');
+                                        errfunc(res, e);
+                                    });
+                                }).catch(function(e){
+                                    console.log('error at query 4');
+                                    errfunc(res, e);
+                                });
+                            }).catch(function(e){
+                                console.log('error at query 3');
+                                errfunc(res, e);
+                            });
+                        }).catch(function(e){
+                            console.log('error at query 2');
+                            errfunc(res, e);
+                        });
+                    }).catch(function(e){
+                        console.log('error at query 1');
+                        errfunc(res, e);
+                    });
+                    break;
+                default:
+                    var error = ("collname|String").split("|");
+                    var Err = new Error([httpCode[404], collname].join(" : "));
+                    Err.errors = {
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
+                    };
+                    next(Err);
+                    break;
+            }
         }
     })
     api.all('/', function (req, res) {
@@ -110,6 +330,8 @@ module.exports = function (args, app) {
             data: req.logged.user
         });
     });
+    
+    
     api.get('/:collection', function (req, res, next) {
         var populate = req.logged.populate;
         var org = req.logged.user.organizations;
@@ -126,6 +348,7 @@ module.exports = function (args, app) {
         var query = {
             active: true
         };
+
         if (collname == "organizations" || collname == "groups") {
             query = authorize.rule[collname];
             model.find(query)

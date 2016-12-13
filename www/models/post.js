@@ -319,7 +319,6 @@ module.exports = function (mongoose) {
         var geocoder = NodeGeocoder(options);
         geocoder.reverse({lat:parseFloat(post.lat), lon:parseFloat(post.long)})
         .then(function(res) {
-            console.log(__dirname);
             console.log("succeded reverse geocoding");
             var Organization = mongoose.models.organization;
             var g = res[0];

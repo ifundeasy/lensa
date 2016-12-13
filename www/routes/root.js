@@ -16,6 +16,22 @@ module.exports = function (args, app) {
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
+    var errfunc = function(res, e){
+        console.log(e);
+        var body = {
+            "status" : 0,
+            "message" : e,
+        };
+        res.status(500).send(body);
+    }
+    
+    var successfunc = function(res, data){
+        var body = {
+            "status" : 1,
+            "data" : data,
+        };
+        res.status(200).send(body);
+    }
     //
     api.get('/:collection/', function (req, res, next) {
         var collname = (req.params.collection || "").toLowerCase();
@@ -60,14 +76,29 @@ module.exports = function (args, app) {
                 })
             })
         } else {
-            var error = ("collname|String").split("|");
-            var Err = new Error([httpCode[404], collname].join(" : "))
-            Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
+            
+            //custom APIs
+            switch (collname){
+                case 'getorganization':
+                    var Organization = Collection['organizations'];
+                    Organization.find().then(function(docs){
+                        successfunc(res, docs);
+                    })
+                    .catch(function(e){
+                        errfunc(res, e);
+                    });
+                    break;
+                default:
+                    var error = ("collname|String").split("|");
+                    var Err = new Error([httpCode[404], collname].join(" : "))
+                    Err.errors = {
+                        require : error[0],
+                        type : error[1],
+                        founded : eval(error[0])
+                    }
+                    next(Err);
+                    break;
             }
-            next(Err);
         };
     });
     api.get('/:collection/:id', function (req, res, next) {
@@ -94,14 +125,44 @@ module.exports = function (args, app) {
                 next(e)
             })
         } else {
-            var error = ("req.params|String").split("|");
-            var Err = new Error([httpCode[404], id].join(" : "))
-            Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
+            //custom APIs
+            switch (collname){
+                case 'insertorganization':
+                    var Organization = Collection['organizations'];
+                    var orgObj = {
+                        name : req.body.name,
+                        pic : req.body.pic,
+                        "email.value" : req.body.email,
+                        "phone.value" : req.body.phone,
+                        "location.address" : req.body.address,
+                        "location.country" : req.body.country,
+                        "location.state" : req.body.state,
+                        "location.zipcode" : req.body.zipcode,
+                        "location.administrativeAreaLevel" : req.body.level,
+                        "location.lat" : req.body.lat,
+                        "location.long" : req.body.long
+                    };
+                    if (req.body.avatar) orgObj.media._id = req.body.avatar;
+                    var newOrganization = new Organization(orgObj);
+                    newOrganization.save()
+                    .then(function(result){
+                        successfunc(res, result);
+                    })
+                    .catch(function(e){
+                        errfunc(res, e);
+                    });
+                    break;
+                default:
+                    var error = ("collname|String").split("|");
+                    var Err = new Error([httpCode[404], collname].join(" : "))
+                    Err.errors = {
+                        require : error[0],
+                        type : error[1],
+                        founded : eval(error[0])
+                    }
+                    next(Err);
+                    break;
             }
-            next(Err);
         };
     });
     api.post('/:collection', function (req, res, next) {

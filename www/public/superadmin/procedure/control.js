@@ -2,6 +2,7 @@ $(document).ready(function () {
     var clsColors = ["default", "success", "primary", "warning", "danger"];
     var url = "!/procedures/";
     var isUpdate = false;
+    var isUpdateModal = false;
     var save = $('#save');
     var reset = $('#reset');
     var info = $('#info');
@@ -15,6 +16,22 @@ $(document).ready(function () {
     var notes = $('#notes');
     //
     var modal = new Modal({
+        title : "Prompt",
+        backdrop : true,
+        handler : {
+            OK : {class : "btn-success"},
+            Cancel : {class : "btn-default", dismiss : true}
+        }
+    });
+    var modal2 = new Modal({
+        title : "Prompt",
+        backdrop : true,
+        handler : {
+            OK : {class : "btn-success"},
+            Cancel : {class : "btn-default", dismiss : true}
+        }
+    });
+    var modal3 = new Modal({
         title : "Prompt",
         backdrop : true,
         handler : {
@@ -58,6 +75,7 @@ $(document).ready(function () {
         save.on('click', saving);
         reset.on('click', function () {
             isUpdate = false;
+            isUpdateModal = false;
             info.text("Create");
             infoname.text("");
             name.val("");
@@ -68,6 +86,176 @@ $(document).ready(function () {
         gettingRoles();
         getting();
     }
+    
+    var getSteps = function(procedure_id, procedure_name){
+        
+        var modalselector = '#'+modal2.id;
+        $(modalselector + ' .modal-dialog').css("width", "80%");
+        $(modalselector + ' .modal-dialog .modal-body').addClass("wrapper wrapper-content gray-bg");      
+        
+        modal2.setTitle(procedure_name + ' Step Detail');
+        
+        var el = '<div class="row">'+
+                    '<div class="col-lg-4">'+
+                        '<div class="ibox float-e-margins">'+
+                            '<div class="ibox-title">'+
+                                '<h5>'+
+                                    '<span id="info-modal">Create Step</span>'+
+                                    '<small id="info-name-modal"></small>'+
+                                '</h5>'+
+                            '</div>'+
+                            '<div class="ibox-content">'+
+                                '<div class="row">'+
+                                    '<div class="col-sm-12">'+
+                                        '<form id="form" role="form">'+
+                                            '<div class="form-group">'+
+                                                '<label>Name</label>'+
+                                                '<input id="name-modal" type="text" placeholder="" class="form-control">'+
+                                            '</div>'+
+                                            '<div class="form-group">'+
+                                                '<label>Description</label>'+
+                                                '<input id="description-modal" type="text" placeholder="" class="form-control">'+
+                                            '</div>'+
+                                            '<div class="form-group">'+
+                                                '<label>Duration</label>'+
+                                                '<input id="duration-modal" type="number" min="1" class="form-control">'+
+                                            '</div>'+
+                                            '<div class="pull-right">'+
+                                                '<button id="reset-modal" type="button" class="btn btn-sm btn-default m-t-n-xs">'+
+                                                    '<strong>Reset</strong>'+
+                                                '</button>'+
+                                                '<button id="save-modal" type="button" class="btn btn-sm btn-success m-t-n-xs">'+
+                                                    '<strong>Save</strong>'+
+                                                '</button>'+
+                                            '</div>'+
+                                        '</form>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class="col-lg-8">'+
+                        '<div class="ibox float-e-margins">'+
+                            '<div class="ibox-title">'+
+                                '<h5>Current Steps </h5>'+
+                            '</div>'+
+                            '<div class="ibox-content">'+
+                                '<div id="table-modal" class="table-responsive">Loading data..'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>';
+        modal2.setBody(el).show();
+        
+        setTimeout(function(){
+            $.ajax({
+                method : "GET",
+                url: '!/getsteps?procedure_id=' + procedure_id,
+                success: function(data, status, xhr){
+                    console.log(data);
+                    var tableModalContainer = $(modalselector + ' .table-responsive');
+                    var saveModal = $(modalselector + ' #save-modal');
+                    var resetModal = $(modalselector + ' #reset-modal');
+                    tableModalContainer.html('<table class="table table-striped table-bordered table-hover">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Delete</th>' +
+                        '<th>Step No</th>' +
+                        '<th>Name</th>' +
+                        '<th>Description</th>' +
+                        '<th>Duration (hour)</th>' +
+                        '<th>Notes</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody></tbody>' +
+                        '</table>');
+                        
+                    saveModal.on('click', savingModal);
+                    resetModal.on('click', function () {
+                        isUpdateModal = false;
+                        $('#info-modal').text("Create");
+                        $('#info-name-modal').text("");
+                        $('#name-modal').val("");
+                        $('#description-modal').val("");
+                        $('#duration-modal').val(1);
+                    });
+                    var rows = data.data;
+                    var cnt = 1;
+                    rows.forEach(function (row) {
+                        var tr = $('<tr>');
+                        var action = $('<td>');
+                        
+                        var actionBtn = $("<button type='button' class='btn btn-xs btn-danger'><i class='fa fa-times'></i></button>");
+                        
+                        row.notes = row.notes || "";
+                        action.append(actionBtn);
+                        
+                        //
+                        tr.data(row);
+                        tr.append(action);
+                        tr.append("<td>" + cnt + "</td>")
+                        tr.append("<td>" + row.name + "</td>")
+                        tr.append("<td>" + row.description + "</td>")
+                        tr.append("<td>" + row.duration + "</td>")
+                        tr.append("<td>" + row.notes + "</td>");
+                        
+                        tr.on("click", function (ev) {
+                            var is = ev.target.nodeName;
+                            var data = $(this).data();
+                            if (["INPUT", "BUTTON", "I"].indexOf(is) == -1) {
+                                $('#info-modal').text("Update ");
+                                modal3.setTitle("Update : " + data.name);
+                                $('#info-name-modal').text("\"" + data.name + "\"");
+                                $('#name-modal').val(data.name);
+                                $('#description-modal').val(data.description);
+                                $('#duration-modal').val(data.duration);
+                                
+                                isUpdateModal = data._id;
+                            }
+                        });
+                        actionBtn.data({
+                            id : row._id,
+                            name : row.name
+                        });
+                        actionBtn.on("click", function () {
+                            modal3
+                            .setTitle("Delete : " + $(this).data('name'))
+                            .setBody("Are you sure want to remove this step?")
+                            .show();
+                            modal3.$buttons.OK.off("click");
+                            modal3.$buttons.OK.on("click", function () {
+                                modal3.hide();
+                                deleteStep();
+                                
+                            });
+                        })
+                        
+                        tableModalContainer.find('tbody').append(tr)
+                        cnt++;
+                    })
+                    
+                    tableModalContainer.find('table').DataTable({
+                        pageLength : 5,
+                        lengthMenu : [5, 10, 25, 50, 75, 100],
+                        order : [[1, "asc"]],
+                        responsive : false,
+                        dom : '<"html5buttons"B>lTfgitp',
+                        buttons : []
+                    });
+                },
+                error: function(xhr, status, err){
+                    twowew({
+                        type : "error",
+                        title : "GET",
+                        message : xhr.responseJSON.message,
+                        time : 0
+                    });    
+                }
+            });
+        },50)
+    }
+    
     var gettingCategory = function () {
         $.ajax({
             method : "GET",
@@ -207,6 +395,12 @@ $(document).ready(function () {
                             });
                         });
                     })
+                    detailBtn.procId = row._id;
+                    detailBtn.procName = row.name;
+                    detailBtn.on('click', function(){
+                        console.log(detailBtn.procId);
+                        getSteps(detailBtn.procId, detailBtn.procName);
+                    });
                     table.find('tbody').append(tr)
                 })
                 table.DataTable({
@@ -271,6 +465,14 @@ $(document).ready(function () {
             save();
         }
     };
+    
+    var savingModal = function(){
+        //TODO
+    }
+    
+    var deleteStep = function(){
+        //TODO
+    }
     //
     init();
 })

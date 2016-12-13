@@ -3,7 +3,7 @@
         <div class="pull-left">
             <h3 style="margin-top: 10px">Hi! Super Admin.</h3>
         </div>
-        <div class="pull-right">
+        <!--<div class="pull-right">
             <select class="form-control" name="account">
                 <option>Monthly&nbsp</option>
                 <option>Yearly&nbsp</option>
@@ -14,7 +14,7 @@
         </div>
         <div class="pull-right">
             <h4 style="float: left; margin-top: 10px; margin-right: 10px">Filters : </h4>
-        </div>
+        </div>-->
     </div>
 </div>
 <div style="border: 1px solid; margin: 15px 0"></div>
@@ -22,12 +22,12 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <span class="label label-success pull-right">Monthly</span>
+                <!--<span class="label label-success pull-right">Monthly</span>-->
                 <h5>Done</h5>
             </div>
             <div class="ibox-content">
-                <h1 class="no-margins">786</h1>
-                <div class="stat-percent font-bold text-success">28.13% <i class="fa fa-bolt"></i></div>
+                <h1 class="no-margins" id="done-count">loading data..</h1>
+                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
                 <small>Total posting</small>
             </div>
         </div>
@@ -35,12 +35,12 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <span class="label label-success pull-right">Monthly</span>
+                <!--<span class="label label-success pull-right">Monthly</span>-->
                 <h5>Progress</h5>
             </div>
             <div class="ibox-content">
-                <h1 class="no-margins">140</h1>
-                <div class="stat-percent font-bold text-success">16.32% <i class="fa fa-bolt"></i></div>
+                <h1 class="no-margins" id="progress-count">loading data..</h1>
+                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
                 <small>Total posting</small>
             </div>
         </div>
@@ -48,12 +48,12 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <span class="label label-success pull-right">Monthly</span>
+                <!--<span class="label label-success pull-right">Monthly</span>-->
                 <h5>Accepted</h5>
             </div>
             <div class="ibox-content">
-                <h1 class="no-margins">923</h1>
-                <div class="stat-percent font-bold text-success">34.71% <i class="fa fa-bolt"></i></div>
+                <h1 class="no-margins" id="accepted-count">loading data..</h1>
+                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
                 <small>Total posting</small>
             </div>
         </div>
@@ -61,12 +61,12 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <span class="label label-success pull-right">Monthly</span>
+                <!--<span class="label label-success pull-right">Monthly</span>-->
                 <h5>Rejected</h5>
             </div>
             <div class="ibox-content">
-                <h1 class="no-margins">234</h1>
-                <div class="stat-percent font-bold text-success">28.34% <i class="fa fa-bolt"></i></div>
+                <h1 class="no-margins" id="rejected-count">loading data..</h1>
+                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
                 <small>Total posting</small>
             </div>
         </div>
@@ -76,26 +76,23 @@
     <div class="col-lg-9">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <h5>Posting location</h5>
+                <h5>Report Locations</h5>
+                <div class="ibox-tools">
+                    <span>Filter by status </span>
+                    <select id="dashboard-maps-filter">
+                        <option>All reports</option>
+                        <option>Done</option>
+                        <option>Progress</option>
+                        <option>Accepted</option>
+                        <option>Rejected</option>
+                    </select>
+                    <a class="collapse-link">
+                        <i class="fa fa-chevron-up"></i>
+                    </a>
+                </div>
             </div>
-            <div class="ibox-content no-padding">
-                <div id="map" style="height: 348px"></div>
-                <div id="legend"></div>
-                <style>
-                    #legend {
-                        font-family: Arial, sans-serif;
-                        background: #fff;
-                        padding: 10px;
-                        margin: 10px;
-                        border: 3px solid #000;
-                    }
-                    #legend h3 {
-                        margin-top: 0;
-                    }
-                    #legend img {
-                        vertical-align: middle;
-                    }
-                </style>
+            <div class="ibox-content">
+                <div id="dashboard-maps" style="height: 300px;"></div>
             </div>
         </div>
     </div>
@@ -105,62 +102,10 @@
                 <h5>Top Entities</h5>
             </div>
             <div class="ibox-content p-sm" style="padding-top: 0px; padding-bottom: 5px">
-                <div class="row">
-                    <div class="col-sm-12 border-bottom" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Sampah</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">74</small>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 border-bottom" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Tiang Rubuh</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">65</small>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 border-bottom" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Banjir</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">55</small>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 border-bottom" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Macet</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">43</small>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 border-bottom" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Premanisme</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">30</small>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 border-bottom" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Pak ogah</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">20</small>
-                        </div>
-                    </div>
+                <div class="row" id="top-entities-list">
+                
                     <div class="col-sm-12" style="padding-top: 10px">
-                        <h4 class="pull-left" style="">Percaloan</h4>
-                        <div class="pull-right text-right">
-                            <span class="bar_dashboard">5,3,9,6,5,9,7,3,5,2,4,7,3,2,7,9,6,4,5,7,3,2,1,0,9,5,6,8,3,2,1</span>
-                            <br />
-                            <small class="font-bold">10</small>
-                        </div>
+                        <h2 class="pull-left" style="">none</h2>
                     </div>
                 </div>
             </div>
@@ -168,7 +113,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-9">
+    <div class="col-lg-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <h5>Key Performance Indicator</h5>
@@ -180,27 +125,38 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3 no-padding text-center">
+    
+    <div class="col-lg-6">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>Report Exposure</h5>
+                <div class="ibox-tools">
+                    <a class="collapse-link">
+                        <i class="fa fa-chevron-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                <div class="flot-chart">
+                    <div class="flot-chart-content" id="flot-bar-chart" ></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div class="col-lg-3 no-padding text-center">
         <div class="ibox-title">
             <h5>Report total</h5>
         </div>
         <div class="ibox-content">
             <canvas id="doughnutChart1" style="margin: 0"></canvas>
         </div>
-    </div>
+    </div>-->
 </div>
 <div class="row">
-    <div class="col-lg-12">
+    <!--<div class="col-lg-12">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <h5>Report Exposure</h5>
-                <!--<div class="pull-right">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-xs btn-white active">Today</button>
-                        <button type="button" class="btn btn-xs btn-white">Monthly</button>
-                        <button type="button" class="btn btn-xs btn-white">Annual</button>
-                    </div>
-                </div>-->
             </div>
             <div class="ibox-content">
                 <div class="row">
@@ -212,7 +168,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>-->
 </div>
 <!-- JQuery Flot -->
 <script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.js"></script>
@@ -239,5 +195,5 @@
 <!-- Sparkline demo data  -->
 <script type="application/javascript" src="/.inspinia/js/demo/sparkline-demo.js"></script>
 <!-- Custom Libs & Controller -->
-<script type="application/javascript" src="/.assets/js/gmap.js"></script>
+
 <script type="application/javascript" src="/superadmin/dashboard/control.js"></script>
