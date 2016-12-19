@@ -82,20 +82,20 @@ module.exports = function (mongoose) {
             createdAt : {type : Date}
         },
         assignTo : {
-            "users._id" :  {
-                ref: 'user',
+            "roles._id" :  {
+                ref: 'role',
                 type: Schema.Types.ObjectId,
                 required: false
             },
-            createdAt : {type : Date}
-        },
-        implementor : {
-            "users._id" :  {
-                ref: 'user',
-                type: Schema.Types.ObjectId,
-                required: false
-            },
-            createdAt : {type : Date, required: false}
+            createdAt : {type : Date},
+            implementor : {
+                "users._id" :  {
+                    ref: 'user',
+                    type: Schema.Types.ObjectId,
+                    required: false
+                },
+                createdAt : {type : Date, required: false}
+            }
         },
         lat : {
             type : String,

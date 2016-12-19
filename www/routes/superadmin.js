@@ -41,7 +41,7 @@ module.exports = function (args, app) {
                 "status" : 0,
                 "message" : e,
             };
-            res.status(500).send(body);
+            res.status(200).send(body);
         }
         var pathname = req._parsedUrl.pathname;
         var org = req.logged.user.organizations;
@@ -59,7 +59,7 @@ module.exports = function (args, app) {
                 },
                 posts: {
                     "organizations._id": orgId,
-                    "assignTo.users._id": {
+                    "assignTo.roles._id": {
                         $exists: false
                     }
                 },
@@ -115,12 +115,14 @@ module.exports = function (args, app) {
                     var procId = req.param('procedure_id');
                     var Procedure = Collection['procedures'];
                     Procedure.findOne({
-                        "_id": procId
+                        "_id": procId,
+                        active: true
                     }).then(function(doc){
                         if(doc!==null){
                             var Step = Collection['steps'];
                             Step.find({
-                                "procedures._id": procId
+                                "procedures._id": procId,
+                                active: true
                             }).then(function(docs){
                                 var body = {
                                     "status" : 1,
@@ -307,6 +309,186 @@ module.exports = function (args, app) {
                     }).catch(function(e){
                         console.log('error at query 1');
                         errfunc(res, e);
+                    });
+                    break;
+                    
+                case "kpi":
+                    var data = {};
+                    var Post = Collection['posts'];
+                    
+                    // look for assigned reports
+                    Post.find({
+                        "organizations._id" : req.logged.user.organizations._id, 
+                        active: true,
+                        finished: false,
+                        "assignTo" : { $exists: true },
+                        "assignTo.implementor" : { $exists: false },
+                        $or:[ {"static": false}, {"static":{ $exists: false }} ],
+                        rejected: { $exists: false }
+                    })
+                    .then(function(docs){
+                        var timeSum = 0;
+                        var highestData = 0;
+                        for(var i=0; i<docs.length; i++){
+                            var time1 = new Date(docs[i].createdAt);
+                            var time2 = new Date(docs[i].assignTo.createdAt);
+                            var interval = time2.getTime() - time1.getTime();
+                            if(highestData < interval){
+                                highestData = interval;
+                            }
+                            timeSum = timeSum + interval;
+                        }
+
+                        var totalData = docs.length !== 0 ? docs.length:1;
+                        var avgInterval = timeSum / totalData;
+                        data.assigned = {
+                            avg: ((avgInterval/1000)/60)/60, // change in hour
+                            high: ((highestData/1000)/60)/60,
+                        };
+                        // look for on progress reports
+                        Post.find({
+                            "organizations._id" : req.logged.user.organizations._id, 
+                            active: true,
+                            finished: false,
+                            "assignTo" : { $exists: true },
+                            "assignTo.implementor" : { $exists: true },
+                            $or:[ {"static": false}, {"static":{ $exists: false }} ],
+                            rejected: { $exists: false }
+                        })
+                        .then(function(docs2){
+                            var timeSum = 0;
+                            var highestData = 0;
+                            for(var i=0; i<docs2.length; i++){
+                                var time1 = new Date(docs2[i].assignTo.createdAt);
+                                var time2 = new Date(docs2[i].assignTo.implementor.createdAt);
+                                var interval = time2.getTime() - time1.getTime();
+                                if(highestData < interval){
+                                    highestData = interval;
+                                }
+                                timeSum = timeSum + interval;
+                            }
+                            var totalData = docs2.length !== 0 ? docs2.length:1;
+                            var avgInterval = timeSum / totalData;
+                            data.onprogress = {
+                                avg: ((avgInterval/1000)/60)/60, // change in hour
+                                high: ((highestData/1000)/60)/60,
+                            };
+                            // look for on finished reports
+                            Post.find({
+                                "organizations._id" : req.logged.user.organizations._id, 
+                                active: true,
+                                finished: true
+                            })
+                            .then(function(docs3){
+                                var timeSum = 0;
+                                var highestData = 0;
+                                for(var i=0; i<docs3.length; i++){
+                                    var time1 = new Date(docs3[i].assignTo.implementor.createdAt);
+                                    var time2 = new Date(docs3[i].statuses[docs3[i].statuses.length-1].createdAt);
+                                    var interval = time2.getTime() - time1.getTime();
+                                    if(highestData < interval){
+                                        highestData = interval;
+                                    }
+                                    timeSum = timeSum + interval;
+                                }
+                                var totalData = docs3.length !== 0 ? docs3.length:1;
+                                var avgInterval = timeSum / totalData;
+                                data.finished = {
+                                    avg: ((avgInterval/1000)/60)/60, // change in hour
+                                    high: ((highestData/1000)/60)/60,
+                                };
+                                finalfunc(res, data);
+                            })
+                            .catch(function(e){
+                                errfunc(res, e);
+                            });
+                        })
+                        .catch(function(e){
+                            errfunc(res, e);
+                        });
+                    })
+                    .catch(function(e){
+                        errfunc(res, e);
+                    });
+                    break;
+                
+                case "monthlyreports":
+                    var currentYear = new Date().getFullYear();
+                    var m = parseInt(req.param('m'));
+                    var Post = Collection['posts'];
+                    var query = {
+                        "organizations._id" : req.logged.user.organizations._id, 
+                        active: true,
+                        "createdAt": {"$gte": new Date(Date.UTC(currentYear, m, 1, 0, 0, 0)), "$lt": new Date(Date.UTC(currentYear, (m+1), 1, 0, 0, 0))}
+                    };
+                    Post.find(query)
+                    .populate({ path: 'users._id', select: 'name' })
+                    .then(function(docs){
+                        var body = {
+                            "status" : 1,
+                            "data" : docs,
+                            "query": query
+                        };
+                        res.status(200).send(body);
+                    }).catch(function(e){
+                        var body = {
+                            "status" : 0,
+                            "message" : e,
+                        };
+                        res.status(500).send(body);
+                    });
+                    break;
+                    
+                case "reportdetail":
+                    var postid = req.param('postid');
+                    var Post = Collection['posts'];
+                    Post.findOne({ 
+                        "organizations._id" : req.logged.user.organizations._id, 
+                        _id: postid,
+                        active: true
+                    })
+                    .populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' })
+                    .populate({ path: 'statuses.steps._id', select: 'procedures._id name' })
+                    .then(function(doc){
+                        if(doc.statuses.length>0){
+                            var Step = Collection['steps'];
+                            Step.find({
+                                "procedures._id": doc.statuses[0].steps._id.procedures._id
+                            })
+                            .populate({ path: 'procedures._id', select: 'name' })
+                            .sort({ stepNumber: 1 })
+                            .then(function(doc2){
+                                var body = {
+                                    "status" : 1,
+                                    "data" : doc,
+                                    "steps" : doc2
+                                };
+                                res.status(200).send(body);   
+                            })
+                            .catch(function(e){
+                                console.log('error at step query');
+                                console.log(e);
+                                var body = {
+                                    "status" : 0,
+                                    "message" : e,
+                                };
+                                res.status(500).send(body);
+                            });
+                        } else {
+                            var body = {
+                                "status" : 1,
+                                "data" : doc,
+                                "steps" : []
+                            };
+                            res.status(200).send(body);   
+                        }
+                    })
+                    .catch(function(e){
+                        var body = {
+                            "status" : 0,
+                            "message" : e,
+                        };
+                        res.status(500).send(body);
                     });
                     break;
                 default:

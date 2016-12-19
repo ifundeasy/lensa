@@ -1,10 +1,13 @@
 $(document).ready(function () {
     var clsColors = ["default", "success", "primary", "warning", "danger"];
     var url = "!/procedures/";
+    var lastStepNumber = 1;
     var isUpdate = false;
     var isUpdateModal = false;
     var save = $('#save');
     var reset = $('#reset');
+    var saveModal = '';
+    var resetModal = '';
     var info = $('#info');
     var infoname = $('#info-name');
     var tcontainer = $('#table');
@@ -14,6 +17,11 @@ $(document).ready(function () {
     var role = $('#role');
     var description = $('#description');
     var notes = $('#notes');
+    var nameModal = '';
+    var descriptionModal = '';
+    var durationModal = '';
+    var procedure_id = '';
+    var procedure_name = '';
     //
     var modal = new Modal({
         title : "Prompt",
@@ -87,7 +95,7 @@ $(document).ready(function () {
         getting();
     }
     
-    var getSteps = function(procedure_id, procedure_name){
+    var getSteps = function(){
         
         var modalselector = '#'+modal2.id;
         $(modalselector + ' .modal-dialog').css("width", "80%");
@@ -155,8 +163,15 @@ $(document).ready(function () {
                 success: function(data, status, xhr){
                     console.log(data);
                     var tableModalContainer = $(modalselector + ' .table-responsive');
-                    var saveModal = $(modalselector + ' #save-modal');
-                    var resetModal = $(modalselector + ' #reset-modal');
+                    saveModal = $(modalselector + ' #save-modal');
+                    resetModal = $(modalselector + ' #reset-modal');
+                    nameModal = $('#name-modal');
+                    descriptionModal = $('#description-modal');
+                    durationModal = $('#duration-modal');
+                    if (typeof tableModalContainer.find('table')[0] !== "undefined") {
+                        // safe to use the function
+                        tableModalContainer.find('table').destroy();
+                    }
                     tableModalContainer.html('<table class="table table-striped table-bordered table-hover">' +
                         '<thead>' +
                         '<tr>' +
@@ -165,12 +180,13 @@ $(document).ready(function () {
                         '<th>Name</th>' +
                         '<th>Description</th>' +
                         '<th>Duration (hour)</th>' +
-                        '<th>Notes</th>' +
                         '</tr>' +
                         '</thead>' +
                         '<tbody></tbody>' +
                         '</table>');
                         
+                    saveModal.off('click');
+                    resetModal.off('click');
                     saveModal.on('click', savingModal);
                     resetModal.on('click', function () {
                         isUpdateModal = false;
@@ -181,12 +197,16 @@ $(document).ready(function () {
                         $('#duration-modal').val(1);
                     });
                     var rows = data.data;
+                    if(rows.length > 0){
+                        lastStepNumber = rows[rows.length-1].stepNumber;
+                    }
                     var cnt = 1;
+                    var tbody =  tableModalContainer.find('tbody');
                     rows.forEach(function (row) {
                         var tr = $('<tr>');
                         var action = $('<td>');
                         
-                        var actionBtn = $("<button type='button' class='btn btn-xs btn-danger'><i class='fa fa-times'></i></button>");
+                        var actionBtn = $("<button type='button' class='btn btn-xs btn-danger rm-step-btn'><i class='fa fa-times'></i></button>");
                         
                         row.notes = row.notes || "";
                         action.append(actionBtn);
@@ -198,7 +218,6 @@ $(document).ready(function () {
                         tr.append("<td>" + row.name + "</td>")
                         tr.append("<td>" + row.description + "</td>")
                         tr.append("<td>" + row.duration + "</td>")
-                        tr.append("<td>" + row.notes + "</td>");
                         
                         tr.on("click", function (ev) {
                             var is = ev.target.nodeName;
@@ -214,10 +233,7 @@ $(document).ready(function () {
                                 isUpdateModal = data._id;
                             }
                         });
-                        actionBtn.data({
-                            id : row._id,
-                            name : row.name
-                        });
+                        actionBtn.stepid = row._id;
                         actionBtn.on("click", function () {
                             modal3
                             .setTitle("Delete : " + $(this).data('name'))
@@ -226,12 +242,12 @@ $(document).ready(function () {
                             modal3.$buttons.OK.off("click");
                             modal3.$buttons.OK.on("click", function () {
                                 modal3.hide();
-                                deleteStep();
+                                deleteStep(actionBtn.stepid);
                                 
                             });
                         })
                         
-                        tableModalContainer.find('tbody').append(tr)
+                        tbody.append(tr)
                         cnt++;
                     })
                     
@@ -240,7 +256,6 @@ $(document).ready(function () {
                         lengthMenu : [5, 10, 25, 50, 75, 100],
                         order : [[1, "asc"]],
                         responsive : false,
-                        dom : '<"html5buttons"B>lTfgitp',
                         buttons : []
                     });
                 },
@@ -256,6 +271,7 @@ $(document).ready(function () {
         },50)
     }
     
+
     var gettingCategory = function () {
         $.ajax({
             method : "GET",
@@ -399,7 +415,9 @@ $(document).ready(function () {
                     detailBtn.procName = row.name;
                     detailBtn.on('click', function(){
                         console.log(detailBtn.procId);
-                        getSteps(detailBtn.procId, detailBtn.procName);
+                        procedure_id = detailBtn.procId;
+                        procedure_name = detailBtn.procName;
+                        getSteps();
                     });
                     table.find('tbody').append(tr)
                 })
@@ -467,11 +485,89 @@ $(document).ready(function () {
     };
     
     var savingModal = function(){
-        //TODO
+        var method = "POST";
+        var url_ = "!/steps/";
+        
+        if (isUpdateModal) {
+            var _data = {
+                "name": nameModal.val(),
+                "description": descriptionModal.val(),
+                "duration": parseInt(durationModal.val())
+            };
+            
+            method = "PUT";
+            url_ = url_ + isUpdateModal;
+            var data = {
+                docs: _data
+            };
+        } else {
+            var data = {
+                name: nameModal.val(),
+                description: descriptionModal.val(),
+                notes: "",
+                "procedures._id": procedure_id,
+                duration: parseInt(durationModal.val()),
+                stepNumber: lastStepNumber+1,
+            };
+        }
+        console.log(data);
+        
+        var save = function () {
+            $.ajax({
+                method: method,
+                dataType: "json",
+                data: data,
+                url: url_
+            }).error(function (jqXHR, is, message) {
+                toastmsg = jqXHR.responseJSON.message;
+                console.error(method, jqXHR.responseJSON);
+            }).success(function (res) {
+                resetModal.click();
+                getSteps();
+            }).complete(function () {
+                twowew({
+                    type: toastmsg ? "error" : "success",
+                    title: method.toUpperCase(),
+                    message: toastmsg || "success",
+                    time: toastmsg ? 0 : 3000
+                });
+                toastmsg = false;
+            });
+        };
+        
+        if (method == "PUT") {
+            modal3.setTitle('Prompt');
+            modal3.setBody("Are you sure want to save these changes?").show();
+            modal3.$buttons.OK.off("click");
+            modal3.$buttons.OK.on("click", function () {
+                $('#save-modal').addClass('disabled');
+                $('#save-modal').html('saving..');
+                modal3.hide();
+                save();
+            });
+        } else {
+            save();
+        }
     }
     
-    var deleteStep = function(){
-        //TODO
+    var deleteStep = function(_id){
+        $.ajax({
+            method: 'delete',
+            url: '!/steps/' + _id,
+            success: function(data, status, xhr){
+                getSteps();
+                twowew({
+                    type: status=="success" ? "success" : "error",
+                    title: "Delete Step",
+                    message: "success" || xhr.responseJSON.message,
+                    time: toastmsg ? 0 : 3000
+                });
+                toastmsg = false;
+            },
+            error: function(xhr, status, err){
+                toastmsg = xhr.responseJSON.message;
+            }
+        })
     }
     //
     init();

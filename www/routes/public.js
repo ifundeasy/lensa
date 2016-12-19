@@ -282,21 +282,50 @@ module.exports = function (args, app) {
                         var Post = Collection['posts'];
                         var start = parseInt(req.body.start);
                         var limit = parseInt(req.body.limit);
-                        Post.find({}).sort('createdAt').skip(start).limit(limit).then(function (docs) {
-                            var objArray = [];
-                            for(x=0; x<docs.length; x++){
-                                var postObject = docs[x].toObject();
-                                if(!postObject.hasOwnProperty('title')){
-                                    postObject.title = 'Untitled Report';
-                                }
-                                objArray.push(postObject);
-                            }
-                            var body = {
-                                "status" : 1,
-                                "data" : objArray,
-                                "nextToken" : newToken
-                            };
-                            res.status(200).send(body);
+                        Post.find({ active: true }).sort('createdAt')
+                        .populate({ path: 'users._id', select: 'name media' })
+                        .populate({ path: 'media._ids', select: 'directory' })
+                        .populate({ path: 'categories._id', select: 'name' })
+                        .populate({ path: 'comments.users._id', select: 'name media' })
+                        .populate({ path: 'statuses.steps._id', select: 'name' })
+                        .populate({ path: 'organizations._id', select: 'name' })
+                        .skip(start).limit(limit).then(function (docs) {
+                            var Media = Collection['media'];
+                            Media.populate(docs, {
+                                path: 'users._id.media._id',
+                                select: 'directory',
+                            }, function(err, _docs){
+                                Media.populate(_docs, {
+                                    path: 'comments.users._id.media._id',
+                                    select: 'directory',
+                                }, function(err, __docs){
+                                    var objArray = [];
+                                    for(x=0; x<_docs.length; x++){
+                                        var postObject = __docs[x].toObject();
+                                        if(!postObject.hasOwnProperty('title')){
+                                            postObject.title = 'Untitled Report';
+                                        }
+                                        
+                                        if(!postObject.hasOwnProperty('media')){
+                                            postObject.media = 'no-media.jpg';
+                                        }
+                                        for(y=0; y<postObject.comments.length; y++){
+                                            if(!postObject.comments[y].users._id.hasOwnProperty('media')){
+                                                postObject.comments[y].users._id.media = 'no-media.jpg';
+                                            }
+                                        }
+                                        objArray.push(postObject);
+                                    }
+                                    var body = {
+                                        "status" : 1,
+                                        "data" : objArray,
+                                        "nextToken" : newToken
+                                    };
+                                    res.status(200).send(body);
+                                });
+                                
+                            });
+                            
                         }).catch(function (e) {
                             var body = {
                                 "status" : 0,
@@ -318,14 +347,33 @@ module.exports = function (args, app) {
                         res.status(500).send(body);
                     } else {
                         var Post = Collection['posts'];
-                        Post.findOne({_id : req.body._id}).then(function (doc) {
+                        Post.findOne({_id : req.body._id})
+                        .populate({ path: 'users._id', select: 'name media' })
+                        .populate({ path: 'media._ids', select: 'directory' })
+                        .populate({ path: 'categories._id', select: 'name' })
+                        .populate({ path: 'comments.users._id', select: 'name media' })
+                        .populate({ path: 'statuses.steps._id', select: 'name' })
+                        .populate({ path: 'organizations._id', select: 'name' })
+                        .then(function (doc) {
                             if (doc !== null) {
-                                var body = {
-                                    "status" : 1,
-                                    "data" : doc,
-                                    "nextToken" : newToken
-                                };
-                                res.status(200).send(body);
+                                var Media = Collection['media'];
+                                Media.populate(doc, {
+                                    path: 'users._id.media._id',
+                                    select: 'directory',
+                                }, function(err, _doc){
+                                    Media.populate(_doc, {
+                                        path: 'comments.users._id.media._id',
+                                        select: 'directory',
+                                    }, function(err, __doc){
+                                        var body = {
+                                            "status" : 1,
+                                            "data" : __doc,
+                                            "nextToken" : newToken
+                                        };
+                                        res.status(200).send(body);
+                                    });
+                                });
+                                
                             } else {
                                 var body = {
                                     "status" : 0,

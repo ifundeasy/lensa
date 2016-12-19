@@ -43,7 +43,7 @@ module.exports = function (args, app) {
         Post.find({ 
             "organizations._id" : req.logged.user.organizations._id, 
             active: true,
-            "assignTo.users._id" : req.logged.user._id
+            "assignTo.roles._id" : req.logged.user.roles._id
         }, 'text lat long').then(function(doc){
             data.allreportltlng = doc;
 
@@ -52,7 +52,7 @@ module.exports = function (args, app) {
                 $and: [
                     { "organizations._id" : req.logged.user.organizations._id },
                     { active: true },
-                    { "assignTo.users._id" : req.logged.user._id },
+                    { "assignTo.roles._id" : req.logged.user.roles._id },
                     { returned: { $exists: true } }
                 ]
             }, 'text lat long').then(function(doc4){
@@ -63,13 +63,13 @@ module.exports = function (args, app) {
                     $and: [
                         { "organizations._id" : req.logged.user.organizations._id },
                         { active: true },
-                        { "assignTo.users._id" : req.logged.user._id },
+                        { "assignTo.roles._id" : req.logged.user.roles._id },
                         { finished: true }
                     ]
                 }, 'text lat long').then(function(doc4){
                     data.finishedreportltlng = doc4;
                     var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
-                    var adminid = mongoose.Types.ObjectId(req.logged.user._id);
+                    var rolesid = mongoose.Types.ObjectId(req.logged.user.roles._id);
                     var currentYear = new Date();
                     // TODO: monthly reports
                     Post.aggregate([
@@ -78,7 +78,7 @@ module.exports = function (args, app) {
                                 $and: [
                                     { active: true },
                                     { "organizations._id" : orgid },
-                                    { "assignTo.users._id" : adminid },
+                                    { "assignTo.roles._id" : rolesid },
                                 ] 
                             } 
                         }, 
@@ -192,7 +192,7 @@ module.exports = function (args, app) {
         var Post = Collection['posts'];
         Post.find({
             "organizations._id" : req.logged.user.organizations._id, 
-            "assignTo.users._id" : req.logged.user._id 
+            "assignTo.roles._id" : req.logged.user.roles._id 
         }, 'title text users._id createdAt media._ids')
         .populate({ path: 'users._id', select: 'name' })
         .then(function(docs){
@@ -216,8 +216,9 @@ module.exports = function (args, app) {
         var Post = Collection['posts'];
         Post.findOne({ 
             "organizations._id" : req.logged.user.organizations._id, 
-            _id: postid, 
-            "assignTo.users._id" : req.logged.user._id
+            _id: postid,
+            active: true,
+            "assignTo.roles._id" : req.logged.user.roles._id
         })
         .populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' })
         .populate({ path: 'statuses.steps._id', select: 'procedures._id name' })
@@ -273,7 +274,7 @@ module.exports = function (args, app) {
         var query = {
             "organizations._id" : req.logged.user.organizations._id, 
             active: true,
-            "assignTo.users._id" : req.logged.user._id,
+            "assignTo.roles._id" : req.logged.user.roles._id,
             "createdAt": {"$gte": new Date(Date.UTC(currentYear, m, 1, 0, 0, 0)), "$lt": new Date(Date.UTC(currentYear, (m+1), 1, 0, 0, 0))}
         };
         Post.find(query)
@@ -302,7 +303,7 @@ module.exports = function (args, app) {
             _id: postid, 
             "organizations._id": req.logged.user.organizations._id, 
             active: true, 
-            "assignTo.users._id" : req.logged.user._id })
+            "assignTo.roles._id" : req.logged.user.roles._id })
         .then(function(doc){
             doc.returned.reason = reason;
             doc.returned.createdAt = new Date();
@@ -339,7 +340,7 @@ module.exports = function (args, app) {
         Post.find({
             "organizations._id": req.logged.user.organizations._id,
             active: true,
-            "assignTo.users._id" : req.logged.user._id
+            "assignTo.roles._id" : req.logged.user.roles._id
         }).populate({ path: 'users._id', select: 'name' }).skip(start).limit(limit)
         .populate({ path: 'media._ids', select: 'type directory' })
         .then(function(docs){
@@ -361,7 +362,7 @@ module.exports = function (args, app) {
     api.get('/reportcountbycategory', function(req, res, next) {
         var datatype = req.param('type');
         var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
-        var adminid = mongoose.Types.ObjectId(req.logged.user._id); 
+        var rolesid = mongoose.Types.ObjectId(req.logged.user.roles._id); 
         var Post = Collection['posts'];
         var queryMatch = {};
         switch (datatype){
@@ -370,7 +371,7 @@ module.exports = function (args, app) {
                     $and: [
                         { active: true },
                         { "organizations._id" : orgid },
-                        { "assignTo.users._id" : adminid }
+                        { "assignTo.roles._id" : rolesid }
                     ] 
                 };
                 break;
@@ -379,7 +380,7 @@ module.exports = function (args, app) {
                     $and: [
                         { "organizations._id" : orgid },
                         { active: true },
-                        { "assignTo.users._id" : adminid },
+                        { "assignTo.roles._id" : rolesid },
                         { returned: { $exists: false } },
                         { rejected: { $exists: false } }
                     ] 
@@ -390,7 +391,7 @@ module.exports = function (args, app) {
                     $and: [
                         { "organizations._id" : orgid },
                         { active: true },
-                        { "assignTo.users._id" : adminid },
+                        { "assignTo.roles._id" : rolesid },
                         { finished: true }
                     ] 
                 };
@@ -434,7 +435,7 @@ module.exports = function (args, app) {
         Post.count({ 
             $and: [
                 { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
-                {active: true, "assignTo.users._id" : req.logged.user._id },
+                {active: true, "assignTo.roles._id" : req.logged.user.roles._id },
                 { "assignTo.implementor" : { $exists: false } },
                 { returned: { $exists: false } },
                 { rejected: { $exists: false } }
@@ -447,7 +448,7 @@ module.exports = function (args, app) {
             Post.find({ 
                 $and: [
                     { "organizations._id" : req.logged.user.organizations._id, "posts._id" : { $exists: false } },
-                    {active: true, "assignTo.users._id" : req.logged.user._id },
+                    {active: true, "assignTo.roles._id" : req.logged.user.roles._id },
                     { "assignTo.implementor" : { $exists: false } },
                     { returned: { $exists: false } },
                     { rejected: { $exists: false } }
@@ -484,7 +485,7 @@ module.exports = function (args, app) {
         Post.findOne({
             "organizations._id" : req.logged.user.organizations._id, 
             active: true,
-            "assignTo.users._id" : req.logged.user._id,
+            "assignTo.roles._id" : req.logged.user.roles._id,
             _id : postid
         }).then(function(doc){
             var Procedure = Collection['procedures'];
