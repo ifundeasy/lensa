@@ -9,7 +9,7 @@ api.get('/groups', function (req, res, next) {
     //
     limit = limit > maxLimit ? maxLimit : limit;
     if (Collection.hasOwnProperty(collname)) {
-        var query = {active : true, name : {"$nin" : ["Root", "Public"]}};
+        var query = {active: true, name: {"$nin": ["Root", "Public"]}};
         var model = Collection[collname];
         var popQuery = "";
         if (model.getPopQuery) {
@@ -22,19 +22,19 @@ api.get('/groups', function (req, res, next) {
         .then(function (length) {
             model
             .find(query)
-            .sort({[sortBy] : direction}).skip(skip).limit(limit)
+            .sort({[sortBy]: direction}).skip(skip).limit(limit)
             .populate(popQuery).lean().then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : {
-                        limit : limit,
-                        page : page,
-                        sort : {[sortBy] : direction},
-                        total : length,
-                        rows : rows
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: {
+                        limit: limit,
+                        page: page,
+                        sort: {[sortBy]: direction},
+                        total: length,
+                        rows: rows
                     }
                 })
             })
@@ -50,7 +50,7 @@ api.get('/organization', function (req, res, next) {
     var id = req.params.id;
     var pop = Number(req.query.pop) || 0;
     if (Collection.hasOwnProperty(collname)) {
-        var query = {_id : org._id, active : true};
+        var query = {_id: org._id, active: true};
         var model = Collection[collname];
         var popQuery = "";
         if (model.getPopQuery) {
@@ -62,10 +62,10 @@ api.get('/organization', function (req, res, next) {
         .then(function (docs) {
             var rows = mongoose.normalize(docs);
             res.send({
-                status : 200,
-                message : httpCode[200],
-                error : null,
-                data : rows
+                status: 200,
+                message: httpCode[200],
+                error: null,
+                data: rows
             })
         })
         .catch(function (e) {
@@ -164,16 +164,16 @@ api.get('/users', function (req, res, next) {
     limit = limit > maxLimit ? maxLimit : limit;
     if (Collection.hasOwnProperty(collname)) {
         Collection["groups"]
-        .find({active : true, name : {"$nin" : ["Root", "Public"]}})
+        .find({active: true, name: {"$nin": ["Root", "Public"]}})
         .lean().then(function (docs) {
             var groups = mongoose.normalize(docs);
             var groupIds = groups.map(function (row) {
                 return row._id
             });
             var query = {
-                active : true,
-                "organizations._id" : org._id,
-                "groups._id" : {$in : groupIds}
+                active: true,
+                "organizations._id": org._id,
+                "groups._id": {$in: groupIds}
             };
             var model = Collection[collname];
             var popQuery = "";
@@ -187,19 +187,19 @@ api.get('/users', function (req, res, next) {
             .then(function (length) {
                 model
                 .find(query)
-                .sort({[sortBy] : direction}).skip(skip).limit(limit)
+                .sort({[sortBy]: direction}).skip(skip).limit(limit)
                 .populate(popQuery).lean().then(function (docs) {
                     var rows = mongoose.normalize(docs);
                     res.send({
-                        status : 200,
-                        message : httpCode[200],
-                        error : null,
-                        data : {
-                            limit : limit,
-                            page : page,
-                            sort : {[sortBy] : direction},
-                            total : length,
-                            rows : rows
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: {
+                            limit: limit,
+                            page: page,
+                            sort: {[sortBy]: direction},
+                            total: length,
+                            rows: rows
                         }
                     })
                 })
@@ -220,16 +220,16 @@ api.get('/users/:id', function (req, res, next) {
     var pop = Number(req.query.pop) || 0;
     if (Collection.hasOwnProperty(collname)) {
         Collection["groups"]
-        .find({active : true, name : {"$nin" : ["Root", "Public"]}})
+        .find({active: true, name: {"$nin": ["Root", "Public"]}})
         .lean().then(function (docs) {
             var groups = mongoose.normalize(docs);
             var groupIds = groups.map(function (row) {
                 return row._id
             });
             var query = {
-                active : true,
-                "organizations._id" : org._id,
-                "groups._id" : {$in : groupIds}
+                active: true,
+                "organizations._id": org._id,
+                "groups._id": {$in: groupIds}
             };
             var model = Collection[collname];
             var popQuery = "";
@@ -242,10 +242,10 @@ api.get('/users/:id', function (req, res, next) {
             .then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : rows
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: rows
                 })
             })
             .catch(function (e) {

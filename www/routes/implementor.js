@@ -17,7 +17,7 @@ module.exports = function (args, app) {
         return o;
     })();
     //
-    page.use(function(req, res, next){
+    page.use(function (req, res, next) {
         var group = req.logged.user.groups.name.toLowerCase().replace(/\s/g, "");
         if (group !== namescape) next(group)
         else next();
@@ -25,10 +25,10 @@ module.exports = function (args, app) {
     page.use('/!', api);
     page.get('/', function (req, res, next) {
         locals.www = {
-            name : global.name,
-            description : global.description,
-            activePage : req.url, //todo : buat apa lih?
-            version : global.version
+            name: global.name,
+            description: global.description,
+            activePage: req.url, //todo : buat apa lih?
+            version: global.version
         };
         res.render(namescape, locals.www);
     });

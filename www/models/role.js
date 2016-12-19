@@ -1,30 +1,30 @@
 module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
     var roleSchema = new Schema({
-        name : {
-            type : String,
-            required : true
+        name: {
+            type: String,
+            required: true
         },
-        description : String,
-        "organizations._id" : {
-            ref : 'organization',
-            type : Schema.Types.ObjectId,
-            required : true
+        description: String,
+        "organizations._id": {
+            ref: 'organization',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        notes : String,
-        createdAt : {type : Date, default : Date.now},
-        active : {type : Boolean, default : true}
+        notes: String,
+        createdAt: {type: Date, default: Date.now},
+        active: {type: Boolean, default: true}
     });
     //
     roleSchema.statics.getPopQuery = function (nestIdx) {
         var populate = {
-            path : "organizations._id",
-            select : "name description",
-            match : {active : true},
-            populate : {
-                path : "media._id",
-                select : "type directory description",
-                match : {active : true}
+            path: "organizations._id",
+            select: "name description",
+            match: {active: true},
+            populate: {
+                path: "media._id",
+                select: "type directory description",
+                match: {active: true}
             }
         };
         return mongoose.nested(populate, nestIdx)

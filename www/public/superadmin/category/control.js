@@ -147,9 +147,9 @@ $(document).ready(function () {
                     });
                     deleteBtn.on("click", function () {
                         modal
-                            .setTitle("Delete : " + $(this).data('name'))
-                            .setBody("Are you sure want to remove these?")
-                            .show();
+                        .setTitle("Delete : " + $(this).data('name'))
+                        .setBody("Are you sure want to remove these?")
+                        .show();
                         modal.$buttons.OK.off("click");
                         modal.$buttons.OK.on("click", function () {
                             modal.hide();

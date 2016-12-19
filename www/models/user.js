@@ -7,85 +7,85 @@ module.exports = function (mongoose, opts) {
     //
     var Schema = mongoose.Schema;
     var userSchema = new Schema({
-        username : {
-            type : String,
-            required : true,
-            lowercase : true,
-            minlength : 4,
-            maxlength : 20,
-            match : [regEx.username, '{VALUE} is not a valid username format!'],
-            unique : true,
-            index : true
+        username: {
+            type: String,
+            required: true,
+            lowercase: true,
+            minlength: 4,
+            maxlength: 20,
+            match: [regEx.username, '{VALUE} is not a valid username format!'],
+            unique: true,
+            index: true
         },
-        "media._id" : { //avatar
-            ref : 'media',
-            type : Schema.Types.ObjectId
+        "media._id": { //avatar
+            ref: 'media',
+            type: Schema.Types.ObjectId
         },
-        name : {
-            first : String,
-            last : String
+        name: {
+            first: String,
+            last: String
         },
-        gender : {
-            type : String,
-            required : true,
-            enum : ['male', 'female'],
-            default : 'male'
+        gender: {
+            type: String,
+            required: true,
+            enum: ['male', 'female'],
+            default: 'male'
         },
-        password : {
-            type : String,
-            minlength : 4,
-            match : [regEx.password, '{VALUE} is not a valid password format!'],
-            required : true
+        password: {
+            type: String,
+            minlength: 4,
+            match: [regEx.password, '{VALUE} is not a valid password format!'],
+            required: true
         },
-        email : {
-            value : {
-                type : String,
-                trim : true,
-                lowercase : true,
-                match : [regEx.email, '{VALUE} is not a valid email address!'],
-                unique : true,
-                required : true
+        email: {
+            value: {
+                type: String,
+                trim: true,
+                lowercase: true,
+                match: [regEx.email, '{VALUE} is not a valid email address!'],
+                unique: true,
+                required: true
             },
-            verifyUrl : String,
-            verified : {type : Boolean, default : false}
+            verifyUrl: String,
+            verified: {type: Boolean, default: false}
         },
-        phone : {
-            value : {
-                type : String,
-                trim : true,
-                lowercase : true,
+        phone: {
+            value: {
+                type: String,
+                trim: true,
+                lowercase: true,
                 //v = v.replace(/[\(\)\+\-\s]/g, "");
-                match : [regEx.phone, '{VALUE} is not a valid phone number!'],
-                unique : false,
-                required : false
+                match: [regEx.phone, '{VALUE} is not a valid phone number!'],
+                unique: false,
+                required: false
             },
-            verifyCode : String,
-            verified : {type : Boolean, default : false}
+            verifyCode: String,
+            verified: {type: Boolean, default: false}
         },
-        address : String,
-        country : String,
-        state : String,
-        zipcode : String,
-        birthDate : {type : Date, default : Date.now},
-        "groups._id" : {
-            ref : 'group',
-            type : Schema.Types.ObjectId,
-            required : true
+        address: String,
+        country: String,
+        state: String,
+        zipcode: String,
+        birthDate: {type: Date, default: Date.now},
+        "groups._id": {
+            ref: 'group',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        "organizations._id" : {
-            ref : 'organization',
-            type : Schema.Types.ObjectId,
-            required : true
+        "organizations._id": {
+            ref: 'organization',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        "roles._id" : {
-            ref : 'role',
-            type : Schema.Types.ObjectId
+        "roles._id": {
+            ref: 'role',
+            type: Schema.Types.ObjectId
         },
-        restricted : {type : Boolean, default : false},
-        notes : String,
-        createdAt : {type : Date, default : Date.now},
-        token: {type : String, required: false},
-        active : {type : Boolean, default : true}
+        restricted: {type: Boolean, default: false},
+        notes: String,
+        createdAt: {type: Date, default: Date.now},
+        token: {type: String, required: false},
+        active: {type: Boolean, default: true}
     });
     //
     userSchema.virtual('name.full').get(function () {
@@ -125,7 +125,7 @@ module.exports = function (mongoose, opts) {
         }
         this.findOne(this._conditions).lean().then(function (docs) {
             older = (docs);
-            verifyPwd(function(){
+            verifyPwd(function () {
                 verifyEmail(function () {
                     verifyPhone(next);
                 })
@@ -136,7 +136,7 @@ module.exports = function (mongoose, opts) {
     });
     userSchema.pre('save', function (next) {
         var user = this;
-        if(user.phone.value) user.phone.value = user.phone.value.replace(/[\(\)\+\-\s]/g, "");
+        if (user.phone.value) user.phone.value = user.phone.value.replace(/[\(\)\+\-\s]/g, "");
         if (!user.isModified('password')) return next();
         // generate a salt
         bcrypt.genSalt(factory, function (err, salt) {
@@ -147,8 +147,8 @@ module.exports = function (mongoose, opts) {
                 if (err) return next(err);
                 // override the cleartext password with the hashed one
                 user.password = hash;
-                if(user.phone.value) user.phone.verifyCode = getCode4();
-                if(user.phone.value) user.phone.verified = false;
+                if (user.phone.value) user.phone.verifyCode = getCode4();
+                if (user.phone.value) user.phone.verified = false;
                 user.email.verified = false;
                 bcrypt.hash(url, salt, function (err, mailhash) {
                     if (err) return next(err);
@@ -168,37 +168,37 @@ module.exports = function (mongoose, opts) {
     userSchema.statics.getPopQuery = function (nestIdx) {
         var populate = [
             {
-                path : "media._ids",
-                select : "type directory description",
-                match : {active : true}
+                path: "media._ids",
+                select: "type directory description",
+                match: {active: true}
             },
             {
-                path : "groups._id",
-                select : "name routes",
-                match : {active : true}
+                path: "groups._id",
+                select: "name routes",
+                match: {active: true}
             },
             {
-                path : "organizations._id",
-                select : "name description",
-                match : {active : true},
-                populate : {
-                    path : "media._id",
-                    select : "type directory description",
-                    match : {active : true}
+                path: "organizations._id",
+                select: "name description",
+                match: {active: true},
+                populate: {
+                    path: "media._id",
+                    select: "type directory description",
+                    match: {active: true}
                 }
             },
             {
-                path : "roles._id",
-                select : "name description organizations._id",
-                match : {active : true},
-                populate : {
-                    path : "organizations._id",
-                    select : "name description",
-                    match : {active : true},
-                    populate : {
-                        path : "media._id",
-                        select : "type directory description",
-                        match : {active : true}
+                path: "roles._id",
+                select: "name description organizations._id",
+                match: {active: true},
+                populate: {
+                    path: "organizations._id",
+                    select: "name description",
+                    match: {active: true},
+                    populate: {
+                        path: "media._id",
+                        select: "type directory description",
+                        match: {active: true}
                     }
                 }
             }

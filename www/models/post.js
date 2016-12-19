@@ -12,253 +12,253 @@ var options = {
 module.exports = function (mongoose) {
     var Schema = mongoose.Schema;
     var commentSchema = new Schema({
-        text : String,
-        "users._id" : {
-            ref : 'user',
-            type : Schema.Types.ObjectId,
-            required : true
+        text: String,
+        "users._id": {
+            ref: 'user',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        "media._ids" : [
+        "media._ids": [
             {
-                ref : 'media',
-                type : Schema.Types.ObjectId
+                ref: 'media',
+                type: Schema.Types.ObjectId
             }
         ],
-        createdAt : {type : Date, default : Date.now},
-        active : {type : Boolean, default : true}
+        createdAt: {type: Date, default: Date.now},
+        active: {type: Boolean, default: true}
     });
     var statusSchema = new Schema({
-        "users._id" : {
-            ref : 'user',
-            type : Schema.Types.ObjectId,
-            required : true
+        "users._id": {
+            ref: 'user',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        "steps._id" : {
-            ref : 'step',
-            type : Schema.Types.ObjectId,
-            required : true
+        "steps._id": {
+            ref: 'step',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        createdAt : {type : Date, default : Date.now},
-        active : {type : Boolean, default : true}
+        createdAt: {type: Date, default: Date.now},
+        active: {type: Boolean, default: true}
     });
     var postSchema = new Schema({
-        title : {
-            type : String,
-            required : false
+        title: {
+            type: String,
+            required: false
         },
-        text : {
-            type : String,
-            required : true
+        text: {
+            type: String,
+            required: true
         },
-        "categories._id" : {
-            ref : 'category',
-            type : Schema.Types.ObjectId,
-            required : false
+        "categories._id": {
+            ref: 'category',
+            type: Schema.Types.ObjectId,
+            required: false
         },
-        "users._id" : {
-            ref : 'user',
-            type : Schema.Types.ObjectId,
-            required : true
+        "users._id": {
+            ref: 'user',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        "organizations._id" : {
-            ref : 'organization',
-            type : Schema.Types.ObjectId,
-            required : true
+        "organizations._id": {
+            ref: 'organization',
+            type: Schema.Types.ObjectId,
+            required: true
         },
-        "media._ids" : [
+        "media._ids": [
             {
-                ref : 'media',
-                type : Schema.Types.ObjectId
+                ref: 'media',
+                type: Schema.Types.ObjectId
             }
         ],
-        statuses : [statusSchema],
-        comments : [commentSchema],
+        statuses: [statusSchema],
+        comments: [commentSchema],
         assignFrom: {
-            "users._id" :  {
+            "users._id": {
                 ref: 'user',
                 type: Schema.Types.ObjectId,
                 required: false
             },
-            createdAt : {type : Date}
+            createdAt: {type: Date}
         },
-        assignTo : {
-            "roles._id" :  {
+        assignTo: {
+            "roles._id": {
                 ref: 'role',
                 type: Schema.Types.ObjectId,
                 required: false
             },
-            createdAt : {type : Date},
-            implementor : {
-                "users._id" :  {
+            createdAt: {type: Date},
+            implementor: {
+                "users._id": {
                     ref: 'user',
                     type: Schema.Types.ObjectId,
                     required: false
                 },
-                createdAt : {type : Date, required: false}
+                createdAt: {type: Date, required: false}
             }
         },
-        lat : {
-            type : String,
-            required : false
+        lat: {
+            type: String,
+            required: false
         },
-        long : {
-            type : String,
-            required : false
+        long: {
+            type: String,
+            required: false
         },
-        posts : {
+        posts: {
             _id: {
-                ref : 'post',
-                type : Schema.Types.ObjectId
+                ref: 'post',
+                type: Schema.Types.ObjectId
             },
-            "users._id" :  {
+            "users._id": {
                 ref: 'user',
                 type: Schema.Types.ObjectId,
                 required: false
             },
-            createdAt : {type : Date}
+            createdAt: {type: Date}
         },
-        createdAt : {type : Date, default : Date.now},
+        createdAt: {type: Date, default: Date.now},
         returned: {
-            reason : {type : String, required : false },
-            createdAt : {type : Date, required : false }
+            reason: {type: String, required: false},
+            createdAt: {type: Date, required: false}
         },
-        notes: { type: String, required: false },
+        notes: {type: String, required: false},
         rejected: {
-            "users._id" :  {
+            "users._id": {
                 ref: 'user',
                 type: Schema.Types.ObjectId
             },
-            reason : {type : String, required : false },
-            createdAt : {type : Date, required : false }
+            reason: {type: String, required: false},
+            createdAt: {type: Date, required: false}
         },
         finished: {type: Boolean, default: false},
         static: {type: Boolean, default: false},
-        active : {type : Boolean, default : true}
+        active: {type: Boolean, default: true}
     });
     //
     postSchema.statics.getPopQuery = function (nestIdx) {
         var populate = [
             {
-                path : "media._ids",
-                select : "type directory description",
-                match : {active : true}
+                path: "media._ids",
+                select: "type directory description",
+                match: {active: true}
             },
             {
-                path : "users._id",
-                select : "name username",
-                match : {active : true},
-                populate : [
+                path: "users._id",
+                select: "name username",
+                match: {active: true},
+                populate: [
                     {
-                        path : "media._ids",
-                        select : "type directory description",
-                        match : {active : true}
+                        path: "media._ids",
+                        select: "type directory description",
+                        match: {active: true}
                     },
                     {
-                        path : "groups._id",
-                        select : "name routes",
-                        match : {active : true}
+                        path: "groups._id",
+                        select: "name routes",
+                        match: {active: true}
                     },
                     {
-                        path : "organizations._id",
-                        select : "name description",
-                        match : {active : true},
-                        populate : {
-                            path : "media._id",
-                            select : "type directory description",
-                            match : {active : true}
+                        path: "organizations._id",
+                        select: "name description",
+                        match: {active: true},
+                        populate: {
+                            path: "media._id",
+                            select: "type directory description",
+                            match: {active: true}
                         }
                     },
                     {
-                        path : "roles._id",
-                        select : "name description organizations._id",
-                        match : {active : true},
-                        populate : {
-                            path : "organizations._id",
-                            select : "name description",
-                            match : {active : true},
-                            populate : {
-                                path : "media._id",
-                                select : "type directory description",
-                                match : {active : true}
+                        path: "roles._id",
+                        select: "name description organizations._id",
+                        match: {active: true},
+                        populate: {
+                            path: "organizations._id",
+                            select: "name description",
+                            match: {active: true},
+                            populate: {
+                                path: "media._id",
+                                select: "type directory description",
+                                match: {active: true}
                             }
                         }
                     }
                 ]
             },
             {
-                path : "comments.users._id",
-                select : "name username",
-                match : {active : true},
-                populate : [
+                path: "comments.users._id",
+                select: "name username",
+                match: {active: true},
+                populate: [
                     {
-                        path : "groups._id",
-                        select : "name",
-                        match : {active : true}
+                        path: "groups._id",
+                        select: "name",
+                        match: {active: true}
                     },
                     {
-                        path : "organizations._id",
-                        select : "name description",
-                        match : {active : true},
-                        populate : {
-                            path : "media._id",
-                            select : "type directory description",
-                            match : {active : true}
+                        path: "organizations._id",
+                        select: "name description",
+                        match: {active: true},
+                        populate: {
+                            path: "media._id",
+                            select: "type directory description",
+                            match: {active: true}
                         }
                     },
                     {
-                        path : "roles._id",
-                        select : "name description organizations._id",
-                        match : {active : true},
-                        populate : {
-                            path : "organizations._id",
-                            select : "name description",
-                            match : {active : true},
-                            populate : {
-                                path : "media._id",
-                                select : "type directory description",
-                                match : {active : true}
+                        path: "roles._id",
+                        select: "name description organizations._id",
+                        match: {active: true},
+                        populate: {
+                            path: "organizations._id",
+                            select: "name description",
+                            match: {active: true},
+                            populate: {
+                                path: "media._id",
+                                select: "type directory description",
+                                match: {active: true}
                             }
                         }
                     }
                 ]
             },
             {
-                path : "comments.media._ids",
-                select : "type directory description",
-                match : {active : true}
+                path: "comments.media._ids",
+                select: "type directory description",
+                match: {active: true}
             },
             {
-                path : "statuses.users._id",
-                select : "name username",
-                match : {active : true},
-                populate : [
+                path: "statuses.users._id",
+                select: "name username",
+                match: {active: true},
+                populate: [
                     {
-                        path : "groups._id",
-                        select : "name",
-                        match : {active : true}
+                        path: "groups._id",
+                        select: "name",
+                        match: {active: true}
                     },
                     {
-                        path : "organizations._id",
-                        select : "name description",
-                        match : {active : true},
-                        populate : {
-                            path : "media._id",
-                            select : "type directory description",
-                            match : {active : true}
+                        path: "organizations._id",
+                        select: "name description",
+                        match: {active: true},
+                        populate: {
+                            path: "media._id",
+                            select: "type directory description",
+                            match: {active: true}
                         }
                     },
                     {
-                        path : "roles._id",
-                        select : "name description organizations._id",
-                        match : {active : true},
-                        populate : {
-                            path : "organizations._id",
-                            select : "name description",
-                            match : {active : true},
-                            populate : {
-                                path : "media._id",
-                                select : "type directory description",
-                                match : {active : true}
+                        path: "roles._id",
+                        select: "name description organizations._id",
+                        match: {active: true},
+                        populate: {
+                            path: "organizations._id",
+                            select: "name description",
+                            match: {active: true},
+                            populate: {
+                                path: "media._id",
+                                select: "type directory description",
+                                match: {active: true}
                             }
                         }
                     }
@@ -283,25 +283,25 @@ module.exports = function (mongoose) {
                 //        }
                 //    }
                 //}
-                path : "statuses.steps._id",
-                select : "name  description  stepNumber duration procedures._id",
-                match : {active : true},
-                populate : {
-                    path : "procedures._id",
-                    select : "name description categories._id",
-                    match : {active : true},
-                    populate : {
-                        path : "categories._id",
-                        select : "name description organizations._id",
-                        match : {active : true},
-                        populate : {
-                            path : "organizations._id",
-                            select : "name description",
-                            match : {active : true},
-                            populate : {
-                                path : "media._id",
-                                select : "type directory description",
-                                match : {active : true}
+                path: "statuses.steps._id",
+                select: "name  description  stepNumber duration procedures._id",
+                match: {active: true},
+                populate: {
+                    path: "procedures._id",
+                    select: "name description categories._id",
+                    match: {active: true},
+                    populate: {
+                        path: "categories._id",
+                        select: "name description organizations._id",
+                        match: {active: true},
+                        populate: {
+                            path: "organizations._id",
+                            select: "name description",
+                            match: {active: true},
+                            populate: {
+                                path: "media._id",
+                                select: "type directory description",
+                                match: {active: true}
                             }
                         }
                     }
@@ -317,32 +317,32 @@ module.exports = function (mongoose) {
 
         // proses mencari organisasi yang tepat untuk laporan yang akan disimpan, based on location data
         var geocoder = NodeGeocoder(options);
-        geocoder.reverse({lat:parseFloat(post.lat), lon:parseFloat(post.long)})
-        .then(function(res) {
+        geocoder.reverse({lat: parseFloat(post.lat), lon: parseFloat(post.long)})
+        .then(function (res) {
             console.log("succeded reverse geocoding");
             var Organization = mongoose.models.organization;
             var g = res[0];
             console.log(g);
             Organization.find({
                 $or: [
-                    { $and: [{"location.administrativeAreaLevel": 1}, {"location.administrativeName": g.administrativeLevels.level1long}] },
-                    { $and: [{"location.administrativeAreaLevel": 2}, {"location.administrativeName": g.administrativeLevels.level2long}] },
-                    { $and: [{"location.administrativeAreaLevel": 3}, {"location.administrativeName": g.administrativeLevels.level3long}] },
-                    { $and: [{"location.administrativeAreaLevel": 4}, {"location.administrativeName": g.administrativeLevels.level4long}] }
+                    {$and: [{"location.administrativeAreaLevel": 1}, {"location.administrativeName": g.administrativeLevels.level1long}]},
+                    {$and: [{"location.administrativeAreaLevel": 2}, {"location.administrativeName": g.administrativeLevels.level2long}]},
+                    {$and: [{"location.administrativeAreaLevel": 3}, {"location.administrativeName": g.administrativeLevels.level3long}]},
+                    {$and: [{"location.administrativeAreaLevel": 4}, {"location.administrativeName": g.administrativeLevels.level4long}]}
                 ]
-            }).then(function(docs){
+            }).then(function (docs) {
                 console.log(docs);
-                if(docs.length != 0){
+                if (docs.length != 0) {
                     console.log("organization : " + docs[0].name);
                     post.organizations._id = docs[0]._id;
                 }
                 next();
-            }).catch(function(e){
+            }).catch(function (e) {
                 console.log("failed query organization");
                 next(e);
             });
         })
-        .catch(function(err) {
+        .catch(function (err) {
             next(err);
         });
     });

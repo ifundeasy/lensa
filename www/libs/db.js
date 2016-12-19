@@ -7,9 +7,9 @@ Db.prototype.open = function (config) {
     var me = this;
     var url = me.url;
     var o = {
-        db : {native_parser : true},
-        server : {poolSize : 5},
-        promiseLibrary : require('q')
+        db: {native_parser: true},
+        server: {poolSize: 5},
+        promiseLibrary: require('q')
     };
     if (config.name) url += config.name;
     if (config.username) o.user = config.username;

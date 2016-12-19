@@ -1,51 +1,58 @@
 <div class="row">
-	<div class="col-md-3 text-center">
-		<div class="ibox float-e-margins">
-            <a detailbtn style="color:inherit;"><div class="ibox-title">
-                <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
-                <div class="label label-success" style="font-size: inherit;" datatype="1">Total Report In</div>
-            </div></a>
-            <div class="ibox-content">
-            	<h1><i class="fa fa-bars fa-5 pull-left"></i><span id="totalcount">loading..</span></h1>
-            </div>
-        </div>
-	</div>
-	<div class="col-md-3 text-center">
-		<div class="ibox float-e-margins">
-            <a detailbtn style="color:inherit;"><div class="ibox-title">
-                <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
-                <div class="label label-warning" style="font-size: smaller;background-color: #81c823" datatype="2">Report On Progress</div>
-            </div></a>
-            <div class="ibox-content">
-            	<h1><i class="fa fa-clock-o fa-5 pull-left"></i><span id="assignedcount">loading..</span></h1>
-            </div>
-        </div>
-	</div>
-	<div class="col-md-3 text-center">
-		<div class="ibox float-e-margins">
-            <a detailbtn style="color:inherit;"><div class="ibox-title">
-                <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
-                <div class="label label-info" style="font-size: inherit;" datatype="3">Report Returned</div>
-            </div></a>
-            <div class="ibox-content">
-            	<h1><i class="fa fa-reply fa-5 pull-left"></i><span id="returnedcount">loading..</span></h1>
-            </div>
-        </div>
-	</div>
-
-    <div class="col-md-3 text-center" >
+    <div class="col-md-3 text-center">
         <div class="ibox float-e-margins">
-            <a detailbtn style="color:inherit;"><div class="ibox-title">
-                <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
-                <div class="label label-info" style="font-size: inherit;background-color: #c82349;" datatype="4">Report Rejected</div>
-            </div></a>
+            <a detailbtn style="color:inherit;">
+                <div class="ibox-title">
+                    <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
+                    <div class="label label-success" style="font-size: inherit;" datatype="1">Total Report In</div>
+                </div>
+            </a>
+            <div class="ibox-content">
+                <h1><i class="fa fa-bars fa-5 pull-left"></i><span id="totalcount">loading..</span></h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 text-center">
+        <div class="ibox float-e-margins">
+            <a detailbtn style="color:inherit;">
+                <div class="ibox-title">
+                    <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
+                    <div class="label label-warning" style="font-size: smaller;background-color: #81c823" datatype="2">Report On Progress</div>
+                </div>
+            </a>
+            <div class="ibox-content">
+                <h1><i class="fa fa-clock-o fa-5 pull-left"></i><span id="assignedcount">loading..</span></h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 text-center">
+        <div class="ibox float-e-margins">
+            <a detailbtn style="color:inherit;">
+                <div class="ibox-title">
+                    <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
+                    <div class="label label-info" style="font-size: inherit;" datatype="3">Report Returned</div>
+                </div>
+            </a>
+            <div class="ibox-content">
+                <h1><i class="fa fa-reply fa-5 pull-left"></i><span id="returnedcount">loading..</span></h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 text-center">
+        <div class="ibox float-e-margins">
+            <a detailbtn style="color:inherit;">
+                <div class="ibox-title">
+                    <span class="pull-right"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
+                    <div class="label label-info" style="font-size: inherit;background-color: #c82349;" datatype="4">Report Rejected</div>
+                </div>
+            </a>
             <div class="ibox-content">
                 <h1><i class="fa fa-close fa-5 pull-left"></i><span id="rejectedcount">loading..</span></h1>
             </div>
         </div>
     </div>
 </div>
-
 
 <div class="row">
     <div class="col-md-7">
@@ -82,7 +89,7 @@
             </div>
             <div class="ibox-content">
                 <div class="flot-chart">
-                    <div class="flot-chart-content" id="flot-bar-chart" ></div>
+                    <div class="flot-chart-content" id="flot-bar-chart"></div>
                 </div>
             </div>
         </div>

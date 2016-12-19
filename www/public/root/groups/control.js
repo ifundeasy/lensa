@@ -14,34 +14,34 @@ $(document).ready(function () {
     var notes = $('#notes');
     //
     var modal = new Modal({
-        title : "Prompt",
-        backdrop : true,
-        handler : {
-            OK : {class : "btn-success"},
-            Cancel : {class : "btn-default", dismiss : true}
+        title: "Prompt",
+        backdrop: true,
+        handler: {
+            OK: {class: "btn-success"},
+            Cancel: {class: "btn-default", dismiss: true}
         }
     });
     var rolesPopUp = new Modal({
-        backdrop : true,
-        body : $(
-            ["GET", "POST", "PUT", "DELETE"].map(function(m, i, all){
+        backdrop: true,
+        body: $(
+            ["GET", "POST", "PUT", "DELETE"].map(function (m, i, all) {
                 return (
                     '<div class="row">' +
-                        '<label class="col-sm-2 control-label b-r">'+ m +'</label>' +
-                        '<div class="col-sm-10">' +
-                            '<div class="col-sm-3">' +
-                                '<label><input type="radio" value="block" name="'+ m +'-routes"> Block</label>' +
-                            '</div>' +
-                            '<div class="col-sm-3">' +
-                                '<label><input type="radio" value="self" name="'+ m +'-routes"> Self</label>' +
-                            '</div>' +
-                            '<div class="col-sm-3">' +
-                                '<label><input type="radio" value="restrict" name="'+ m +'-routes"> Restrict</label>' +
-                            '</div>' +
-                            '<div class="col-sm-3">' +
-                                '<label><input type="radio" value="all" name="'+ m +'-routes"> All</label>' +
-                            '</div>' +
-                        '</div>' +
+                    '<label class="col-sm-2 control-label b-r">' + m + '</label>' +
+                    '<div class="col-sm-10">' +
+                    '<div class="col-sm-3">' +
+                    '<label><input type="radio" value="block" name="' + m + '-routes"> Block</label>' +
+                    '</div>' +
+                    '<div class="col-sm-3">' +
+                    '<label><input type="radio" value="self" name="' + m + '-routes"> Self</label>' +
+                    '</div>' +
+                    '<div class="col-sm-3">' +
+                    '<label><input type="radio" value="restrict" name="' + m + '-routes"> Restrict</label>' +
+                    '</div>' +
+                    '<div class="col-sm-3">' +
+                    '<label><input type="radio" value="all" name="' + m + '-routes"> All</label>' +
+                    '</div>' +
+                    '</div>' +
                     '</div>' +
                     (i < all.length - 1 ? '<div class="hr-line-dashed" style="margin:10px 0px;"></div>' : '')
                 )
@@ -56,9 +56,9 @@ $(document).ready(function () {
             '</select>'
             */
         ),
-        handler : {
-            Save : {class : "btn-success"},
-            Cancel : {class : "btn-default", dismiss : true}
+        handler: {
+            Save: {class: "btn-success"},
+            Cancel: {class: "btn-default", dismiss: true}
         }
     });
     var toastmsg = false;
@@ -67,7 +67,7 @@ $(document).ready(function () {
         toastr.options = {
             closeButton: true,
             progressBar: true,
-            newestOnTop : true,
+            newestOnTop: true,
             showMethod: 'slideDown',
             timeOut: obj.time || 10000
         };
@@ -92,7 +92,7 @@ $(document).ready(function () {
         return table;
     }
     var init = function () {
-        var chosenConfig = {no_results_text : "Oops, nothing found!", width : "100%"};
+        var chosenConfig = {no_results_text: "Oops, nothing found!", width: "100%"};
         for (var m in App.models) {
             var model = App.models[m]
             routes.append('<option value="' + m + '">' + model + '</option>');
@@ -115,21 +115,21 @@ $(document).ready(function () {
         var putEmpty = function () {
             table.find('tbody').append(
                 '<tr role="row" class="text-center">' +
-                '<td colspan="'+ table.find('thead tr th').length +'">Empty</td>' +
+                '<td colspan="' + table.find('thead tr th').length + '">Empty</td>' +
                 '</tr>'
             );
         };
         $.ajax({
-            method : "GET",
-            dataType : "json",
-            url : url + "?" + $.param({limit : 1000})
+            method: "GET",
+            dataType: "json",
+            url: url + "?" + $.param({limit: 1000})
         }).error(function (jqXHR, is, message) {
             putEmpty();
             twowew({
-                type : "error",
-                title : "GET",
-                message : jqXHR.responseJSON.message,
-                time : 0
+                type: "error",
+                title: "GET",
+                message: jqXHR.responseJSON.message,
+                time: 0
             });
             console.error("GET", jqXHR.responseJSON);
         }).success(function (res) {
@@ -146,61 +146,61 @@ $(document).ready(function () {
                     tr.append("<td>" + row.name + "</td>")
                     if (row.routes && typeof row.routes == "object") {
                         var data =
-                        row.routes.forEach(function (route) {
-                            route.methods = route.methods || [];
-                            var cls = clsColors[route.methods.length];
-                            var btn = $("<input type='button' class='btn btn-xs btn-outline btn-primary' style='margin-right: 3px'>")
-                            btn.val(App.models[route.model])
-                            btn.data(route);
-                            btn.on("click", function () {
-                                //var selections = rolesPopUp.$body.find("select");
-                                var data = $(this).data();
-                                ["GET", "POST", "PUT", "DELETE"].forEach(function(m){
-                                    $('[name="'+ m +'-routes"][value="' + (data[m] || "block") + '"]').prop('checked', true);
-                                });
-                                //selections.val(data.methods).trigger("chosen:updated");
-                                rolesPopUp.$buttons.Save.off("click");
-                                rolesPopUp.$buttons.Save.on("click", function () {
-                                    rolesPopUp.hide();
-                                    $.ajax({
-                                        method : "PUT",
-                                        dataType : "json",
-                                        data : {
-                                            nested : {
-                                                key : "routes._id",
-                                                value : data._id
-                                            },
-                                            docs : {
-                                                model : data.model,
-                                                GET : $('[name="GET-routes"]:checked').val(),
-                                                POST : $('[name="POST-routes"]:checked').val(),
-                                                PUT : $('[name="PUT-routes"]:checked').val(),
-                                                DELETE : $('[name="DELETE-routes"]:checked').val()
-                                                //methods : selections.val()
-                                            }
-                                        },
-                                        url : url + tr.data('_id')
-                                    }).error(function (jqXHR, is, message) {
-                                        toastmsg = jqXHR.responseJSON.message;
-                                        console.error("PUT", jqXHR.responseJSON)
-                                    }).success(function (res) {
-                                        reset.click();
-                                        getting();
-                                    }).complete(function(){
-                                        twowew({
-                                            type : toastmsg ? "error" : "success",
-                                            title : "PUT",
-                                            message : toastmsg || "success",
-                                            time : toastmsg ? 0 : 3000
-                                        })
-                                        toastmsg = false;
+                            row.routes.forEach(function (route) {
+                                route.methods = route.methods || [];
+                                var cls = clsColors[route.methods.length];
+                                var btn = $("<input type='button' class='btn btn-xs btn-outline btn-primary' style='margin-right: 3px'>")
+                                btn.val(App.models[route.model])
+                                btn.data(route);
+                                btn.on("click", function () {
+                                    //var selections = rolesPopUp.$body.find("select");
+                                    var data = $(this).data();
+                                    ["GET", "POST", "PUT", "DELETE"].forEach(function (m) {
+                                        $('[name="' + m + '-routes"][value="' + (data[m] || "block") + '"]').prop('checked', true);
                                     });
+                                    //selections.val(data.methods).trigger("chosen:updated");
+                                    rolesPopUp.$buttons.Save.off("click");
+                                    rolesPopUp.$buttons.Save.on("click", function () {
+                                        rolesPopUp.hide();
+                                        $.ajax({
+                                            method: "PUT",
+                                            dataType: "json",
+                                            data: {
+                                                nested: {
+                                                    key: "routes._id",
+                                                    value: data._id
+                                                },
+                                                docs: {
+                                                    model: data.model,
+                                                    GET: $('[name="GET-routes"]:checked').val(),
+                                                    POST: $('[name="POST-routes"]:checked').val(),
+                                                    PUT: $('[name="PUT-routes"]:checked').val(),
+                                                    DELETE: $('[name="DELETE-routes"]:checked').val()
+                                                    //methods : selections.val()
+                                                }
+                                            },
+                                            url: url + tr.data('_id')
+                                        }).error(function (jqXHR, is, message) {
+                                            toastmsg = jqXHR.responseJSON.message;
+                                            console.error("PUT", jqXHR.responseJSON)
+                                        }).success(function (res) {
+                                            reset.click();
+                                            getting();
+                                        }).complete(function () {
+                                            twowew({
+                                                type: toastmsg ? "error" : "success",
+                                                title: "PUT",
+                                                message: toastmsg || "success",
+                                                time: toastmsg ? 0 : 3000
+                                            })
+                                            toastmsg = false;
+                                        });
+                                    });
+                                    rolesPopUp.setTitle(tr.data("name") + " : " + App.models[data.model] + " role");
+                                    rolesPopUp.show();
                                 });
-                                rolesPopUp.setTitle(tr.data("name") + " : " + App.models[data.model] + " role");
-                                rolesPopUp.show();
-                            });
-                            tdRoutes.append(btn);
-                        })
+                                tdRoutes.append(btn);
+                            })
                     }
                     tr.append(tdRoutes)
                     tr.append("<td>" + row.notes + "</td>")
@@ -223,8 +223,8 @@ $(document).ready(function () {
                         }
                     });
                     deleteBtn.data({
-                        id : row._id,
-                        name : row.name
+                        id: row._id,
+                        name: row.name
                     });
                     deleteBtn.on("click", function () {
                         modal
@@ -235,21 +235,21 @@ $(document).ready(function () {
                         modal.$buttons.OK.on("click", function () {
                             modal.hide();
                             $.ajax({
-                                method : "DELETE",
-                                dataType : "json",
-                                url : url + tr.data('_id')
+                                method: "DELETE",
+                                dataType: "json",
+                                url: url + tr.data('_id')
                             }).error(function (jqXHR, is, message) {
                                 toastmsg = jqXHR.responseJSON.message;
                                 console.error("DELETE", jqXHR.responseJSON)
                             }).success(function (res) {
                                 reset.click();
                                 getting();
-                            }).complete(function(){
+                            }).complete(function () {
                                 twowew({
-                                    type : toastmsg ? "error" : "success",
-                                    title : "DELETE",
-                                    message : toastmsg || "success",
-                                    time : toastmsg ? 0 : 3000
+                                    type: toastmsg ? "error" : "success",
+                                    title: "DELETE",
+                                    message: toastmsg || "success",
+                                    time: toastmsg ? 0 : 3000
                                 });
                                 toastmsg = false;
                             });
@@ -258,12 +258,12 @@ $(document).ready(function () {
                     table.find('tbody').append(tr)
                 })
                 table.DataTable({
-                    pageLength : 5,
-                    lengthMenu : [5, 10, 25, 50, 75, 100],
-                    order : [[1, "asc"]],
-                    responsive : false,
-                    dom : '<"html5buttons"B>lTfgitp',
-                    buttons : []
+                    pageLength: 5,
+                    lengthMenu: [5, 10, 25, 50, 75, 100],
+                    order: [[1, "asc"]],
+                    responsive: false,
+                    dom: '<"html5buttons"B>lTfgitp',
+                    buttons: []
                 });
             } else putEmpty();
         });
@@ -272,16 +272,16 @@ $(document).ready(function () {
         var method = "POST";
         var url_ = url;
         var data = {
-            name : name.val(),
-            notes : notes.val(),
-            routes : routes.val() || []
+            name: name.val(),
+            notes: notes.val(),
+            routes: routes.val() || []
         };
         var save = function () {
             $.ajax({
-                method : method,
-                dataType : "json",
-                data : data,
-                url : url_
+                method: method,
+                dataType: "json",
+                data: data,
+                url: url_
             }).error(function (jqXHR, is, message) {
                 toastmsg = jqXHR.responseJSON.message;
                 console.error(method, jqXHR.responseJSON)
@@ -290,10 +290,10 @@ $(document).ready(function () {
                 getting();
             }).complete(function () {
                 twowew({
-                    type : toastmsg ? "error" : "success",
-                    title : method.toUpperCase(),
-                    message : toastmsg || "success",
-                    time : toastmsg ? 0 : 3000
+                    type: toastmsg ? "error" : "success",
+                    title: method.toUpperCase(),
+                    message: toastmsg || "success",
+                    time: toastmsg ? 0 : 3000
                 })
                 toastmsg = false;
             });
@@ -313,16 +313,16 @@ $(document).ready(function () {
                 return 0;
             }).map(function (route) {
                 return {
-                    model : route,
-                    methods : ["GET", "POST", "PUT", "DELETE"]
+                    model: route,
+                    methods: ["GET", "POST", "PUT", "DELETE"]
                 }
             }).concat(newState);
-            data = {docs : data};
+            data = {docs: data};
         } else {
             data.routes = data.routes.map(function (route) {
                 return {
-                    model : route,
-                    methods : ["GET", "POST", "PUT", "DELETE"]
+                    model: route,
+                    methods: ["GET", "POST", "PUT", "DELETE"]
                 }
             })
         }

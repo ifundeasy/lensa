@@ -28,18 +28,18 @@ module.exports = function (args, app) {
      ** **************************************************************************/
     api.use(function (req, res, next) {
 
-        var finalfunc = function(res, data){
+        var finalfunc = function (res, data) {
             var body = {
-                "status" : 1,
-                "data" : data,
+                "status": 1,
+                "data": data,
             };
             res.status(200).send(body);
         }
-        var errfunc = function(res, e){
+        var errfunc = function (res, e) {
             console.log(e);
             var body = {
-                "status" : 0,
-                "message" : e,
+                "status": 0,
+                "message": e,
             };
             res.status(200).send(body);
         }
@@ -109,124 +109,124 @@ module.exports = function (args, app) {
             next();
         } else {
             //custom APIs
-            
-            switch(collname){
+
+            switch (collname) {
                 case 'getsteps':
                     var procId = req.param('procedure_id');
                     var Procedure = Collection['procedures'];
                     Procedure.findOne({
                         "_id": procId,
                         active: true
-                    }).then(function(doc){
-                        if(doc!==null){
+                    }).then(function (doc) {
+                        if (doc !== null) {
                             var Step = Collection['steps'];
                             Step.find({
                                 "procedures._id": procId,
                                 active: true
-                            }).then(function(docs){
+                            }).then(function (docs) {
                                 var body = {
-                                    "status" : 1,
-                                    "data" : docs,
+                                    "status": 1,
+                                    "data": docs,
                                 };
                                 res.status(200).send(body);
                             })
-                            .catch(function(e){
+                            .catch(function (e) {
                                 console.log(e);
                                 var body = {
-                                    "status" : 0,
-                                    "message" : e,
+                                    "status": 0,
+                                    "message": e,
                                 };
                                 res.status(500).send(body);
                             });
-                            
+
                         } else {
                             var body = {
-                                "status" : 0,
-                                "message" : "invalid procedure id",
+                                "status": 0,
+                                "message": "invalid procedure id",
                             };
                             res.status(500).send(body);
                         }
-                    }).catch(function(e){
+                    }).catch(function (e) {
                         console.log(e);
                         var body = {
-                            "status" : 0,
-                            "message" : e,
+                            "status": 0,
+                            "message": e,
                         };
                         res.status(500).send(body);
                     });
-            
+
                     break;
-                    
+
                 case 'alldashboarddata':
-                    
+
                     var Post = Collection['posts'];
                     var data = {};
-                    
+
                     // all incoming reports
-                    Post.find({ 
-                        "organizations._id" : req.logged.user.organizations._id, 
-                        active: true 
+                    Post.find({
+                        "organizations._id": req.logged.user.organizations._id,
+                        active: true
                     }, 'text lat long')
-                    .then(function(docs){
+                    .then(function (docs) {
                         data.allreportltlng = docs;
-                        
+
                         // finished reports
-                        Post.find({ 
-                            "organizations._id" : req.logged.user.organizations._id, 
+                        return Post.find({
+                            "organizations._id": req.logged.user.organizations._id,
                             active: true,
                             finished: true
-                        }, 'text lat long').then(function(docs2){
+                        }, 'text lat long').then(function (docs2) {
                             data.finishedreportltlng = docs2;
-                            
+
                             // reports on progress
-                            Post.find({ 
-                                "organizations._id" : req.logged.user.organizations._id, 
+                            return Post.find({
+                                "organizations._id": req.logged.user.organizations._id,
                                 active: true,
                                 finished: false,
-                                "assignTo" : { $exists: true },
-                                "assignTo.implementor" : { $exists: true },
-                                rejected: { $exists: false }
-                            }, 'text lat long').then(function(docs3){
+                                "assignTo": {$exists: true},
+                                "assignTo.implementor": {$exists: true},
+                                rejected: {$exists: false}
+                            }, 'text lat long').then(function (docs3) {
                                 data.onprogressreportltlng = docs3;
-                                
+
                                 // accepted reports
-                                
-                                Post.find({ 
-                                    "organizations._id" : req.logged.user.organizations._id, 
+
+                                return Post.find({
+                                    "organizations._id": req.logged.user.organizations._id,
                                     active: true,
                                     finished: false,
-                                    "assignTo" : { $exists: true },
-                                    "assignTo.implementor" : { $exists: false },
-                                    rejected: { $exists: false }
-                                }, 'text lat long').then(function(docs4){
+                                    "assignTo": {$exists: true},
+                                    "assignTo.implementor": {$exists: false},
+                                    rejected: {$exists: false}
+                                }, 'text lat long').then(function (docs4) {
                                     data.acceptedreportltlng = docs4;
-                                    
+
                                     // rejected reports
-                                    Post.find({ 
-                                        "organizations._id" : req.logged.user.organizations._id, 
+                                    return Post.find({
+                                        "organizations._id": req.logged.user.organizations._id,
                                         active: true,
                                         finished: false,
-                                        rejected: { $exists: true }
-                                    }, 'text lat long').then(function(docs5){
+                                        rejected: {$exists: true}
+                                    }, 'text lat long').then(function (docs5) {
                                         data.rejectedreportltlng = docs5;
                                         var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
                                         // aggregate by category
-                                        Post.aggregate([
-                                            { 
-                                                $match :  { 
+                                        return Post.aggregate([
+                                            {
+                                                $match: {
                                                     $and: [
-                                                        { active: true },
-                                                        { "organizations._id" : orgid }
-                                                    ] 
+                                                        {active: true},
+                                                        {"organizations._id": orgid}
+                                                    ]
                                                 }
-                                            }, 
+                                            },
                                             {
                                                 $group: {
-                                                    _id:  '$categories._id',
+                                                    _id: '$categories._id',
                                                     sum: {$sum: 1}
                                                 }
                                             },
-                                            { 
+                                            {
                                                 $lookup: {
                                                     "from": "categories",
                                                     "localField": "_id",
@@ -234,38 +234,38 @@ module.exports = function (args, app) {
                                                     "as": "category"
                                                 }
                                             },
-                                        ]).then(function(docs6){
+                                        ]).then(function (docs6) {
                                             data.categoryagg = docs6;
-                                            
+
                                             // aggregate by month
                                             var currentYear = new Date();
-                            
-                                            Post.aggregate([
-                                                { 
-                                                    $match : { 
+
+                                            return Post.aggregate([
+                                                {
+                                                    $match: {
                                                         $and: [
-                                                            { active: true },
-                                                            { "organizations._id" : orgid }
-                                                        ] 
-                                                    } 
-                                                }, 
+                                                            {active: true},
+                                                            {"organizations._id": orgid}
+                                                        ]
+                                                    }
+                                                },
                                                 {
                                                     $group: {
-                                                        _id:  { year: { $year: currentYear }, month: { $month: "$createdAt" } },
+                                                        _id: {year: {$year: currentYear}, month: {$month: "$createdAt"}},
                                                         sum: {$sum: 1}
                                                     }
-                                                }   
+                                                }
                                             ])
-                                            .then(function(doc5){
+                                            .then(function (doc5) {
                                                 var aggData = [];
                                                 // before injecting the data, set other month values with 0
-                
+
                                                 // loop through months
-                                                for(m=1; m<=12; m++){
-                                                    var monthExist = doc5.filter(function( obj ) {
+                                                for (m = 1; m <= 12; m++) {
+                                                    var monthExist = doc5.filter(function (obj) {
                                                         return obj._id.month == m;
                                                     });
-                                                    if(monthExist.length === 0){
+                                                    if (monthExist.length === 0) {
                                                         aggData.push({
                                                             _id: {
                                                                 month: m,
@@ -278,215 +278,218 @@ module.exports = function (args, app) {
                                                     }
                                                 }
                                                 data.monthlyreports = aggData;
-                
-                                                finalfunc(res, data);
-                
-                                            }).catch(function(e){
+
+                                                return finalfunc(res, data);
+
+                                            }).catch(function (e) {
                                                 console.log('error at query 7');
-                                            errfunc(res, e);
+                                                return errfunc(res, e);
                                             });
-                                            
-                                        }).catch(function(e){
+
+                                        }).catch(function (e) {
                                             console.log('error at query 6');
                                             errfunc(res, e);
                                         });
-                                    }).catch(function(e){
+                                    }).catch(function (e) {
                                         console.log('error at query 5');
                                         errfunc(res, e);
                                     });
-                                }).catch(function(e){
+                                }).catch(function (e) {
                                     console.log('error at query 4');
                                     errfunc(res, e);
                                 });
-                            }).catch(function(e){
+                            }).catch(function (e) {
                                 console.log('error at query 3');
                                 errfunc(res, e);
                             });
-                        }).catch(function(e){
+                        }).catch(function (e) {
                             console.log('error at query 2');
                             errfunc(res, e);
                         });
-                    }).catch(function(e){
+                    }).catch(function (e) {
                         console.log('error at query 1');
                         errfunc(res, e);
                     });
                     break;
-                    
+
                 case "kpi":
                     var data = {};
                     var Post = Collection['posts'];
-                    
+
                     // look for assigned reports
                     Post.find({
-                        "organizations._id" : req.logged.user.organizations._id, 
+                        "organizations._id": req.logged.user.organizations._id,
                         active: true,
                         finished: false,
-                        "assignTo" : { $exists: true },
-                        "assignTo.implementor" : { $exists: false },
-                        $or:[ {"static": false}, {"static":{ $exists: false }} ],
-                        rejected: { $exists: false }
+                        "assignTo": {$exists: true},
+                        "assignTo.implementor": {$exists: false},
+                        $or: [{"static": false}, {"static": {$exists: false}}],
+                        rejected: {$exists: false}
                     })
-                    .then(function(docs){
+                    .then(function (docs) {
                         var timeSum = 0;
                         var highestData = 0;
-                        for(var i=0; i<docs.length; i++){
+                        for (var i = 0; i < docs.length; i++) {
                             var time1 = new Date(docs[i].createdAt);
                             var time2 = new Date(docs[i].assignTo.createdAt);
                             var interval = time2.getTime() - time1.getTime();
-                            if(highestData < interval){
+                            if (highestData < interval) {
                                 highestData = interval;
                             }
                             timeSum = timeSum + interval;
                         }
 
-                        var totalData = docs.length !== 0 ? docs.length:1;
+                        var totalData = docs.length !== 0 ? docs.length : 1;
                         var avgInterval = timeSum / totalData;
                         data.assigned = {
-                            avg: ((avgInterval/1000)/60)/60, // change in hour
-                            high: ((highestData/1000)/60)/60,
+                            avg: ((avgInterval / 1000) / 60) / 60, // change in hour
+                            high: ((highestData / 1000) / 60) / 60,
                         };
                         // look for on progress reports
-                        Post.find({
-                            "organizations._id" : req.logged.user.organizations._id, 
+                        return Post.find({
+                            "organizations._id": req.logged.user.organizations._id,
                             active: true,
                             finished: false,
-                            "assignTo" : { $exists: true },
-                            "assignTo.implementor" : { $exists: true },
-                            $or:[ {"static": false}, {"static":{ $exists: false }} ],
-                            rejected: { $exists: false }
+                            "assignTo": {$exists: true},
+                            "assignTo.implementor": {$exists: true},
+                            $or: [{"static": false}, {"static": {$exists: false}}],
+                            rejected: {$exists: false}
                         })
-                        .then(function(docs2){
+                        .then(function (docs2) {
                             var timeSum = 0;
                             var highestData = 0;
-                            for(var i=0; i<docs2.length; i++){
+                            for (var i = 0; i < docs2.length; i++) {
                                 var time1 = new Date(docs2[i].assignTo.createdAt);
                                 var time2 = new Date(docs2[i].assignTo.implementor.createdAt);
                                 var interval = time2.getTime() - time1.getTime();
-                                if(highestData < interval){
+                                if (highestData < interval) {
                                     highestData = interval;
                                 }
                                 timeSum = timeSum + interval;
                             }
-                            var totalData = docs2.length !== 0 ? docs2.length:1;
+                            var totalData = docs2.length !== 0 ? docs2.length : 1;
                             var avgInterval = timeSum / totalData;
                             data.onprogress = {
-                                avg: ((avgInterval/1000)/60)/60, // change in hour
-                                high: ((highestData/1000)/60)/60,
+                                avg: ((avgInterval / 1000) / 60) / 60, // change in hour
+                                high: ((highestData / 1000) / 60) / 60,
                             };
                             // look for on finished reports
-                            Post.find({
-                                "organizations._id" : req.logged.user.organizations._id, 
+                            return Post.find({
+                                "organizations._id": req.logged.user.organizations._id,
                                 active: true,
                                 finished: true
                             })
-                            .then(function(docs3){
+                            .then(function (docs3) {
                                 var timeSum = 0;
                                 var highestData = 0;
-                                for(var i=0; i<docs3.length; i++){
+                                for (var i = 0; i < docs3.length; i++) {
                                     var time1 = new Date(docs3[i].assignTo.implementor.createdAt);
-                                    var time2 = new Date(docs3[i].statuses[docs3[i].statuses.length-1].createdAt);
+                                    var time2 = new Date(docs3[i].statuses[docs3[i].statuses.length - 1].createdAt);
                                     var interval = time2.getTime() - time1.getTime();
-                                    if(highestData < interval){
+                                    if (highestData < interval) {
                                         highestData = interval;
                                     }
                                     timeSum = timeSum + interval;
                                 }
-                                var totalData = docs3.length !== 0 ? docs3.length:1;
+                                var totalData = docs3.length !== 0 ? docs3.length : 1;
                                 var avgInterval = timeSum / totalData;
                                 data.finished = {
-                                    avg: ((avgInterval/1000)/60)/60, // change in hour
-                                    high: ((highestData/1000)/60)/60,
+                                    avg: ((avgInterval / 1000) / 60) / 60, // change in hour
+                                    high: ((highestData / 1000) / 60) / 60,
                                 };
-                                finalfunc(res, data);
+                                return finalfunc(res, data);
                             })
-                            .catch(function(e){
-                                errfunc(res, e);
+                            .catch(function (e) {
+                                return errfunc(res, e);
                             });
                         })
-                        .catch(function(e){
-                            errfunc(res, e);
+                        .catch(function (e) {
+                            return errfunc(res, e);
                         });
                     })
-                    .catch(function(e){
-                        errfunc(res, e);
+                    .catch(function (e) {
+                        return errfunc(res, e);
                     });
                     break;
-                
+
                 case "monthlyreports":
                     var currentYear = new Date().getFullYear();
                     var m = parseInt(req.param('m'));
                     var Post = Collection['posts'];
                     var query = {
-                        "organizations._id" : req.logged.user.organizations._id, 
+                        "organizations._id": req.logged.user.organizations._id,
                         active: true,
-                        "createdAt": {"$gte": new Date(Date.UTC(currentYear, m, 1, 0, 0, 0)), "$lt": new Date(Date.UTC(currentYear, (m+1), 1, 0, 0, 0))}
+                        "createdAt": {
+                            "$gte": new Date(Date.UTC(currentYear, m, 1, 0, 0, 0)),
+                            "$lt": new Date(Date.UTC(currentYear, (m + 1), 1, 0, 0, 0))
+                        }
                     };
                     Post.find(query)
-                    .populate({ path: 'users._id', select: 'name' })
-                    .then(function(docs){
+                    .populate({path: 'users._id', select: 'name'})
+                    .then(function (docs) {
                         var body = {
-                            "status" : 1,
-                            "data" : docs,
+                            "status": 1,
+                            "data": docs,
                             "query": query
                         };
-                        res.status(200).send(body);
-                    }).catch(function(e){
+                        return res.status(200).send(body);
+                    }).catch(function (e) {
                         var body = {
-                            "status" : 0,
-                            "message" : e,
+                            "status": 0,
+                            "message": e,
                         };
-                        res.status(500).send(body);
+                        return res.status(500).send(body);
                     });
                     break;
-                    
+
                 case "reportdetail":
                     var postid = req.param('postid');
                     var Post = Collection['posts'];
-                    Post.findOne({ 
-                        "organizations._id" : req.logged.user.organizations._id, 
+                    Post.findOne({
+                        "organizations._id": req.logged.user.organizations._id,
                         _id: postid,
                         active: true
                     })
-                    .populate({ path: 'users._id', select: 'name' }).populate({ path: 'media._ids', select: 'directory type' })
-                    .populate({ path: 'statuses.steps._id', select: 'procedures._id name' })
-                    .then(function(doc){
-                        if(doc.statuses.length>0){
+                    .populate({path: 'users._id', select: 'name'}).populate({path: 'media._ids', select: 'directory type'})
+                    .populate({path: 'statuses.steps._id', select: 'procedures._id name'})
+                    .then(function (doc) {
+                        if (doc.statuses.length > 0) {
                             var Step = Collection['steps'];
                             Step.find({
                                 "procedures._id": doc.statuses[0].steps._id.procedures._id
                             })
-                            .populate({ path: 'procedures._id', select: 'name' })
-                            .sort({ stepNumber: 1 })
-                            .then(function(doc2){
+                            .populate({path: 'procedures._id', select: 'name'})
+                            .sort({stepNumber: 1})
+                            .then(function (doc2) {
                                 var body = {
-                                    "status" : 1,
-                                    "data" : doc,
-                                    "steps" : doc2
+                                    "status": 1,
+                                    "data": doc,
+                                    "steps": doc2
                                 };
-                                res.status(200).send(body);   
+                                res.status(200).send(body);
                             })
-                            .catch(function(e){
+                            .catch(function (e) {
                                 console.log('error at step query');
                                 console.log(e);
                                 var body = {
-                                    "status" : 0,
-                                    "message" : e,
+                                    "status": 0,
+                                    "message": e,
                                 };
                                 res.status(500).send(body);
                             });
                         } else {
                             var body = {
-                                "status" : 1,
-                                "data" : doc,
-                                "steps" : []
+                                "status": 1,
+                                "data": doc,
+                                "steps": []
                             };
-                            res.status(200).send(body);   
+                            res.status(200).send(body);
                         }
                     })
-                    .catch(function(e){
+                    .catch(function (e) {
                         var body = {
-                            "status" : 0,
-                            "message" : e,
+                            "status": 0,
+                            "message": e,
                         };
                         res.status(500).send(body);
                     });
@@ -512,8 +515,7 @@ module.exports = function (args, app) {
             data: req.logged.user
         });
     });
-    
-    
+
     api.get('/:collection', function (req, res, next) {
         var populate = req.logged.populate;
         var org = req.logged.user.organizations;
@@ -534,57 +536,57 @@ module.exports = function (args, app) {
         if (collname == "organizations" || collname == "groups") {
             query = authorize.rule[collname];
             model.find(query)
-                .populate(populate).lean().then(function (docs) {
-                    var rows = mongoose.normalize(docs).filter(function (doc) {
-                        if (authorize.isCorrect(doc)) return 1;
-                        return 0;
-                    });
-                    res.send({
-                        status: 200,
-                        message: httpCode[200],
-                        error: null,
-                        data: {
-                            limit: limit,
-                            page: page,
-                            sort: {
-                                [sortBy]: direction
-                            },
-                            total: rows.length,
-                            rows: rows
-                        }
-                    })
-                })
-                .catch(function (e) {
-                    next(e);
+            .populate(populate).lean().then(function (docs) {
+                var rows = mongoose.normalize(docs).filter(function (doc) {
+                    if (authorize.isCorrect(doc)) return 1;
+                    return 0;
                 });
+                res.send({
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: {
+                        limit: limit,
+                        page: page,
+                        sort: {
+                            [sortBy]: direction
+                        },
+                        total: rows.length,
+                        rows: rows
+                    }
+                })
+            })
+            .catch(function (e) {
+                next(e);
+            });
         } else {
             model.find(query)
-                .sort({
-                    [sortBy]: direction
-                }).skip(skip).limit(limit) //TODO
-                .populate(populate).lean().then(function (docs) {
-                    var rows = mongoose.normalize(docs).filter(function (doc) {
-                        if (authorize.isCorrect(doc)) return 1;
-                        return 0;
-                    });
-                    res.send({
-                        status: 200,
-                        message: httpCode[200],
-                        error: null,
-                        data: {
-                            limit: limit,
-                            page: page,
-                            sort: {
-                                [sortBy]: direction
-                            },
-                            total: rows.length,
-                            rows: rows
-                        }
-                    });
-                })
-                .catch(function (e) {
-                    next(e);
+            .sort({
+                [sortBy]: direction
+            }).skip(skip).limit(limit) //TODO
+            .populate(populate).lean().then(function (docs) {
+                var rows = mongoose.normalize(docs).filter(function (doc) {
+                    if (authorize.isCorrect(doc)) return 1;
+                    return 0;
                 });
+                res.send({
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: {
+                        limit: limit,
+                        page: page,
+                        sort: {
+                            [sortBy]: direction
+                        },
+                        total: rows.length,
+                        rows: rows
+                    }
+                });
+            })
+            .catch(function (e) {
+                next(e);
+            });
         }
     });
     api.get('/:collection/:id', function (req, res, next) {
@@ -594,33 +596,33 @@ module.exports = function (args, app) {
         var pop = Number(req.query.pop) || 1;
         var model = Collection[collname];
         model.findOne({
-                _id: id,
-                active: true
-            })
-            .populate(populate).lean().then(function (docs) {
-                var row = mongoose.normalize(docs);
-                var is = authorize.isCorrect(row);
-                if (is) {
-                    res.send({
-                        status: 200,
-                        message: httpCode[200],
-                        error: null,
-                        data: row
-                    });
-                } else {
-                    var error = ("req.params|String").split("|");
-                    var Err = new Error([httpCode[403], id].join(" : "));
-                    Err.errors = {
-                        require: error[0],
-                        type: error[1],
-                        founded: eval(error[0])
-                    };
-                    next(Err);
-                }
-            })
-            .catch(function (e) {
-                next(e);
-            });
+            _id: id,
+            active: true
+        })
+        .populate(populate).lean().then(function (docs) {
+            var row = mongoose.normalize(docs);
+            var is = authorize.isCorrect(row);
+            if (is) {
+                res.send({
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: row
+                });
+            } else {
+                var error = ("req.params|String").split("|");
+                var Err = new Error([httpCode[403], id].join(" : "));
+                Err.errors = {
+                    require: error[0],
+                    type: error[1],
+                    founded: eval(error[0])
+                };
+                next(Err);
+            }
+        })
+        .catch(function (e) {
+            next(e);
+        });
     });
     api.post('/:collection', function (req, res, next) {
         var collname = (req.params.collection || "").toLowerCase();
@@ -648,41 +650,41 @@ module.exports = function (args, app) {
         var model = Collection[collname];
         var isAllow = function (callback) {
             model.findOne({
-                    _id: id,
-                    // "$or" : [
-                    //     {restricted : {"$exists" : false}},
-                    //     {restricted : {"$ne" : true}}
-                    // ],
-                    restricted: {"$ne" : true},
-                    active: true
-                })
-                .populate(populate).lean().then(function (docs) {
-                    var row = mongoose.normalize(docs);
-                    var is = authorize.isCorrect(row);
-                    var code = null;
-                    //
-                    if (!docs || !is) code = 404;
-                    else if (docs.restricted) code = 403;
-                    //
-                    if (code) {
-                        var error = ("req.params|String").split("|");
-                        var Err = new Error([httpCode[code], id].join(" : "));
-                        Err.errors = {
-                            require: error[0],
-                            type: error[1],
-                            founded: eval(error[0])
-                        };
-                        next(Err);
-                        return 0;
-                    } else {
-                        callback(row);
-                        return 0;
-                    }
-                })
-                .catch(function (e) {
-                    callback(e);
+                _id: id,
+                // "$or" : [
+                //     {restricted : {"$exists" : false}},
+                //     {restricted : {"$ne" : true}}
+                // ],
+                restricted: {"$ne": true},
+                active: true
+            })
+            .populate(populate).lean().then(function (docs) {
+                var row = mongoose.normalize(docs);
+                var is = authorize.isCorrect(row);
+                var code = null;
+                //
+                if (!docs || !is) code = 404;
+                else if (docs.restricted) code = 403;
+                //
+                if (code) {
+                    var error = ("req.params|String").split("|");
+                    var Err = new Error([httpCode[code], id].join(" : "));
+                    Err.errors = {
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
+                    };
+                    next(Err);
                     return 0;
-                });
+                } else {
+                    callback(row);
+                    return 0;
+                }
+            })
+            .catch(function (e) {
+                callback(e);
+                return 0;
+            });
         };
         if (id) {
             isAllow(function (row) {
@@ -778,41 +780,41 @@ module.exports = function (args, app) {
         var model = Collection[collname];
         var isAllow = function (callback) {
             model.findOne({
-                    _id: id,
-                    // "$or" : [
-                    //     {restricted : {"$exists" : false}},
-                    //     {restricted : {"$ne" : true}}
-                    // ],
-                    restricted: {"$ne" : true},
-                    active: true
-                })
-                .populate(populate).lean().then(function (docs) {
-                    var row = mongoose.normalize(docs);
-                    var is = authorize.isCorrect(row);
-                    var code = null;
-                    //
-                    if (!docs || !is) code = 404;
-                    else if (docs.restricted) code = 403;
-                    //
-                    if (code) {
-                        var error = ("req.params|String").split("|");
-                        var Err = new Error([httpCode[code], id].join(" : "));
-                        Err.errors = {
-                            require: error[0],
-                            type: error[1],
-                            founded: eval(error[0])
-                        };
-                        next(Err);
-                        return 0;
-                    } else {
-                        callback(row);
-                        return 0;
-                    }
-                })
-                .catch(function (e) {
-                    next(e);
+                _id: id,
+                // "$or" : [
+                //     {restricted : {"$exists" : false}},
+                //     {restricted : {"$ne" : true}}
+                // ],
+                restricted: {"$ne": true},
+                active: true
+            })
+            .populate(populate).lean().then(function (docs) {
+                var row = mongoose.normalize(docs);
+                var is = authorize.isCorrect(row);
+                var code = null;
+                //
+                if (!docs || !is) code = 404;
+                else if (docs.restricted) code = 403;
+                //
+                if (code) {
+                    var error = ("req.params|String").split("|");
+                    var Err = new Error([httpCode[code], id].join(" : "));
+                    Err.errors = {
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
+                    };
+                    next(Err);
                     return 0;
-                });
+                } else {
+                    callback(row);
+                    return 0;
+                }
+            })
+            .catch(function (e) {
+                next(e);
+                return 0;
+            });
         };
         if (id) {
             isAllow(function (row) {

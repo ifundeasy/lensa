@@ -37,12 +37,12 @@
             };
             window.googlemaps.getMyLocation = function (cb) {
                 if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
                         cb(null, {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude
                         })
-                    }, function() {
+                    }, function () {
                         cb('Error: The Geolocation service failed.')
                     });
                 } else {

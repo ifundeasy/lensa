@@ -16,19 +16,19 @@ module.exports = function (args, app) {
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
-    var errfunc = function(res, e){
+    var errfunc = function (res, e) {
         console.log(e);
         var body = {
-            "status" : 0,
-            "message" : e,
+            "status": 0,
+            "message": e,
         };
         res.status(500).send(body);
     }
-    
-    var successfunc = function(res, data){
+
+    var successfunc = function (res, data) {
         var body = {
-            "status" : 1,
-            "data" : data,
+            "status": 1,
+            "data": data,
         };
         res.status(200).send(body);
     }
@@ -50,24 +50,24 @@ module.exports = function (args, app) {
                 popQuery = model.getPopQuery(pop);
                 if (!Object.keys(popQuery).length) popQuery = "";
             }
-            model.count({active : true}).lean().catch(function (e) {
+            model.count({active: true}).lean().catch(function (e) {
                 next(e)
             }).then(function (length) {
-                model.find({active : true})
-                .sort({[sortBy] : direction}).skip(skip).limit(limit)
+                model.find({active: true})
+                .sort({[sortBy]: direction}).skip(skip).limit(limit)
                 .populate(popQuery).lean().then(function (docs) {
                     var rows = mongoose.normalize(docs);
                     res.send({
-                        status : 200,
-                        message : httpCode[200],
-                        error : null,
-                        data : {
-                            pop : popQuery,
-                            limit : limit,
-                            page : page,
-                            sort : {[sortBy] : direction},
-                            total : length,
-                            rows : rows
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: {
+                            pop: popQuery,
+                            limit: limit,
+                            page: page,
+                            sort: {[sortBy]: direction},
+                            total: length,
+                            rows: rows
                         }
                     })
                 })
@@ -76,15 +76,15 @@ module.exports = function (args, app) {
                 })
             })
         } else {
-            
+
             //custom APIs
-            switch (collname){
+            switch (collname) {
                 case 'getorganization':
                     var Organization = Collection['organizations'];
-                    Organization.find().then(function(docs){
+                    Organization.find().then(function (docs) {
                         successfunc(res, docs);
                     })
-                    .catch(function(e){
+                    .catch(function (e) {
                         errfunc(res, e);
                     });
                     break;
@@ -92,14 +92,15 @@ module.exports = function (args, app) {
                     var error = ("collname|String").split("|");
                     var Err = new Error([httpCode[404], collname].join(" : "))
                     Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
                     }
                     next(Err);
                     break;
             }
-        };
+        }
+        ;
     });
     api.get('/:collection/:id', function (req, res, next) {
         var collname = (req.params.collection || "").toLowerCase();
@@ -112,13 +113,13 @@ module.exports = function (args, app) {
                 popQuery = model.getPopQuery(pop);
                 if (!Object.keys(popQuery).length) popQuery = "";
             }
-            model.findOne({_id : id, active : true}).populate(popQuery).lean().then(function (docs) {
+            model.findOne({_id: id, active: true}).populate(popQuery).lean().then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : rows
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: rows
                 })
             })
             .catch(function (e) {
@@ -126,29 +127,29 @@ module.exports = function (args, app) {
             })
         } else {
             //custom APIs
-            switch (collname){
+            switch (collname) {
                 case 'insertorganization':
                     var Organization = Collection['organizations'];
                     var orgObj = {
-                        name : req.body.name,
-                        pic : req.body.pic,
-                        "email.value" : req.body.email,
-                        "phone.value" : req.body.phone,
-                        "location.address" : req.body.address,
-                        "location.country" : req.body.country,
-                        "location.state" : req.body.state,
-                        "location.zipcode" : req.body.zipcode,
-                        "location.administrativeAreaLevel" : req.body.level,
-                        "location.lat" : req.body.lat,
-                        "location.long" : req.body.long
+                        name: req.body.name,
+                        pic: req.body.pic,
+                        "email.value": req.body.email,
+                        "phone.value": req.body.phone,
+                        "location.address": req.body.address,
+                        "location.country": req.body.country,
+                        "location.state": req.body.state,
+                        "location.zipcode": req.body.zipcode,
+                        "location.administrativeAreaLevel": req.body.level,
+                        "location.lat": req.body.lat,
+                        "location.long": req.body.long
                     };
                     if (req.body.avatar) orgObj.media._id = req.body.avatar;
                     var newOrganization = new Organization(orgObj);
                     newOrganization.save()
-                    .then(function(result){
+                    .then(function (result) {
                         successfunc(res, result);
                     })
-                    .catch(function(e){
+                    .catch(function (e) {
                         errfunc(res, e);
                     });
                     break;
@@ -156,14 +157,15 @@ module.exports = function (args, app) {
                     var error = ("collname|String").split("|");
                     var Err = new Error([httpCode[404], collname].join(" : "))
                     Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
                     }
                     next(Err);
                     break;
             }
-        };
+        }
+        ;
     });
     api.post('/:collection', function (req, res, next) {
         //todo : auto gen phone verify code & email verify url if insert new user;
@@ -174,10 +176,10 @@ module.exports = function (args, app) {
             data.save().then(function (docs) {
                 var rows = mongoose.normalize(docs);
                 res.send({
-                    status : 200,
-                    message : httpCode[200],
-                    error : null,
-                    data : rows
+                    status: 200,
+                    message: httpCode[200],
+                    error: null,
+                    data: rows
                 })
             }).catch(function (e) {
                 next(e)
@@ -186,12 +188,13 @@ module.exports = function (args, app) {
             var error = ("req.params|String").split("|");
             var Err = new Error([httpCode[404], id].join(" : "))
             Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
+                require: error[0],
+                type: error[1],
+                founded: eval(error[0])
             }
             next(Err);
-        };
+        }
+        ;
     });
     api.put('/:collection/:id', function (req, res, next) {
         var err, notError = true;
@@ -199,7 +202,7 @@ module.exports = function (args, app) {
         var id = req.params.id;
         var model = Collection[collname];
         var isAllow = function (callback) {
-            model.findOne({_id : id, active : true})
+            model.findOne({_id: id, active: true})
             .lean().then(function (docs) {
                 var row = mongoose.normalize(docs);
                 var code = null;
@@ -212,9 +215,9 @@ module.exports = function (args, app) {
                     var error = ("req.params|String").split("|");
                     var Err = new Error([httpCode[code], id].join(" : "))
                     Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
                     }
                     next(Err);
                 }
@@ -251,7 +254,7 @@ module.exports = function (args, app) {
                 //Validation block : end.
                 //
                 if (notError == true) {
-                    var selection = {_id : id, active : true, restricted : false};
+                    var selection = {_id: id, active: true, restricted: false};
                     var docs = req.body.docs;
                     var nested = req.body.nested;
                     if (nested) {
@@ -270,13 +273,13 @@ module.exports = function (args, app) {
                         delete docs["restricted"];
                     }
                     //
-                    model.update(selection, {$set : docs}, {runValidators : true}).then(function (docs) {
+                    model.update(selection, {$set: docs}, {runValidators: true}).then(function (docs) {
                         var rows = mongoose.normalize(docs);
                         res.send({
-                            status : 200,
-                            message : httpCode[200],
-                            error : null,
-                            data : rows
+                            status: 200,
+                            message: httpCode[200],
+                            error: null,
+                            data: rows
                         })
                     }).catch(function (e) {
                         next(e)
@@ -285,9 +288,9 @@ module.exports = function (args, app) {
                     var error = notError.split("|");
                     var Err = new Error([httpCode[400], id].join(" : "))
                     Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
                     }
                     next(Err);
                 }
@@ -296,9 +299,9 @@ module.exports = function (args, app) {
             var error = ("req.params|String").split("|");
             var Err = new Error([httpCode[404], id].join(" : "))
             Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
+                require: error[0],
+                type: error[1],
+                founded: eval(error[0])
             }
             next(Err);
         }
@@ -309,7 +312,7 @@ module.exports = function (args, app) {
         var id = req.params.id;
         var model = Collection[collname];
         var isAllow = function (callback) {
-            model.findOne({_id : id, active : true})
+            model.findOne({_id: id, active: true})
             .lean().then(function (docs) {
                 var row = mongoose.normalize(docs);
                 var code = null;
@@ -322,9 +325,9 @@ module.exports = function (args, app) {
                     var error = ("req.params|String").split("|");
                     var Err = new Error([httpCode[code], id].join(" : "))
                     Err.errors = {
-                        require : error[0],
-                        type : error[1],
-                        founded : eval(error[0])
+                        require: error[0],
+                        type: error[1],
+                        founded: eval(error[0])
                     }
                     next(Err);
                 }
@@ -336,15 +339,15 @@ module.exports = function (args, app) {
         if (Collection.hasOwnProperty(collname) && id) {
             isAllow(function (row) {
                 model.update(
-                    {_id : id, active : true, restricted : false},
-                    {$set : {active : false}}
+                    {_id: id, active: true, restricted: false},
+                    {$set: {active: false}}
                 ).then(function (docs) {
                     var rows = mongoose.normalize(docs);
                     res.send({
-                        status : 200,
-                        message : httpCode[200],
-                        error : null,
-                        data : rows
+                        status: 200,
+                        message: httpCode[200],
+                        error: null,
+                        data: rows
                     })
                 }).catch(function (e) {
                     next(e)
@@ -354,12 +357,13 @@ module.exports = function (args, app) {
             var error = ("req.params|String").split("|");
             var Err = new Error([httpCode[404], id].join(" : "))
             Err.errors = {
-                require : error[0],
-                type : error[1],
-                founded : eval(error[0])
+                require: error[0],
+                type: error[1],
+                founded: eval(error[0])
             }
             next(Err);
-        };
+        }
+        ;
     });
     //
     page.use(function (req, res, next) {
@@ -370,10 +374,10 @@ module.exports = function (args, app) {
     page.use('/!', api);
     page.get('/', function (req, res, next) {
         locals.www = {
-            name : global.name,
-            description : global.description,
-            version : global.version,
-            models : (function () {
+            name: global.name,
+            description: global.description,
+            version: global.version,
+            models: (function () {
                 var o = {}
                 for (var m in Collection) o[Collection[m].collection.name] = m;
                 return o

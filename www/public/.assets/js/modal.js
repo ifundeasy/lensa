@@ -46,7 +46,7 @@ Modal.prototype.init = function () {
     return me;
 }
 Modal.prototype.show = function (backdrop) {
-    this.$container.modal({backdrop : this.backdrop})
+    this.$container.modal({backdrop: this.backdrop})
     return this;
 };
 Modal.prototype.hide = function () {

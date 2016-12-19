@@ -88,10 +88,10 @@ Authorize.prototype.finder = function (NESTED, CALLBACK, FALLBACK) {
                         models[name].find({
                             active: true
                         }).populate(pop).lean()
-                            .catch(function (e) {
+                        .catch(function (e) {
                             fallback(e)
                         })
-                            .then(function (docs) {
+                        .then(function (docs) {
                             var ids = docs.map(function (doc) {
                                 return doc._id
                             });

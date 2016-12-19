@@ -9,7 +9,7 @@ mongoose.nested = function (obj, nestIdx) {
                 nest(pop, j)
             })
         } else if (o.constructor == Object) {
-            if ((j < nestIdx-1) && o.populate) {
+            if ((j < nestIdx - 1) && o.populate) {
                 j += 1;
                 nest(o.populate, j)
             } else {

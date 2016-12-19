@@ -24,24 +24,24 @@ module.exports = function (global, worker, db) {
     var locals = app.locals;
     var mails = account.mail;
     var models = require(global.models)(mongoose, {
-        directory : global.models,
-        getCode4 : global.getCode4,
-        factory : global.factory,
-        regEx : global.regEx
+        directory: global.models,
+        getCode4: global.getCode4,
+        factory: global.factory,
+        regEx: global.regEx
     });
     //
     var authenticate = require(global.home + 'authenticate');
     var store = connectMongo(expressSession);
     var session = {
-        secret : global.name,
-        saveUninitialized : false,
-        resave : false,
+        secret: global.name,
+        saveUninitialized: false,
+        resave: false,
         //saveUninitialized : false, //don't create session until something stored
         //resave: false,             //don't save session if unmodified
-        cookie : {maxAge : global.sessionAge},
-        store : new store({
-            mongooseConnection : mongoose.connection,
-            ttl : 2 * 24 * 60 * 60
+        cookie: {maxAge: global.sessionAge},
+        store: new store({
+            mongooseConnection: mongoose.connection,
+            ttl: 2 * 24 * 60 * 60
         })
     };
     var forbiddenFn = function (msg) {
@@ -56,19 +56,19 @@ module.exports = function (global, worker, db) {
         logger.path = path.join(global.home, 'log');
         fs.existsSync(logger.path) || fs.mkdirSync(logger.path);
         logger.file = require('file-stream-rotator').getStream({
-            date_format : 'YYYYMMDD',
-            filename : path.join(logger.path, 'morgan.%DATE%.log'),
-            frequency : 'daily',
-            verbose : false
+            date_format: 'YYYYMMDD',
+            filename: path.join(logger.path, 'morgan.%DATE%.log'),
+            frequency: 'daily',
+            verbose: false
         });
     };
     //
     var param = {
-        global : global,
-        locals : locals,
-        worker : worker,
-        account : account,
-        mongoose : mongoose
+        global: global,
+        locals: locals,
+        worker: worker,
+        account: account,
+        mongoose: mongoose
     };
     //
     logger();
@@ -80,7 +80,7 @@ module.exports = function (global, worker, db) {
     app.use(cookieParser());
     app.use(express.static(path.join(global.home, 'public')));
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({extended : true}));
+    app.use(bodyParser.urlencoded({extended: true}));
     app.use(cors());
     app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -98,9 +98,9 @@ module.exports = function (global, worker, db) {
     if (app.get('env') == 'production') {
         app.set('trust proxy', 1);
         session.cookie.secure = true;
-        app.use(morgan(logger.format, {stream : logger.file}));
+        app.use(morgan(logger.format, {stream: logger.file}));
     } else {
-        app.use(morgan(logger.format, {stream : logger.file}));
+        app.use(morgan(logger.format, {stream: logger.file}));
         app.use(morgan(logger.format));
     }
     /** **************************************************************************
@@ -134,14 +134,14 @@ module.exports = function (global, worker, db) {
      ** standard http request
      ** **************************************************************************/
     app.get('/contact', function (req, res, next) {
-        res.render('contact', {logged : req.logged ? 1 : 0});
+        res.render('contact', {logged: req.logged ? 1 : 0});
     });
     app.get('/termspolicy', function (req, res, next) {
-        res.render('termspolicy', {logged : req.logged ? 1 : 0});
+        res.render('termspolicy', {logged: req.logged ? 1 : 0});
     });
     app.get('/about', function (req, res, next) {
         var logged = req.logged ? 1 : 0;
-        res.render('about', {logged : req.logged ? 1 : 0});
+        res.render('about', {logged: req.logged ? 1 : 0});
     });
     app.get('/registration', function (req, res, next) {
         res.render('registration');
@@ -161,37 +161,37 @@ module.exports = function (global, worker, db) {
                         bcrypt.hash(q, salt, function (err, mailhash) {
                             if (err) return next(err);
                             else {
-                                var selection = {_id : req.logged.user._id, active : true};
+                                var selection = {_id: req.logged.user._id, active: true};
                                 var docs = {
-                                    "email.value" : value,
-                                    "email.verifyUrl" : mailhash,
-                                    "email.verified" : false
+                                    "email.value": value,
+                                    "email.verifyUrl": mailhash,
+                                    "email.verified": false
                                 };
                                 //
-                                models.user.update(selection, {$set : docs}, {runValidators : true})
+                                models.user.update(selection, {$set: docs}, {runValidators: true})
                                 .then(function (updated) {
                                     var url = account.domain + "/verify/email?q=" + mailhash;
                                     var sender = mails.system;
                                     var message = "";
                                     var smtp = nodemailer.createTransport({
-                                        service : 'Gmail',
-                                        authenticate : sender
+                                        service: 'Gmail',
+                                        authenticate: sender
                                     });
                                     var mailOptions = {
-                                        from : sender.user,
-                                        to : value,
-                                        subject : "Lensa : Email verifiying",
-                                        html : url
+                                        from: sender.user,
+                                        to: value,
+                                        subject: "Lensa : Email verifiying",
+                                        html: url
                                     };
                                     console.log("> Sending mail for verification", JSON.stringify(mailOptions, 0, 2))
                                     smtp.sendMail(mailOptions, function (e, info) {
                                         if (e) next(e);
                                         else {
                                             res.send({
-                                                status : 200,
-                                                message : httpCode[200],
-                                                error : null,
-                                                data : docs
+                                                status: 200,
+                                                message: httpCode[200],
+                                                error: null,
+                                                data: docs
                                             })
                                         }
                                     });
@@ -202,7 +202,7 @@ module.exports = function (global, worker, db) {
                         });
                     });
                 } else {
-                    res.send({msg : "under developement"});
+                    res.send({msg: "under developement"});
                 }
             } else {
                 next();
@@ -215,23 +215,23 @@ module.exports = function (global, worker, db) {
         if (mode == "email" || mode == "phone") {
             var render = function (is, invalid) {
                 res.render('emailVerify', {
-                    invalid : invalid,
-                    value : req.logged.user[mode].value,
-                    verified : is,
-                    name : param.global.name,
-                    description : param.global.description,
-                    version : param.global.version
+                    invalid: invalid,
+                    value: req.logged.user[mode].value,
+                    verified: is,
+                    name: param.global.name,
+                    description: param.global.description,
+                    version: param.global.version
                 });
             };
             if (code) {
                 if (mode == "email") {
                     if (req.logged.user.email.verifyUrl == code) {
                         var selection = {
-                            _id : req.logged.user._id,
-                            active : true
+                            _id: req.logged.user._id,
+                            active: true
                         };
-                        var doc = {"email.verified" : false};
-                        models.user.update(selection, {$set : doc}, {runValidators : true})
+                        var doc = {"email.verified": false};
+                        models.user.update(selection, {$set: doc}, {runValidators: true})
                         .then(function (updated) {
                             render(true);
                         }).catch(function (e) {
@@ -240,7 +240,7 @@ module.exports = function (global, worker, db) {
                     } else render(req.logged.user.email.verified)
                 } else {
                     //todo : under development
-                    res.send({msg : "under developement"});
+                    res.send({msg: "under developement"});
                 }
             } else next();
         } else next();
@@ -250,22 +250,22 @@ module.exports = function (global, worker, db) {
     });
     app.get('/login', function (req, res, next) {
         var message = {
-            login : {
-                subject : locals.loginMsgTxt || "Logged out",
-                value : locals.loginMsg.length ? locals.loginMsg : [{"Logged out" : 1}]
+            login: {
+                subject: locals.loginMsgTxt || "Logged out",
+                value: locals.loginMsg.length ? locals.loginMsg : [{"Logged out": 1}]
             },
-            name : global.name,
-            description : global.description,
-            version : global.version
+            name: global.name,
+            description: global.description,
+            version: global.version
         };
         res.format({
-            html : function () {
+            html: function () {
                 res.render('login', message);
             },
-            json : function () {
+            json: function () {
                 res.json(message);
             },
-            text : function () {
+            text: function () {
                 res.send(JSON.stringify(message));
             }
         });
@@ -293,9 +293,9 @@ module.exports = function (global, worker, db) {
         var verb1 = req.url.length - 7 == req.url.lastIndexOf(".js.map");
         var verb2 = req.url.length - 8 == req.url.lastIndexOf(".css.map");
         locals.ERR = {
-            status : err.status || 500,
-            message : err.message || "Oops! Something wrong",
-            error : err.errors
+            status: err.status || 500,
+            message: err.message || "Oops! Something wrong",
+            error: err.errors
         };
         //
         if (!(verb1 || verb2)) console.log("> ", JSON.stringify(locals.ERR));
@@ -305,13 +305,13 @@ module.exports = function (global, worker, db) {
         }
         res.status(locals.ERR.status);
         res.format({
-            html : function () {
+            html: function () {
                 res.render('error', locals);
             },
-            json : function () {
+            json: function () {
                 res.json(locals.ERR);
             },
-            text : function () {
+            text: function () {
                 res.send(JSON.stringify(locals.ERR, 0, 2));
             }
         });
@@ -355,7 +355,7 @@ module.exports = function (global, worker, db) {
         });
         var interval = setInterval(function () {
             socket.emit('rand', {
-                rand : Math.floor(Math.random() * 5)
+                rand: Math.floor(Math.random() * 5)
             });
         }, 1000);
         socket.on('disconnect', function () {

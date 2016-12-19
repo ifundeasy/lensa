@@ -25,11 +25,11 @@ $(document).ready(function () {
     var notes = $('#notes');
     //
     var modal = new Modal({
-        title : "Prompt",
-        backdrop : true,
-        handler : {
-            OK : {class : "btn-success"},
-            Cancel : {class : "btn-default", dismiss : true}
+        title: "Prompt",
+        backdrop: true,
+        handler: {
+            OK: {class: "btn-success"},
+            Cancel: {class: "btn-default", dismiss: true}
         }
     });
     var toastmsg = false;
@@ -38,7 +38,7 @@ $(document).ready(function () {
         toastr.options = {
             closeButton: true,
             progressBar: true,
-            newestOnTop : true,
+            newestOnTop: true,
             showMethod: 'slideDown',
             timeOut: obj.time || 10000
         };
@@ -100,21 +100,21 @@ $(document).ready(function () {
         var putEmpty = function () {
             table.find('tbody').append(
                 '<tr role="row" class="text-center">' +
-                '<td colspan="'+ table.find('thead tr th').length +'">Empty</td>' +
+                '<td colspan="' + table.find('thead tr th').length + '">Empty</td>' +
                 '</tr>'
             );
         };
         $.ajax({
-            method : "GET",
-            dataType : "json",
-            url : url + "?" + $.param({limit : 1000})
+            method: "GET",
+            dataType: "json",
+            url: url + "?" + $.param({limit: 1000})
         }).error(function (jqXHR, is, message) {
             putEmpty();
             twowew({
-                type : "error",
-                title : "GET",
-                message : jqXHR.responseJSON.message,
-                time : 0
+                type: "error",
+                title: "GET",
+                message: jqXHR.responseJSON.message,
+                time: 0
             });
             console.error("GET", jqXHR.responseJSON);
         }).success(function (res) {
@@ -163,8 +163,8 @@ $(document).ready(function () {
                         }
                     });
                     deleteBtn.data({
-                        id : row._id,
-                        name : row.name
+                        id: row._id,
+                        name: row.name
                     });
                     deleteBtn.on("click", function () {
                         modal
@@ -175,21 +175,21 @@ $(document).ready(function () {
                         modal.$buttons.OK.on("click", function () {
                             modal.hide();
                             $.ajax({
-                                method : "DELETE",
-                                dataType : "json",
-                                url : url + tr.data('_id')
+                                method: "DELETE",
+                                dataType: "json",
+                                url: url + tr.data('_id')
                             }).error(function (jqXHR, is, message) {
                                 toastmsg = jqXHR.responseJSON.message;
                                 console.error("DELETE", jqXHR.responseJSON)
                             }).success(function (res) {
                                 reset.click();
                                 getting();
-                            }).complete(function(){
+                            }).complete(function () {
                                 twowew({
-                                    type : toastmsg ? "error" : "success",
-                                    title : "DELETE",
-                                    message : toastmsg || "success",
-                                    time : toastmsg ? 0 : 3000
+                                    type: toastmsg ? "error" : "success",
+                                    title: "DELETE",
+                                    message: toastmsg || "success",
+                                    time: toastmsg ? 0 : 3000
                                 });
                                 toastmsg = false;
                             });
@@ -198,12 +198,12 @@ $(document).ready(function () {
                     table.find('tbody').append(tr)
                 })
                 table.DataTable({
-                    pageLength : 5,
-                    lengthMenu : [5, 10, 25, 50, 75, 100],
-                    order : [[1, "asc"]],
-                    responsive : false,
-                    dom : '<"html5buttons"B>lTfgitp',
-                    buttons : []
+                    pageLength: 5,
+                    lengthMenu: [5, 10, 25, 50, 75, 100],
+                    order: [[1, "asc"]],
+                    responsive: false,
+                    dom: '<"html5buttons"B>lTfgitp',
+                    buttons: []
                 });
             } else putEmpty();
         });
@@ -212,26 +212,26 @@ $(document).ready(function () {
         var method = "POST";
         var url_ = url;
         var data = {
-            name : name.val(),
-            pic : pic.val(),
-            "email.value" : email.val(),
-            "phone.value" : phone.val(),
-            location : {
-                address : address.val(),
-                state : state.val(),
-                zipcode : zipcode.val(),
-                country : country.val(),
-                lat : lat.val(),
-                long : long.val(),
+            name: name.val(),
+            pic: pic.val(),
+            "email.value": email.val(),
+            "phone.value": phone.val(),
+            location: {
+                address: address.val(),
+                state: state.val(),
+                zipcode: zipcode.val(),
+                country: country.val(),
+                lat: lat.val(),
+                long: long.val(),
             },
-            notes : notes.val()
+            notes: notes.val()
         };
         var save = function () {
             $.ajax({
-                method : method,
-                dataType : "json",
-                data : data,
-                url : url_
+                method: method,
+                dataType: "json",
+                data: data,
+                url: url_
             }).error(function (jqXHR, is, message) {
                 toastmsg = jqXHR.responseJSON.message;
                 console.error(method, jqXHR.responseJSON)
@@ -240,10 +240,10 @@ $(document).ready(function () {
                 getting();
             }).complete(function () {
                 twowew({
-                    type : toastmsg ? "error" : "success",
-                    title : method.toUpperCase(),
-                    message : toastmsg || "success",
-                    time : toastmsg ? 0 : 3000
+                    type: toastmsg ? "error" : "success",
+                    title: method.toUpperCase(),
+                    message: toastmsg || "success",
+                    time: toastmsg ? 0 : 3000
                 })
                 toastmsg = false;
             });
@@ -251,7 +251,7 @@ $(document).ready(function () {
         if (isUpdate) {
             method = "PUT";
             url_ = url + isUpdate;
-            data = {docs : data};
+            data = {docs: data};
         }
         if (method == "PUT") {
             modal.setBody("Are you sure want to save these changes?").show();

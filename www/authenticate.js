@@ -174,24 +174,24 @@ module.exports = function (global, locals, user) {
                                         res.redirect('/login');
                                     } else {
                                         user
-                                            .findOne({
-                                                username: body.username,
-                                                active: true
-                                            })
-                                            .populate(popQuery).lean().exec(function (err, user) {
-                                                if (!user.organizations._id) locals.loginMsg.push({
-                                                    'invalid user organization': null
-                                                });
-                                                if (!user.groups._id) locals.loginMsg.push({
-                                                    'invalid user group': null
-                                                });
-                                                if (locals.loginMsg.length) {
-                                                    locals.loginMsgTxt = 'Login fail';
-                                                    res.redirect('/login');
-                                                } else {
-                                                    res.redirect('/');
-                                                }
+                                        .findOne({
+                                            username: body.username,
+                                            active: true
+                                        })
+                                        .populate(popQuery).lean().exec(function (err, user) {
+                                            if (!user.organizations._id) locals.loginMsg.push({
+                                                'invalid user organization': null
                                             });
+                                            if (!user.groups._id) locals.loginMsg.push({
+                                                'invalid user group': null
+                                            });
+                                            if (locals.loginMsg.length) {
+                                                locals.loginMsgTxt = 'Login fail';
+                                                res.redirect('/login');
+                                            } else {
+                                                res.redirect('/');
+                                            }
+                                        });
                                     }
                                 });
                             }

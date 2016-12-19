@@ -1,17 +1,17 @@
 module.exports = {
-    system : {
+    system: {
         //user : "system.lensa@gmail.com",
-        user : "lensa.reporting@gmail.com",
-        pass : "5pasienter"
+        user: "lensa.reporting@gmail.com",
+        pass: "5pasienter"
     },
-    support : {
+    support: {
         //user : "support.lensa@gmail.com",
-        user : "lensa.reporting@gmail.com",
-        pass : "5pasienter"
+        user: "lensa.reporting@gmail.com",
+        pass: "5pasienter"
     },
-    fake : {
+    fake: {
         //user : "fake.lensa@gmail.com",
-        user : "lensa.reporting@gmail.com",
-        pass : "5pasienter"
+        user: "lensa.reporting@gmail.com",
+        pass: "5pasienter"
     }
 };

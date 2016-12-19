@@ -114,7 +114,7 @@ $(document).ready(function () {
         $.ajax({
             method: method,
             dataType: "json",
-            data: {docs:data},
+            data: {docs: data},
             url: url + id
         }).error(function (jqXHR, is, message) {
             toastmsg = jqXHR.responseJSON.message;

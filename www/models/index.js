@@ -8,9 +8,9 @@ module.exports = function (mongoose, obj) {
         var modelName = path.basename(location, '.js');
         if ((modelName.indexOf(".") !== 0) && modelName != 'index') {
             o[modelName] = require(location)(mongoose, {
-                regEx : obj.regEx,
-                getCode4 : obj.getCode4,
-                factory : obj.factory
+                regEx: obj.regEx,
+                getCode4: obj.getCode4,
+                factory: obj.factory
             });
         }
     });
