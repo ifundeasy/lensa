@@ -572,7 +572,6 @@ function getkpi() {
                         ["On Progress", truncateDecimals(kpidata.onprogress.avg, 1)],
                         ["Finished", truncateDecimals(kpidata.finished.avg, 1)]
                     ],
-                    yaxis: 2,
                     color: "#1C84C6",
                     lines: {
                         lineWidth: 1,
@@ -608,12 +607,14 @@ function getkpi() {
                 yaxes: [
                     {
                         position: "left",
-                        max: 1270,
+                        min: 0,
+                        max: 120,
                         color: "#d5d5d5",
                         axisLabelUseCanvas: true,
                         axisLabelFontSizePixels: 12,
                         axisLabelFontFamily: 'Arial',
-                        axisLabelPadding: 3
+                        axisLabelPadding: 3,
+                        tickSize: 5
                     },
                     {
                         position: "right",
@@ -626,7 +627,9 @@ function getkpi() {
                 ],
                 yaxes: {
                     position: "left",
-                    max: 1270,
+                    min: 0,
+                    max: 120,
+                    tickSize: 5,
                     color: "#d5d5d5",
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,

@@ -38,7 +38,17 @@ module.exports = function (mongoose) {
             type: Schema.Types.ObjectId,
             required: true
         },
+        "media._id": {
+            ref: 'media',
+            type: Schema.Types.ObjectId,
+            required: false
+        },
+        remark: {
+            type: String,
+            required: false
+        },
         createdAt: {type: Date, default: Date.now},
+        finishedAt: {type: Date, required: false },
         active: {type: Boolean, default: true}
     });
     var postSchema = new Schema({

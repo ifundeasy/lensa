@@ -19,6 +19,7 @@ module.exports = function (args, app) {
         for (var m in models) o[models[m].collection.name] = mongoose.models[m];
         return o;
     })();
+    
     var mediadirpath = './public/img/post';
     var allowedExtensions = ['jpg', 'jpeg', 'png', 'mp4', '3gp', 'mov'];
     var storage = multer.diskStorage({
@@ -94,7 +95,7 @@ module.exports = function (args, app) {
                         "status": 0,
                         "message": e
                     };
-                    res.status(500).send(body);
+                    res.status(200).send(body);
                 });
             } else {
                 var body = {
@@ -108,7 +109,29 @@ module.exports = function (args, app) {
         }
     });
     api.post('/', function (req, res, next) {
+        var implementorPrivilege = function(cb){
+            var Group = Collection['groups'];
+            Group.findOne({_id: req.loggedUser.groups._id, active: true})
+            .then(function(doc){
+                console.log("implementor doc");
+                console.log(doc);
+                if(doc){
+                    if(doc.name === "Implementor"){
+                        cb(true);
+                    } else {
+                        cb(false);
+                    }
+                } else {
+                    cb(false);
+                }
+            })
+            .catch(function(e){
+                cb(false);
+            });
+        };
+        
         var class_route = req.header("Class");
+        
         switch (class_route) {
             case 'user/create':
                 // check for mandatory field
@@ -121,7 +144,7 @@ module.exports = function (args, app) {
                                 "status": 0,
                                 "message": "username or email is already registered"
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         } else {
                             var newUser = new User({
                                 username: req.body.username,
@@ -148,7 +171,7 @@ module.exports = function (args, app) {
                                     "status": 0,
                                     "message": e
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             });
                         }
                     }).catch(function (e) {
@@ -156,14 +179,14 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": e
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     });
                 } else {
                     var body = {
                         "status": 0,
                         "message": "field is not completed"
                     };
-                    res.status(500).send(body);
+                    res.status(200).send(body);
                 }
                 break;
             case 'login':
@@ -182,7 +205,7 @@ module.exports = function (args, app) {
                                     "status": 0,
                                     "message": err
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             } else {
                                 if (success) {
                                     console.log("success checking the password");
@@ -195,7 +218,7 @@ module.exports = function (args, app) {
                                                 "status": 0,
                                                 "message": error
                                             };
-                                            res.status(500).send(body);
+                                            res.status(200).send(body);
                                         } else {
                                             console.log("success generating salt");
                                             var tokenString = req.body.username + Math.random().toString(36).substr(2, 5);
@@ -228,7 +251,7 @@ module.exports = function (args, app) {
                                                             "status": 0,
                                                             "message": e
                                                         };
-                                                        res.status(500).send(body);
+                                                        res.status(200).send(body);
                                                     });
                                                 } else {
                                                     console.log("error at creating hash");
@@ -238,7 +261,7 @@ module.exports = function (args, app) {
                                                         "status": 0,
                                                         "message": errorhash
                                                     };
-                                                    res.status(500).send(body);
+                                                    res.status(200).send(body);
                                                 }
                                             });
                                         }
@@ -249,7 +272,7 @@ module.exports = function (args, app) {
                                         "status": 0,
                                         "message": "invalid username password combination"
                                     };
-                                    res.status(500).send(body);
+                                    res.status(200).send(body);
                                 }
                             }
                         });
@@ -258,14 +281,14 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "invalid user"
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     }
                 }).catch(function (e) {
                     var body = {
                         "status": 0,
                         "message": e
                     };
-                    res.status(500).send(body);
+                    res.status(200).send(body);
                 });
                 break;
             case 'logout':
@@ -277,62 +300,77 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Post = Collection['posts'];
                         var start = parseInt(req.body.start);
                         var limit = parseInt(req.body.limit);
-                        Post.find({active: true}).sort('createdAt')
-                        .populate({path: 'users._id', select: 'name media'})
-                        .populate({path: 'media._ids', select: 'directory'})
-                        .populate({path: 'categories._id', select: 'name'})
-                        .populate({path: 'comments.users._id', select: 'name media'})
-                        .populate({path: 'statuses.steps._id', select: 'name'})
-                        .populate({path: 'organizations._id', select: 'name'})
-                        .skip(start).limit(limit).then(function (docs) {
-                            var Media = Collection['media'];
-                            Media.populate(docs, {
-                                path: 'users._id.media._id',
-                                select: 'directory',
-                            }, function (err, _docs) {
-                                Media.populate(_docs, {
-                                    path: 'comments.users._id.media._id',
+                        var query = {};
+                        implementorPrivilege(function(impResult){
+                            if(impResult){
+                                query = {
+                                    active: true,
+                                    "assignTo.implementor.users._id": req.loggedUser._id
+                                };
+                            } else {
+                                query = {
+                                    active: true
+                                };
+                            }
+                            console.log("query");
+                            console.log(query);
+                            Post.find(query).sort('createdAt')
+                            .populate({path: 'users._id', select: 'name media'})
+                            .populate({path: 'media._ids', select: 'directory'})
+                            .populate({path: 'categories._id', select: 'name'})
+                            .populate({path: 'comments.users._id', select: 'name media'})
+                            .populate({path: 'statuses.steps._id', select: 'name'})
+                            .populate({path: 'organizations._id', select: 'name'})
+                            .skip(start).limit(limit).then(function (docs) {
+                                var Media = Collection['media'];
+                                Media.populate(docs, {
+                                    path: 'users._id.media._id',
                                     select: 'directory',
-                                }, function (err, __docs) {
-                                    var objArray = [];
-                                    for (x = 0; x < _docs.length; x++) {
-                                        var postObject = __docs[x].toObject();
-                                        if (!postObject.hasOwnProperty('title')) {
-                                            postObject.title = 'Untitled Report';
-                                        }
-
-                                        if (!postObject.hasOwnProperty('media')) {
-                                            postObject.media = 'no-media.jpg';
-                                        }
-                                        for (y = 0; y < postObject.comments.length; y++) {
-                                            if (!postObject.comments[y].users._id.hasOwnProperty('media')) {
-                                                postObject.comments[y].users._id.media = 'no-media.jpg';
+                                }, function (err, _docs) {
+                                    Media.populate(_docs, {
+                                        path: 'comments.users._id.media._id',
+                                        select: 'directory',
+                                    }, function (err, __docs) {
+                                        var objArray = [];
+                                        for (x = 0; x < _docs.length; x++) {
+                                            var postObject = __docs[x].toObject();
+                                            if (!postObject.hasOwnProperty('title')) {
+                                                postObject.title = 'Untitled Report';
                                             }
+    
+                                            if (!postObject.hasOwnProperty('media')) {
+                                                postObject.media = 'no-media.jpg';
+                                            }
+                                            for (y = 0; y < postObject.comments.length; y++) {
+                                                if (!postObject.comments[y].users._id.hasOwnProperty('media')) {
+                                                    postObject.comments[y].users._id.media = 'no-media.jpg';
+                                                }
+                                            }
+                                            objArray.push(postObject);
                                         }
-                                        objArray.push(postObject);
-                                    }
-                                    var body = {
-                                        "status": 1,
-                                        "data": objArray,
-                                        "nextToken": newToken
-                                    };
-                                    res.status(200).send(body);
+                                        var body = {
+                                            "status": 1,
+                                            "data": objArray,
+                                            "nextToken": newToken
+                                        };
+                                        res.status(200).send(body);
+                                    });
+    
                                 });
-
+    
+                            }).catch(function (e) {
+                                var body = {
+                                    "status": 0,
+                                    "message": e,
+                                    "nextToken": newToken
+                                };
+                                res.status(200).send(body);
                             });
-
-                        }).catch(function (e) {
-                            var body = {
-                                "status": 0,
-                                "message": e,
-                                "nextToken": newToken
-                            };
-                            res.status(500).send(body);
                         });
                     }
                 });
@@ -344,7 +382,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Post = Collection['posts'];
                         Post.findOne({_id: req.body._id})
@@ -380,7 +418,7 @@ module.exports = function (args, app) {
                                     "message": "invalid report id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -388,7 +426,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -400,7 +438,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         console.log("mamat1");
                         var medias = [];
@@ -438,7 +476,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -450,7 +488,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Post = Collection['posts'];
                         Post.findOne({_id: req.body._id, "users._id": req.loggedUser._id}).remove().then(function (doc) {
@@ -467,7 +505,7 @@ module.exports = function (args, app) {
                                     "message": "invalid report id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -475,11 +513,132 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
                 break;
+                
+            case 'report/update':
+                var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
+                    if (errortoken) {
+                        var body = {
+                            "status": 0,
+                            "message": "failed to get new token. Please login again.",
+                        };
+                        res.status(200).send(body);
+                    } else {
+                        implementorPrivilege(function(impResult){
+                            if(impResult){
+                                var reportid = req.body._id;
+                                var mediaid = req.body.mediaid;
+                                var remark = req.body.remark;
+                                
+                                var Post = Collection['posts'];
+                                Post.findOne({
+                                    _id: reportid
+                                })
+                                .populate({path: 'statuses.steps._id', select: 'procedures._id stepNumber'})
+                                .then(function (doc) {
+                                    if (doc !== null) {
+                                        // check for report statuses
+                                        if(doc.statuses.length > 0){
+                                            var Step = Collection['steps'];
+                                            Step.find({
+                                                "procedures._id": doc.statuses[doc.statuses.length-1].steps._id.procedures._id,
+                                                active: true
+                                            })
+                                            .sort({stepNumber: 1})
+                                            .then(function (docs) {
+                                                if(docs.length>0){
+                                                    //update last progress/status element
+                                                    doc.statuses[doc.statuses.length-1].media._id = mediaid;
+                                                    doc.statuses[doc.statuses.length-1].remark = remark;
+                                                    doc.statuses[doc.statuses.length-1].finishedAt = new Date();
+                                                    // check if all steps have been completed (except one last step)
+                                                    if(doc.statuses.length == docs.length){
+                                                        // update post document => finished: true
+                                                        doc.finished = true;
+                                                    } else {
+                                                        // insert new pregress/status
+                                                        var newStatus = {
+                                                            "users._id": req.loggedUser._id,
+                                                            "steps._id":docs[0]._id
+                                                        }
+                                                        doc.statuses.push(newStatus);
+                                                    }
+                                                    
+                                                    doc.save(function (err) {
+                                                        if (!err) {
+                                                            var body = {
+                                                                "status": 1,
+                                                                "message": "report progress has been updated",
+                                                                "nextToken": newToken
+                                                            };
+                                                            res.status(200).send(body);
+                                                        } else {
+                                                            var body = {
+                                                                "status": 0,
+                                                                "message": err,
+                                                                "nextToken": newToken
+                                                            };
+                                                            res.status(200).send(body);
+                                                        }
+                                                    });
+                                                } else {
+                                                    var body = {
+                                                        "status": 0,
+                                                        "message": "invalid procedure id",
+                                                        "nextToken": newToken
+                                                    };
+                                                    res.status(200).send(body);
+                                                }
+                                            })
+                                            .catch(function(e){
+                                                var body = {
+                                                    "status": 0,
+                                                    "message": err,
+                                                    "nextToken": newToken
+                                                };
+                                                res.status(200).send(body);
+                                            });
+                                        } else {
+                                            var body = {
+                                                "status": 0,
+                                                "message": "the report has not yet been assigned",
+                                                "nextToken": newToken
+                                            };
+                                            res.status(200).send(body);
+                                        }
+                                    } else {
+                                        var body = {
+                                            "status": 0,
+                                            "message": "invalid report id",
+                                            "nextToken": newToken
+                                        };
+                                        res.status(200).send(body);
+                                    }
+                                }).catch(function (e) {
+                                    var body = {
+                                        "status": 0,
+                                        "message": e,
+                                        "nextToken": newToken
+                                    };
+                                    res.status(200).send(body);
+                                });
+                            } else {
+                                var body = {
+                                    "status": 0,
+                                    "message": "invalid user group",
+                                    "nextToken": newToken
+                                };
+                                res.status(200).send(body);
+                            }
+                        });
+                    }
+                });
+                break;
+                
             case 'comment/create':
                 var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {
                     if (errortoken) {
@@ -487,7 +646,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Post = Collection['posts'];
                         Post.findOne({_id: req.body.parent_id}).then(function (doc) {
@@ -511,7 +670,7 @@ module.exports = function (args, app) {
                                             "message": err,
                                             "nextToken": newToken
                                         };
-                                        res.status(500).send(body);
+                                        res.status(200).send(body);
                                     }
                                 });
                             } else {
@@ -520,7 +679,7 @@ module.exports = function (args, app) {
                                     "message": "invalid report id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -528,7 +687,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -540,7 +699,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Post = Collection['posts'];
                         Post.findOne({_id: req.body.parent_id}).then(function (doc) {
@@ -560,7 +719,7 @@ module.exports = function (args, app) {
                                             "message": err,
                                             "nextToken": newToken
                                         };
-                                        res.status(500).send(body);
+                                        res.status(200).send(body);
                                     }
                                 });
                             } else {
@@ -569,7 +728,7 @@ module.exports = function (args, app) {
                                     "message": "invalid report id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -577,7 +736,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -589,7 +748,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var User = Collection['users'];
                         User.findOne({_id: req.body._id}).select('-password').then(function (doc) {
@@ -606,7 +765,7 @@ module.exports = function (args, app) {
                                     "message": "invalid user id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -614,7 +773,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -626,7 +785,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var User = Collection['users'];
                         User.findOne({_id: req.loggedUser._id}).then(function (doc) {
@@ -658,7 +817,7 @@ module.exports = function (args, app) {
                                             "message": err,
                                             "nextToken": newToken
                                         };
-                                        res.status(500).send(body);
+                                        res.status(200).send(body);
                                     }
                                 });
                             } else {
@@ -667,7 +826,7 @@ module.exports = function (args, app) {
                                     "message": "invalid user id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -675,7 +834,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -688,7 +847,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
 
                         upload(req, res, function (err) {
@@ -699,7 +858,7 @@ module.exports = function (args, app) {
                                     "err": err,
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             } else {
                                 console.log("req.file :");
                                 console.log(req.file);
@@ -725,7 +884,7 @@ module.exports = function (args, app) {
                                         "message": 'error',
                                         "nextToken": newToken
                                     };
-                                    res.status(500).send(body);
+                                    res.status(200).send(body);
                                 });
                             }
                         });
@@ -740,7 +899,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Organization = Collection['organizations'];
                         Organization.findOne({_id: req.body._id}).then(function (doc) {
@@ -757,7 +916,7 @@ module.exports = function (args, app) {
                                     "message": "invalid organization id",
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             }
                         }).catch(function (e) {
                             var body = {
@@ -765,7 +924,7 @@ module.exports = function (args, app) {
                                 "message": e,
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -779,7 +938,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Category = Collection['categories'];
                         var catObj = {
@@ -802,7 +961,7 @@ module.exports = function (args, app) {
                                 "message": 'error',
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -815,7 +974,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Role = Collection['roles'];
                         var roleObj = {
@@ -838,7 +997,7 @@ module.exports = function (args, app) {
                                 "message": 'error',
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -851,7 +1010,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Procedure = Collection['procedures'];
                         var procObj = {
@@ -875,7 +1034,7 @@ module.exports = function (args, app) {
                                 "message": 'error',
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -888,7 +1047,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
                         var Step = Collection['steps'];
                         var stepObj = {
@@ -913,7 +1072,7 @@ module.exports = function (args, app) {
                                 "message": 'error',
                                 "nextToken": newToken
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         });
                     }
                 });
@@ -927,7 +1086,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": "failed to get new token. Please login again.",
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     } else {
 
                         upload(req, res, function (err) {
@@ -938,7 +1097,7 @@ module.exports = function (args, app) {
                                     "err": err,
                                     "nextToken": newToken
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             } else {
                                 console.log("req.file :");
                                 console.log(req.file);
@@ -964,7 +1123,7 @@ module.exports = function (args, app) {
                                         "message": 'error',
                                         "nextToken": newToken
                                     };
-                                    res.status(500).send(body);
+                                    res.status(200).send(body);
                                 });
                             }
                         });
