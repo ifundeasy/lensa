@@ -21,6 +21,7 @@ $(document).ready(function () {
     var zipcode = $('#zipcode');
     var country = $('#country');
     var lat = $('#lat');
+    var administrativeAreaLevel = $('#administrativeArea');
     var long = $('#long');
     var notes = $('#notes');
     //
@@ -216,14 +217,13 @@ $(document).ready(function () {
             pic: pic.val(),
             "email.value": email.val(),
             "phone.value": phone.val(),
-            location: {
-                address: address.val(),
-                state: state.val(),
-                zipcode: zipcode.val(),
-                country: country.val(),
-                lat: lat.val(),
-                long: long.val(),
-            },
+            "location.address": address.val(),
+            "location.state": state.val(),
+            "location.zipcode": zipcode.val(),
+            "location.country": country.val(),
+            "location.administrativeAreaLevel": administrativeAreaLevel.val(),
+            "location.lat": lat.val(),
+            "location.long": long.val(),
             notes: notes.val()
         };
         var save = function () {

@@ -19,6 +19,8 @@ $(document).ready(function () {
     var email = $('#email');
     var phone = $('#phone');
     var group = $('#group');
+    var department = $('#department');
+    var departmentcontainer = $('#department-container');
     var notes = $('#notes');
     //
     var modal = new Modal({
@@ -85,8 +87,18 @@ $(document).ready(function () {
             forminfo.text("1");
         });
         prev.click();
+        group.on('change', function () {
+            var selectionText = $('#group option:selected').text();
+            if(selectionText == "Admin"){
+                departmentcontainer.removeClass("hidden");
+            } else {
+                departmentcontainer.addClass("hidden");
+            }
+
+        });
         gettingOrganization() //async
         gettingGroup();  //sync
+        gettingdepartment();  //sync
         getting(); //async
     }
     var gettingOrganization = function () {
@@ -133,11 +145,37 @@ $(document).ready(function () {
             }
         });
     };
+    
+    var gettingdepartment = function () {
+        $.ajax({
+            method: "GET",
+            dataType: "json",
+            async: false,
+            url: "!/roles?" + $.param({limit: 1000})
+        }).error(function (jqXHR, is, message) {
+            twowew({
+                type: "error",
+                title: "GET",
+                message: jqXHR.responseJSON.message,
+                time: 0
+            });
+            console.error("GET", jqXHR.responseJSON);
+        }).success(function (res) {
+            if (res.data.total) {
+                var rows = res.data.rows;
+                rows.forEach(function (row) {
+                    department.append('<option value="' + row._id + '">' + row.name + '</option>');
+                });
+                department.chosen({no_results_text: "Oops, nothing found!", width: "100%"});
+            }
+        });
+    };
+    
     var getting = function () {
         var table = setTable();
         var putEmpty = function () {
             table.find('tbody').append(
-                '<tr role="row" class="text-center">' +
+                '<tr department="row" class="text-center">' +
                 '<td colspan="' + table.find('thead tr th').length + '">Empty</td>' +
                 '</tr>'
             );
@@ -252,6 +290,9 @@ $(document).ready(function () {
             "organizations._id": organization._id,
             notes: notes.val()
         };
+        if($('#group option:selected').text() == "Admin"){
+            data["roles._id"] = department.val();
+        }
         var save = function () {
             $.ajax({
                 method: method,

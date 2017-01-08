@@ -5,6 +5,16 @@ var httpCode = require('http').STATUS_CODES;
 var bcrypt = require('bcrypt');
 var multer = require("multer");
 var path = require('path');
+var NodeGeocoder = require('node-geocoder');
+//var path = require('path');
+
+var options = {
+    provider: 'google',
+    // Optional depending on the providers 
+    httpAdapter: 'https', // Default 
+    apiKey: 'AIzaSyDAxcmB59ndh8i4W9R1107oRQ3zu9XIsUw', // for Mapquest, OpenCage, Google Premier 
+    formatter: null       // 'gpx', 'string', ... 
+};
 //
 module.exports = function (args, app) {
     var global = args.global;
@@ -307,70 +317,129 @@ module.exports = function (args, app) {
                         var limit = parseInt(req.body.limit);
                         var query = {};
                         implementorPrivilege(function(impResult){
+                            
+                            var queryfunc = function(query){
+                                console.log("query");
+                                console.log(query);
+                                Post.find(query).sort('createdAt')
+                                .populate({path: 'users._id', select: 'name media'})
+                                .populate({path: 'media._ids', select: 'directory'})
+                                .populate({path: 'categories._id', select: 'name'})
+                                .populate({path: 'comments.users._id', select: 'name media'})
+                                .populate({path: 'statuses.steps._id', select: 'name'})
+                                .populate({path: 'organizations._id', select: 'name'})
+                                .skip(start).limit(limit).then(function (docs) {
+                                    var Media = Collection['media'];
+                                    Media.populate(docs, {
+                                        path: 'users._id.media._id',
+                                        select: 'directory',
+                                    }, function (err, _docs) {
+                                        Media.populate(_docs, {
+                                            path: 'comments.users._id.media._id',
+                                            select: 'directory',
+                                        }, function (err, __docs) {
+                                            var objArray = [];
+                                            for (x = 0; x < _docs.length; x++) {
+                                                var postObject = __docs[x].toObject();
+                                                if (!postObject.hasOwnProperty('title')) {
+                                                    postObject.title = 'Untitled Report';
+                                                }
+        
+                                                if (!postObject.hasOwnProperty('media')) {
+                                                    postObject.media = 'no-media.jpg';
+                                                }
+                                                for (y = 0; y < postObject.comments.length; y++) {
+                                                    if (!postObject.comments[y].users._id.hasOwnProperty('media')) {
+                                                        postObject.comments[y].users._id.media = 'no-media.jpg';
+                                                    }
+                                                }
+                                                objArray.push(postObject);
+                                            }
+                                            var body = {
+                                                "status": 1,
+                                                "data": objArray,
+                                                query: query,
+                                                "nextToken": newToken
+                                            };
+                                            res.status(200).send(body);
+                                        });
+        
+                                    });
+        
+                                }).catch(function (e) {
+                                    var body = {
+                                        "status": 0,
+                                        "message": e,
+                                        "nextToken": newToken
+                                    };
+                                    res.status(200).send(body);
+                                });    
+                            }
+                            //
                             if(impResult){
                                 query = {
                                     active: true,
                                     "assignTo.implementor.users._id": req.loggedUser._id
                                 };
+                                
+                                queryfunc(query);
                             } else {
-                                query = {
-                                    active: true
-                                };
-                            }
-                            console.log("query");
-                            console.log(query);
-                            Post.find(query).sort('createdAt')
-                            .populate({path: 'users._id', select: 'name media'})
-                            .populate({path: 'media._ids', select: 'directory'})
-                            .populate({path: 'categories._id', select: 'name'})
-                            .populate({path: 'comments.users._id', select: 'name media'})
-                            .populate({path: 'statuses.steps._id', select: 'name'})
-                            .populate({path: 'organizations._id', select: 'name'})
-                            .skip(start).limit(limit).then(function (docs) {
-                                var Media = Collection['media'];
-                                Media.populate(docs, {
-                                    path: 'users._id.media._id',
-                                    select: 'directory',
-                                }, function (err, _docs) {
-                                    Media.populate(_docs, {
-                                        path: 'comments.users._id.media._id',
-                                        select: 'directory',
-                                    }, function (err, __docs) {
-                                        var objArray = [];
-                                        for (x = 0; x < _docs.length; x++) {
-                                            var postObject = __docs[x].toObject();
-                                            if (!postObject.hasOwnProperty('title')) {
-                                                postObject.title = 'Untitled Report';
+                                
+                                // proses mencari organisasi yang tepat untuk timeline yg dikirim, based on location data
+                                var geocoder = NodeGeocoder(options);
+                                geocoder.reverse({lat: parseFloat(req.body.lat), lon: parseFloat(req.body.long)})
+                                .then(function (res) {
+                                    console.log("succeded reverse geocoding");
+                                    var Organization = mongoose.models.organization;
+                                    var g = res[0];
+                                    console.log(g);
+                                    Organization.find({
+                                        $or: [
+                                            {$and: [{"location.administrativeAreaLevel": 1}, {"location.administrativeName": g.administrativeLevels.level1long}]},
+                                            {$and: [{"location.administrativeAreaLevel": 2}, {"location.administrativeName": g.administrativeLevels.level2long}]},
+                                            {$and: [{"location.administrativeAreaLevel": 3}, {"location.administrativeName": g.administrativeLevels.level3long}]},
+                                            {$and: [{"location.administrativeAreaLevel": 4}, {"location.administrativeName": g.administrativeLevels.level4long}]}
+                                        ]
+                                    }).then(function (docs) {
+                                        console.log(docs);
+                                        if (docs.length != 0) {
+                                            var orOrgs = [];
+                                            for(i=0; i<docs.length; i++){
+                                                orOrgs.push({ "organizations._id" : docs[i]._id });
                                             }
-    
-                                            if (!postObject.hasOwnProperty('media')) {
-                                                postObject.media = 'no-media.jpg';
-                                            }
-                                            for (y = 0; y < postObject.comments.length; y++) {
-                                                if (!postObject.comments[y].users._id.hasOwnProperty('media')) {
-                                                    postObject.comments[y].users._id.media = 'no-media.jpg';
-                                                }
-                                            }
-                                            objArray.push(postObject);
+                                            
+                                            query = {
+                                                $and: [
+                                                    { active: true },
+                                                    { $or: orOrgs }
+                                                ]
+                                            };
+                                            
+                                            queryfunc(query);
+                                           
                                         }
+                                    }).catch(function (e) {
+                                        console.log("failed query organization");
                                         var body = {
-                                            "status": 1,
-                                            "data": objArray,
+                                            "status": 0,
+                                            "message": e,
                                             "nextToken": newToken
                                         };
                                         res.status(200).send(body);
                                     });
-    
+                                })
+                                .catch(function (err) {
+                                    var body = {
+                                        "status": 0,
+                                        "message": err,
+                                        "nextToken": newToken
+                                    };
+                                    res.status(200).send(body);
                                 });
-    
-                            }).catch(function (e) {
-                                var body = {
-                                    "status": 0,
-                                    "message": e,
-                                    "nextToken": newToken
-                                };
-                                res.status(200).send(body);
-                            });
+                                
+
+                            }
+                            
                         });
                     }
                 });

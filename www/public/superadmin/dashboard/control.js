@@ -4,6 +4,9 @@ var dashboardData = {};
 var markers = [];
 var map = '';
 var monthNameList = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var orglat = 0;
+var orglong = 0;
+
 // modal detail 
 var modal = new Modal({
     title: "Prompt",
@@ -43,10 +46,10 @@ var modalselector3 = '#' + modal3.id;
 $(modalselector3).css("z-index", "2080");
 
 function initMap() {
-    var bandung = {lat: -6.909920, lng: 107.608136}; //TODO: do not hardcode. cari dari organizations._id
+    var orgLocation = {lat: orglat, lng: orglong};
     map = new google.maps.Map($('#dashboard-maps')[0], {
         zoom: 12,
-        center: bandung
+        center: orgLocation
     });
 }
 
@@ -146,20 +149,22 @@ function loadDashboardData() {
                 $('#total-count').html(dashboardData.allreportltlng.length);
 
                 $('#done-count').html(dashboardData.finishedreportltlng.length);
-                var donePercent = dashboardData.finishedreportltlng.length / dashboardData.allreportltlng.length * 100;
+                var donePercent = (dashboardData.finishedreportltlng.length / dashboardData.allreportltlng.length * 100) || 0;
                 $('#done-count').next().html(truncateDecimals(donePercent, 1) + ' %');
 
                 $('#progress-count').html(dashboardData.onprogressreportltlng.length);
-                var progressPercent = dashboardData.onprogressreportltlng.length / dashboardData.allreportltlng.length * 100;
+                var progressPercent = (dashboardData.onprogressreportltlng.length / dashboardData.allreportltlng.length * 100) || 0;
                 $('#progress-count').next().html(truncateDecimals(progressPercent, 1) + ' %');
 
                 $('#accepted-count').html(dashboardData.acceptedreportltlng.length);
-                var acceptedPercent = dashboardData.acceptedreportltlng.length / dashboardData.allreportltlng.length * 100;
+                var acceptedPercent = (dashboardData.acceptedreportltlng.length / dashboardData.allreportltlng.length * 100) || 0;
                 $('#accepted-count').next().html(truncateDecimals(acceptedPercent, 1) + ' %');
 
                 $('#rejected-count').html(dashboardData.rejectedreportltlng.length);
-                var rejectedPercent = dashboardData.rejectedreportltlng.length / dashboardData.allreportltlng.length * 100;
+                var rejectedPercent = (dashboardData.rejectedreportltlng.length / dashboardData.allreportltlng.length * 100) || 0;
                 $('#rejected-count').next().html(truncateDecimals(rejectedPercent, 1) + ' %');
+                orglat = dashboardData.orglocationlat;
+                orglong = dashboardData.orglocationlong;
 
                 $('#top-entities-list').html('');
                 var entitiesEl = '';
@@ -213,6 +218,8 @@ function loadDashboardData() {
                 }, 1000);
                 // just reassign peity style --end
 
+                // do the map
+                initMap();
                 // load marker
                 reloadMarkers(dashboardData.allreportltlng);
 
@@ -665,9 +672,6 @@ function truncateDecimals(number, digits) {
 };
 
 $(document).ready(function () {
-
-    initMap();
     loadDashboardData();
     getkpi();
-
 });

@@ -136,7 +136,7 @@ module.exports = function (args, app) {
                                     "status": 0,
                                     "message": e,
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             });
 
                         } else {
@@ -144,7 +144,7 @@ module.exports = function (args, app) {
                                 "status": 0,
                                 "message": "invalid procedure id",
                             };
-                            res.status(500).send(body);
+                            res.status(200).send(body);
                         }
                     }).catch(function (e) {
                         console.log(e);
@@ -152,7 +152,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": e,
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     });
 
                     break;
@@ -160,8 +160,18 @@ module.exports = function (args, app) {
                 case 'alldashboarddata':
 
                     var Post = Collection['posts'];
+                    var Organization = Collection['organizations'];
                     var data = {};
 
+                    // get organizagtion latlong
+                    Organization.findOne({
+                        "_id": req.logged.user.organizations._id
+                    }).then(function(doc){
+                        data.orglocationlat = doc.location.lat;
+                        data.orglocationlong = doc.location.long;
+                    }).catch(function(e){
+                        errfunc(e);
+                    });
                     // all incoming reports
                     Post.find({
                         "organizations._id": req.logged.user.organizations._id,
@@ -438,7 +448,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": e,
                         };
-                        return res.status(500).send(body);
+                        return res.status(200).send(body);
                     });
                     break;
 
@@ -475,7 +485,7 @@ module.exports = function (args, app) {
                                     "status": 0,
                                     "message": e,
                                 };
-                                res.status(500).send(body);
+                                res.status(200).send(body);
                             });
                         } else {
                             var body = {
@@ -491,7 +501,7 @@ module.exports = function (args, app) {
                             "status": 0,
                             "message": e,
                         };
-                        res.status(500).send(body);
+                        res.status(200).send(body);
                     });
                     break;
                 default:

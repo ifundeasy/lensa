@@ -1,3 +1,13 @@
+var NodeGeocoder = require('node-geocoder');
+
+var options = {
+    provider: 'google',
+    // Optional depending on the providers 
+    httpAdapter: 'https', // Default 
+    apiKey: 'AIzaSyDAxcmB59ndh8i4W9R1107oRQ3zu9XIsUw', // for Mapquest, OpenCage, Google Premier 
+    formatter: null       // 'gpx', 'string', ... 
+};
+
 module.exports = function (mongoose, opts) {
     var Schema = mongoose.Schema;
     var orgSchema = new Schema({
@@ -77,39 +87,30 @@ module.exports = function (mongoose, opts) {
     orgSchema.pre('save', function (next) {
         var org = this;
 
-        var NodeGeocoder = require('node-geocoder');
-        var options = {
-            provider: 'google',
-            // Optional depending on the providers 
-            httpAdapter: 'https', // Default 
-            apiKey: 'AIzaSyDAxcmB59ndh8i4W9R1107oRQ3zu9XIsUw', // for Mapquest, OpenCage, Google Premier 
-            formatter: null       // 'gpx', 'string', ... 
-        };
-
         // proses mencari organisasi yang tepat untuk laporan yang akan disimpan, based on location data
         var geocoder = NodeGeocoder(options);
         geocoder.reverse({lat: parseFloat(org.location.lat), lon: parseFloat(org.location.long)})
         .then(function (res) {
-            console.log("succeded reverse geocoding");
             var g = res[0];
 
-            if (org.location.administrativeAreaLevel == '1') {
+            if (org.location.administrativeAreaLevel == 1) {
                 org.location.administrativeName = g.administrativeLevels.level1long;
-            } else if (org.location.administrativeAreaLevel == '2') {
+            } else if (org.location.administrativeAreaLevel == 2) {
                 org.location.administrativeName = g.administrativeLevels.level2long;
-            } else if (org.location.administrativeAreaLevel == '3') {
+            } else if (org.location.administrativeAreaLevel == 3) {
                 org.location.administrativeName = g.administrativeLevels.level3long;
             } else {
                 org.location.administrativeName = g.administrativeLevels.level4long;
             }
-
+            
+            console.log("succeded reverse geocoding");
+            next();
         })
         .catch(function (err) {
             next(err);
         });
         org.phone.value = org.phone.value.replace(/[\(\)\+\-\s]/g, "");
 
-        return next();
     });
     return mongoose.model('organization', orgSchema);
 };

@@ -20,6 +20,7 @@ module.exports = function (args, app) {
 
     api.get('/alldashboarddata', function (req, res, next) {
         var Post = Collection['posts'];
+        var Organization = Collection['organizations'];
         var data = {};
         var finalfunc = function () {
             var body = {
@@ -33,13 +34,22 @@ module.exports = function (args, app) {
                 "status": 0,
                 "message": e,
             };
-            res.status(500).send(body);
+            res.status(200).send(body);
         }
+        
+        // get organizagtion latlong
+        Organization.findOne({
+            "_id": req.logged.user.organizations._id
+        }).then(function(doc){
+            data.orglocationlat = doc.location.lat;
+            data.orglocationlong = doc.location.long;
+        }).catch(function(e){
+            errfunc(e);
+        });
 
         // TODO: kodenya masih kotor banget. next-nya bersihin pake modul apa kek biar parallel jadi gak terus2an menjorok.
 
         // all reports
-
         Post.find({
             "organizations._id": req.logged.user.organizations._id,
             active: true

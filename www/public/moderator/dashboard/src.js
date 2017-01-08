@@ -2,6 +2,8 @@ var dashboardData = {};
 var markers = [];
 var map = '';
 var monthNameList = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var orglat = 0;
+var orglong = 0;
 
 var modal = new Modal({
     title: "Prompt",
@@ -323,7 +325,11 @@ function loadDashboardData() {
                 $('#assignedcount').html(dashboardData.assignedreportltlng.length);
                 $('#returnedcount').html(dashboardData.returnedreportltlng.length);
                 $('#rejectedcount').html(dashboardData.rejectedreportltlng.length);
+                orglat = dashboardData.orglocationlat;
+                orglong = dashboardData.orglocationlong;
 
+                // init map
+                initMap();
                 // load marker
                 reloadMarkers(dashboardData.allreportltlng);
 
@@ -707,16 +713,14 @@ function setBarChartClickEvent() {
 }
 
 function initMap() {
-    var bandung = {lat: -6.909920, lng: 107.608136}; //TODO: do not hardcode. cari dari organizations._id
+    var orgLocation = {lat: orglat, lng: orglong};
     map = new google.maps.Map($('#dashboard-maps')[0], {
         zoom: 12,
-        center: bandung
+        center: orgLocation
     });
 }
 
 $(document).ready(function () {
-
-    initMap();
 
     loadDashboardData();
 
