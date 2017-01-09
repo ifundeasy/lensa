@@ -615,6 +615,7 @@ module.exports = function (args, app) {
                                             var Step = Collection['steps'];
                                             Step.find({
                                                 "procedures._id": doc.statuses[doc.statuses.length-1].steps._id.procedures._id,
+                                                //stepNumber: { $gt: doc.statuses[doc.statuses.length-1].steps._id.stepNumber },
                                                 active: true
                                             })
                                             .sort({stepNumber: 1})
@@ -630,11 +631,16 @@ module.exports = function (args, app) {
                                                         doc.finished = true;
                                                     } else {
                                                         // insert new pregress/status
-                                                        var newStatus = {
-                                                            "users._id": req.loggedUser._id,
-                                                            "steps._id":docs[0]._id
+                                                        for(var q=0; q<docs.length; q++){
+                                                            if(docs[q].stepNumber > doc.statuses[doc.statuses.length-1].steps._id.stepNumber){
+                                                                var newStatus = {
+                                                                    "users._id": req.loggedUser._id,
+                                                                    "steps._id":docs[q]._id
+                                                                }
+                                                                doc.statuses.push(newStatus);
+                                                                break;
+                                                            }
                                                         }
-                                                        doc.statuses.push(newStatus);
                                                     }
                                                     
                                                     doc.save(function (err) {
@@ -666,7 +672,7 @@ module.exports = function (args, app) {
                                             .catch(function(e){
                                                 var body = {
                                                     "status": 0,
-                                                    "message": err,
+                                                    "message": e,
                                                     "nextToken": newToken
                                                 };
                                                 res.status(200).send(body);

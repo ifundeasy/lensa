@@ -324,17 +324,18 @@ function getAllreports() {
 
                 var tabelRows = '';
                 for (i = 0; i < reportdata.length; i++) {
-                    var reportTitle = 'Untitled Report';
+                    var reportTitle = 'Untitled Report'; // this is no longer relevant, since now title will be handled by server and always exist. but anyway..
                     if (reportdata[i].hasOwnProperty('title')) {
                         reportTitle = reportdata[i].title;
                     }
                     tabelRows += '<tr>' +
                         '<td>' + reportdata[i]._id + '</td>' +
-                        '<td>' + reportTitle + '</td>' +
+                        '<td class="td-center">' + reportTitle + '</td>' +
                         '<td>' + reportdata[i].text + '</td>' +
-                        '<td>' + reportdata[i].users._id.name.first + '</td>' +
-                        '<td>' + reportdata[i].createdAt.substr(0, reportdata[i].createdAt.indexOf('T')) + " " + reportdata[i].createdAt.substr(reportdata[i].createdAt.indexOf('T') + 1, 8) + '</td>' +
-                        '<td><a class="btn btn-default btn-detail"><span class="glyphicon glyphicon-search"></span></a></td>' +
+                        '<td class="td-center">' + reportdata[i].users._id.name.first + '</td>' +
+                        '<td class="td-center">' + reportdata[i].status + '</td>' +
+                        '<td class="td-center">' + reportdata[i].createdAt.substr(0, reportdata[i].createdAt.indexOf('T')) + " " + reportdata[i].createdAt.substr(reportdata[i].createdAt.indexOf('T') + 1, 8) + '</td>' +
+                        '<td class="td-center"><a class="btn btn-default btn-detail"><span class="glyphicon glyphicon-search"></span></a></td>' +
                         '</tr>';
 
                 }
@@ -346,6 +347,30 @@ function getAllreports() {
                             "targets": 0,
                             "visible": false,
                             "searchable": false
+                        },
+                        { 
+                            "targets": 1,
+                            "width": "20%",
+                        },
+                        { 
+                            "targets": 2,
+                            "width": "30%"
+                        },
+                        { 
+                            "targets": 3,
+                            "width": "15%"
+                        },
+                        { 
+                            "targets": 4,
+                            "width": "10%"
+                        },
+                        { 
+                            "targets": 5,
+                            "width": "15%"
+                        },
+                        { 
+                            "targets": 6,
+                            "width": "10%"
                         }
                     ]
                 });
@@ -433,7 +458,11 @@ function getAllreports() {
                                         if (detailreport.statuses.length > 0) {
                                             $('.right-content .well>strong').html(detailreport.statuses[detailreport.statuses.length - 1].steps._id.name);
                                         } else {
-                                            $('.right-content .well>strong').html('assigned to admin');
+                                            if(detailreport.hasOwnProperty('returned')){
+                                                $('.right-content .well>strong').html('returned to moderator');
+                                            } else {
+                                                $('.right-content .well>strong').html('assigned to admin');
+                                            }
                                             $('.right-content .well>a').addClass('hidden');
                                         }
                                     }
@@ -445,33 +474,59 @@ function getAllreports() {
                                     var bodyel2 = '<div class="row">' +
                                         '<h2>SOP : ' + steps[0].procedures._id.name + '</h2>' +
                                         '<div class="timeline timeline-line-dotted">';
-                                    for (i = 0; i < steps.length; i++) {
+                                    for (var i = 0; i < steps.length; i++) {
                                         if (detailreport.statuses[i] !== undefined) {
                                             if (i == detailreport.statuses.length - 1) {
-                                                var dateori = new Date(detailreport.statuses[i].createdAt);
-                                                var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
-                                                bodyel2 += '<span class="timeline-label">' +
-                                                    '<span class="label label-primary">' + dateString + '</span>' +
-                                                    '</span>' +
-                                                    '<div class="timeline-item">' +
-                                                    '<div class="timeline-point timeline-point-warning">' +
-                                                    '<i class="fa fa-clock-o"></i>' +
-                                                    '</div>' +
-                                                    '<div class="timeline-event">' +
-                                                    '<div class="timeline-heading">' +
-                                                    '<h4>' + steps[i].name + '</h4>' +
-                                                    '</div>' +
-                                                    '<div class="timeline-body">' +
-                                                    '<p>' + steps[i].description + '</p>' +
-                                                    '</div>' +
-                                                    '<div class="timeline-footer">' +
-                                                    '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
-                                                    '</div>' +
-                                                    '</div>' +
-                                                    '</div>';
+                                                if(detailreport.finished){
+                                                    var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+    
+                                                    bodyel2 += '<span class="timeline-label">' +
+                                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                                        '</span>' +
+                                                        '<div class="timeline-item">' +
+                                                        '<div class="timeline-point timeline-point-success">' +
+                                                        '<i class="fa fa-check"></i>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-event">' +
+                                                        '<div class="timeline-heading">' +
+                                                        '<h4>' + steps[i].name + '</h4>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-body">' +
+                                                        '<p>' + steps[i].description + '</p>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-footer">' +
+                                                        '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                                        '</div>' +
+                                                        '</div>' +
+                                                        '</div>';
+                                                } else {
+                                                    var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+    
+                                                    bodyel2 += '<span class="timeline-label">' +
+                                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                                        '</span>' +
+                                                        '<div class="timeline-item">' +
+                                                        '<div class="timeline-point timeline-point-warning">' +
+                                                        '<i class="fa fa-clock-o"></i>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-event">' +
+                                                        '<div class="timeline-heading">' +
+                                                        '<h4>' + steps[i].name + '</h4>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-body">' +
+                                                        '<p>' + steps[i].description + '</p>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-footer">' +
+                                                        '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
+                                                        '</div>' +
+                                                        '</div>' +
+                                                        '</div>';
+                                                }
+                                                
                                             } else {
-                                                var dateori = new Date(detailreport.statuses[i + 1].createdAt);
+                                                var dateori = new Date(detailreport.statuses[i].createdAt);
                                                 var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
 
                                                 bodyel2 += '<span class="timeline-label">' +
@@ -489,7 +544,7 @@ function getAllreports() {
                                                     '<p>' + steps[i].description + '</p>' +
                                                     '</div>' +
                                                     '<div class="timeline-footer">' +
-                                                    '<p class="text-right">finished on ' + dateString + '</p>' +
+                                                    '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
                                                     '</div>' +
                                                     '</div>' +
                                                     '</div>';

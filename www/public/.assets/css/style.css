@@ -881,3 +881,9 @@
         float: left;
     }
 }
+
+/*table universal setting*/
+table th, .td-center {
+    text-align: center;
+    vertical-align: middle !important;
+}

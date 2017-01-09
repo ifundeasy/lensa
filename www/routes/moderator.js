@@ -229,12 +229,42 @@ module.exports = function (args, app) {
 
     api.get('/allreports', function (req, res, next) {
         var Post = Collection['posts'];
-        Post.find({"organizations._id": req.logged.user.organizations._id}, 'title text users._id createdAt media._ids')
+        Post.find({
+            "organizations._id": req.logged.user.organizations._id,
+            active: true
+        })
         .populate({path: 'users._id', select: 'name'})
         .then(function (docs) {
+            var projectedDocs = [];
+            for(var i=0; i<docs.length; i++){
+                var plainObj = docs[i].toObject();
+                var docObj = {};
+                docObj._id = plainObj._id;
+                docObj.title = plainObj.title || "Untitled Report";
+                docObj.text = plainObj.text;
+                docObj.users = plainObj.users;
+                docObj.createdAt = plainObj.createdAt;
+                
+                if((plainObj.hasOwnProperty('static')) && (plainObj.static === true)){
+                    docObj.status = "non-report";
+                } else if((plainObj.hasOwnProperty('finished')) && (plainObj.finished === true)){
+                    docObj.status = "Finished";
+                } else {
+                    if(plainObj.hasOwnProperty('rejected')){
+                        docObj.status = "Rejected";
+                    } else if (plainObj.hasOwnProperty('returned')){
+                        docObj.status = "Returned";
+                    } else if(plainObj.hasOwnProperty('assignTo')){
+                        docObj.status = "On Progress";
+                    } else {
+                        docObj.status = "Pending";
+                    }
+                }
+                projectedDocs.push(docObj);
+            }
             var body = {
                 "status": 1,
-                "data": docs,
+                "data": projectedDocs,
             };
             res.status(200).send(body);
         })
@@ -261,7 +291,8 @@ module.exports = function (args, app) {
             if (doc.statuses.length > 0) {
                 var Step = Collection['steps'];
                 Step.find({
-                    "procedures._id": doc.statuses[0].steps._id.procedures._id
+                    "procedures._id": doc.statuses[0].steps._id.procedures._id,
+                    active: true
                 })
                 .populate({path: 'procedures._id', select: 'name'})
                 .sort({stepNumber: 1})

@@ -456,30 +456,56 @@ function openReportDetail(reportid) {
                     for (i = 0; i < steps.length; i++) {
                         if (detailreport.statuses[i] !== undefined) {
                             if (i == detailreport.statuses.length - 1) {
-                                var dateori = new Date(detailreport.statuses[i].createdAt);
-                                var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+                                if(detailreport.finished){
+                                    var dateori = new Date(detailreport.statuses[i].createdAt);
+                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
 
-                                bodyel2 += '<span class="timeline-label">' +
-                                    '<span class="label label-primary">' + dateString + '</span>' +
-                                    '</span>' +
-                                    '<div class="timeline-item">' +
-                                    '<div class="timeline-point timeline-point-warning">' +
-                                    '<i class="fa fa-clock-o"></i>' +
-                                    '</div>' +
-                                    '<div class="timeline-event">' +
-                                    '<div class="timeline-heading">' +
-                                    '<h4>' + steps[i].name + '</h4>' +
-                                    '</div>' +
-                                    '<div class="timeline-body">' +
-                                    '<p>' + steps[i].description + '</p>' +
-                                    '</div>' +
-                                    '<div class="timeline-footer">' +
-                                    '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>';
+                                    bodyel2 += '<span class="timeline-label">' +
+                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                        '</span>' +
+                                        '<div class="timeline-item">' +
+                                        '<div class="timeline-point timeline-point-success">' +
+                                        '<i class="fa fa-check"></i>' +
+                                        '</div>' +
+                                        '<div class="timeline-event">' +
+                                        '<div class="timeline-heading">' +
+                                        '<h4>' + steps[i].name + '</h4>' +
+                                        '</div>' +
+                                        '<div class="timeline-body">' +
+                                        '<p>' + steps[i].description + '</p>' +
+                                        '</div>' +
+                                        '<div class="timeline-footer">' +
+                                        '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
+                                } else {
+                                    var dateori = new Date(detailreport.statuses[i].createdAt);
+                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+
+                                    bodyel2 += '<span class="timeline-label">' +
+                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                        '</span>' +
+                                        '<div class="timeline-item">' +
+                                        '<div class="timeline-point timeline-point-warning">' +
+                                        '<i class="fa fa-clock-o"></i>' +
+                                        '</div>' +
+                                        '<div class="timeline-event">' +
+                                        '<div class="timeline-heading">' +
+                                        '<h4>' + steps[i].name + '</h4>' +
+                                        '</div>' +
+                                        '<div class="timeline-body">' +
+                                        '<p>' + steps[i].description + '</p>' +
+                                        '</div>' +
+                                        '<div class="timeline-footer">' +
+                                        '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
+                                }
+                                
                             } else {
-                                var dateori = new Date(detailreport.statuses[i + 1].createdAt);
+                                var dateori = new Date(detailreport.statuses[i].createdAt);
                                 var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
 
                                 bodyel2 += '<span class="timeline-label">' +
@@ -497,7 +523,7 @@ function openReportDetail(reportid) {
                                     '<p>' + steps[i].description + '</p>' +
                                     '</div>' +
                                     '<div class="timeline-footer">' +
-                                    '<p class="text-right">finished on ' + dateString + '</p>' +
+                                    '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
                                     '</div>' +
                                     '</div>' +
                                     '</div>';
