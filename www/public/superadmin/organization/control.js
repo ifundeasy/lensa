@@ -104,9 +104,9 @@ $(document).ready(function () {
             "location.address": address.val(),
             "location.state": state.val(),
             "location.zipcode": zipcode.val(),
-            "location.country": country.val(),
-            "location.lat": lat.val(),
-            "location.long": long.val(),
+            //"location.country": country.val(),
+            //"location.lat": lat.val(),
+            //"location.long": long.val(),
             "phone.value": phone.val(),
             "email.value": email.val(),
             "notes": notes.val()

@@ -1,3 +1,66 @@
+var modal = new Modal({
+    title: "Prompt",
+    id: 'modal-map',
+    backdrop: true,
+    handler: {
+        OK: {class: "btn-success"},
+        Cancel: {class: "btn-default", dismiss: true}
+    }
+});
+var modalselector = '#' + modal.id;
+$(modalselector).css("z-index", "2060");
+
+var map;
+var geocoder;
+var marker;
+
+function placeMarker(location) {
+    if ( marker ) {
+        marker.setPosition(location);
+    } else {
+        marker = new google.maps.Marker({
+            position: location,
+            map: map
+        });
+    }
+}
+
+function geocodePosition(pos){
+    geocoder.geocode({
+        latLng: pos
+    }, function(responses) {
+        if (responses && responses.length > 0) {
+            console.log(responses);
+            $('#address').val(responses[0].formatted_address);
+            for(var d=0; d<responses[0].address_components.length; d++){
+                if(responses[0].address_components[d].types[0] === "administrative_area_level_1"){
+                    $('#state').val(responses[0].address_components[d].long_name);
+                } else if (responses[0].address_components[d].types[0] === "country"){
+                    $('#country').val(responses[0].address_components[d].long_name); 
+                } else if (responses[0].address_components[d].types[0] === "postal_code"){
+                    $('#zipcode').val(responses[0].address_components[d].long_name);
+                }
+            }
+            
+            if($('#state').val() === 'getting location..'){
+                $('#state').removeAttr('readonly');
+                $('#state').val('');
+            }
+            if($('#country').val() === 'getting location..'){
+                $('#country').removeAttr('readonly');
+                $('#country').val('');
+            }
+            if($('#zipcode').val() === 'getting location..'){
+                $('#zipcode').removeAttr('readonly');
+                $('#zipcode').val('');
+            }
+            $('#save').removeAttr('disabled');
+        } else {
+          alert('Cannot determine address at this location.');
+        }
+    });
+}
+    
 $(document).ready(function () {
     var url = "!/organizations/";
     var isUpdate = false;
@@ -94,6 +157,54 @@ $(document).ready(function () {
             forminfo.text("1");
         });
         prev.click();
+        
+        // location button
+        $('#location-selector-btn').off('click');
+        $('#location-selector-btn').on('click', function(){
+            marker = '';
+            var bodyel = "<div id='map-select-container' style='height: 300px;'>Loading map..</div>";
+            modal.setTitle('Select Location');
+            modal.setBody(bodyel).show();
+            setTimeout(function(){
+                var indonesia = {lat: -5, lng: 112};
+                map = new google.maps.Map($('#map-select-container')[0], {
+                    zoom: 4,
+                    center: indonesia,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    zoomControlOptions: {
+                      style: google.maps.ZoomControlStyle.SMALL
+                    },
+                    draggableCursor:'crosshair',
+                    draggingCursor: 'move'
+                });
+                
+                geocoder = new google.maps.Geocoder();
+                
+                google.maps.event.addListener(map, 'click', function(event) {
+                    placeMarker(event.latLng);
+                });
+                
+                modal.$buttons.OK.on("click", function () {
+                    $('#lat').val(Math.round(marker.position.lat() * 1000000) / 1000000 );
+                    $('#long').val(Math.round(marker.position.lng() * 1000000) / 1000000 );
+                    $('#address').val('getting location..');
+                    $('#state').val('getting location..');
+                    $('#state').attr('readonly', '');
+                    $('#zipcode').val('getting location..');
+                    $('#zipcode').attr('readonly', '');
+                    $('#country').val('getting location..');
+                    $('#country').attr('readonly', '');
+                    
+                    geocodePosition(marker.getPosition());
+                    modal.hide();
+                });
+                
+            },600);
+            modal.$buttons.OK.off("click");
+            
+        });
+        // location button --end
         getting();
     }
     var getting = function () {
@@ -238,6 +349,7 @@ $(document).ready(function () {
             }).success(function (res) {
                 reset.click();
                 getting();
+                $('#save').attr('disabled', '');
             }).complete(function () {
                 twowew({
                     type: toastmsg ? "error" : "success",

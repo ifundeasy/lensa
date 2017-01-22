@@ -107,6 +107,24 @@ module.exports = function (mongoose) {
                 createdAt: {type: Date, required: false}
             }
         },
+        administrativeLevels: { 
+            level4: {
+                type: String,
+                required: false
+            },
+            level3: {
+                type: String,
+                required: false
+            },
+            level2: {
+                type: String,
+                required: false
+            },
+            level1: {
+                type: String,
+                required: false
+            }
+        },
         lat: {
             type: String,
             required: false
@@ -343,17 +361,27 @@ module.exports = function (mongoose) {
             }).then(function (docs) {
                 console.log(docs);
                 if (docs.length != 0) {
+                    // if there is an organization in charge of that location, assign the report for that organization
+                    
                     console.log("organization : " + docs[0].name);
                     post.organizations._id = docs[0]._id;
+                } else {
+                    // if there isn't any, save as public by default (already set) and have necessary information to be saved for later use (administrative level names)
+                
+                    console.log("no organization in charge for this location");
+                    post.administrativeLevels.level4 = g.administrativeLevels.level4long;
+                    post.administrativeLevels.level3 = g.administrativeLevels.level3long;
+                    post.administrativeLevels.level2 = g.administrativeLevels.level2long;
+                    post.administrativeLevels.level1 = g.administrativeLevels.level1long;
                 }
-                next();
+                return next();
             }).catch(function (e) {
                 console.log("failed query organization");
-                next(e);
+                return next(e);
             });
         })
         .catch(function (err) {
-            next(err);
+            return next(err);
         });
     });
 

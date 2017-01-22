@@ -1,0 +1,24 @@
+fitur2 yang ilang / hal yg perlu diperbaiki akibat lupa commit:
+
+- Map masih fixed di Bandung [DONE]
+- kalo gak ada laporan, persentase jadi NaN [DONE]
+- pas bikin organisasi, gak nyari administrativeAreaLevel dan namanya via reverse geocoding [DONE]
+- timeline gak liat lat long client. semua report jadi di-push [DONE]
+- List All Report gak ada status laporannya. [DONE]
+- No Data Available di Dashboard Admin ketika klik bar chart bulanan, padahal ada laporan [DONE]
+
+Notes:
+- Pas pilih organisasi, harusnya pilih map bukan ketik lat long [DONE]
+- Kalo ada organisasi baru dibuat, cek laporan-laporan yang di public 
+dan ubah organisation_id untuk laporan2 yang bersangkutan dgn organisasi baru tsb. [DONE]
+- Susunan total laporan di dashboard superadmin : Incoming, Accepted, On Progress, Finished, Rejected, Total. [DONE]
+- Di modul organization (group superadmin): country, lat, long tidak bisa di-update. [DONE]
+- Timeline pake design kayak SOP (path style) [DONE]
+- Timeline progress dikasih gambar dan remark di tampilannya. [DONE]
+- Timestamp di modal Timeline Progress masih gak enak dibaca.
+- Detail report, tambahin info ttg kapan di-reject, kapan di-assign, dll
+- Susunan total laporan di dashboard admin: Incoming Reports, Assigned Reports, Returned, Finished, Total Reports
+- Laporan return, statusnya masih "assigned to admin" di halaman laporan detail [DONE]
+- Di laporan detail, kalau statusnya rejcted, tampilin alasan, user dan timestamp-nya.
+- Edit Profile
+- Notification

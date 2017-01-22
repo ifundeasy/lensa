@@ -45,19 +45,19 @@
                                 <div class="col-sm-8">
                                     <div class="form-group">
                                         <label>State</label>
-                                        <input id="state" type="text" placeholder="" class="form-control">
+                                        <input id="state" type="text" placeholder="" class="form-control" readonly>
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
                                     <div class="form-group">
                                         <label>Zipcode</label>
-                                        <input id="zipcode" type="text" placeholder="" class="form-control">
+                                        <input id="zipcode" type="text" placeholder="" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>Country</label>
-                                <input id="country" type="text" placeholder="" class="form-control" value="Indonesia">
+                                <input id="country" type="text" placeholder="" class="form-control" value="Indonesia" readonly>
                             </div>
                             <div class="form-group">
                                 <label>Area Administratif</label>
@@ -68,14 +68,21 @@
                                     <option value="4">Kelurahan</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label>Latitude</label>
-                                <input id="lat" type="text" placeholder="" class="form-control">
+                            <div class="row">
+                                <div class="col-xs-5 form-group">
+                                    <label>Latitude</label>
+                                    <input id="lat" type="text" placeholder="" class="form-control" readonly>
+                                </div>
+                                <div class="col-xs-5 form-group">
+                                    <label>Longitude</label>
+                                    <input id="long" type="text" placeholder="" class="form-control" readonly>
+                                </div>
+                                <div class="col-xs-2 form-group">
+                                    <label>&nbsp;</label>
+                                    <a id="location-selector-btn" class="btn btn-primary btn-primary"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Longitude</label>
-                                <input id="long" type="text" placeholder="" class="form-control">
-                            </div>
+                            
                             <button id="prev" type="button" class="btn btn-sm btn-primary">
                                 <strong>Previous</strong>
                             </button>
@@ -83,7 +90,7 @@
                                 <button id="reset" type="button" class="btn btn-sm btn-default">
                                     <strong>Reset</strong>
                                 </button>
-                                <button id="save" type="button" class="btn btn-sm btn-success">
+                                <button id="save" type="button" class="btn btn-sm btn-success" disabled>
                                     <strong>Save</strong>
                                 </button>
                             </div>

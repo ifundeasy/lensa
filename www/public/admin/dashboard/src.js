@@ -97,34 +97,26 @@ function reloadMarkers(latLongArray){
                                 $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html('');
                                 var medias = '';
                                 for(i=0; i<detailreport.media._ids.length; i++){
-                                    if(i==0){
-                                        if(detailreport.media._ids[i].type === "video/mp4"){
-                                            medias += '<div class="item active">'+
-                                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
-                                                          '<source src="/img/post/'+detailreport.media._ids[i].directory+'" type="video/mp4">'+
-                                                          'Your browser does not support HTML5 video.'+
-                                                        '</video>'+
-                                                    '</div>';
-                                        } else {
-                                            medias += '<div class="item active">'+
-                                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+detailreport.media._ids[i].directory+'">'+
-                                                    '</div>';  
-                                        }
-                                        
+                                    var activeToggle = '';
+                                    if (i == 0) {
+                                        activeToggle = ' active';
+                                    }
+                                    
+                                    if (detailreport.media._ids[i].type === "video/mp4") {
+                                        medias += '<div class="item'+activeToggle+'">' +
+                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
+                                            '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
+                                            'Your browser does not support HTML5 video.' +
+                                            '</video>' +
+                                            '</div>';
                                     } else {
-                                        if(detailreport.media._ids[i].type === "video/mp4"){
-                                            medias += '<div class="item">'+
-                                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
-                                                          '<source src="/img/post/'+detailreport.media._ids[i].directory+'" type="video/mp4">'+
-                                                          'Your browser does not support HTML5 video.'+
-                                                        '</video>'+
-                                                    '</div>';
-                                        } else {
-                                            medias += '<div class="item">'+
-                                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+detailreport.media._ids[i].directory+'">'+
-                                                    '</div>';
-                                        }
-                                        
+                                        medias += '<div class="item'+activeToggle+' img-preview">' +
+                                            '<a href="/img/post/' + detailreport.media._ids[i].directory + '" title="">'+
+                                                '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + detailreport.media._ids[i].directory + '">' +
+                                            '</a>'+
+                                            
+                                            '</div>';
+                                            
                                     }
                                 }
                                 $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html(medias);
@@ -154,12 +146,31 @@ function reloadMarkers(latLongArray){
                                             '<h2>SOP : '+steps[0].procedures._id.name+'</h2>'+
                                             '<div class="timeline timeline-line-dotted">';
                             for(i=0; i<steps.length; i++){
-                                if(detailreport.statuses[i] !== undefined){
+                                if (detailreport.statuses[i] !== undefined) {
+                                    var imagepanel = '';
+                                    var remarktext = '';
+                                    
+                                    if(detailreport.statuses[i].hasOwnProperty("media")){
+                                        imagepanel = '<div class="panel img-preview">'+
+                                                '<a href="/img/post/' + detailreport.statuses[i].media._id.directory + '" title="">'+
+                                                    '<img src="/img/post/' + detailreport.statuses[i].media._id.directory + '" alt="">'+
+                                                '</a>'+
+                                            '</div>';
+                                    }
+                                    if(detailreport.statuses[i].hasOwnProperty("remark")){
+                                        remarktext = '<div class="well well-sm">'+
+                                        '<h3>Remark :</h3>'+
+                                        detailreport.statuses[i].remark +
+                                    '</div>';
+                                    }
+                                    
                                     if (i == detailreport.statuses.length - 1) {
                                         if(detailreport.finished){
                                             var dateori = new Date(detailreport.statuses[i].createdAt);
+                                            var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
                                             var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
+                                            var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+        
                                             bodyel2 += '<span class="timeline-label">' +
                                                 '<span class="label label-primary">' + dateString + '</span>' +
                                                 '</span>' +
@@ -173,16 +184,20 @@ function reloadMarkers(latLongArray){
                                                 '</div>' +
                                                 '<div class="timeline-body">' +
                                                 '<p>' + steps[i].description + '</p>' +
+                                                imagepanel +
+                                                '<p>&nbsp;</p>'+
+                                                remarktext +
                                                 '</div>' +
+                                                
                                                 '<div class="timeline-footer">' +
-                                                '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                                '<p class="text-right">finished on ' + dateString2 + '</p>' +
                                                 '</div>' +
                                                 '</div>' +
                                                 '</div>';
                                         } else {
                                             var dateori = new Date(detailreport.statuses[i].createdAt);
                                             var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
+        
                                             bodyel2 += '<span class="timeline-label">' +
                                                 '<span class="label label-primary">' + dateString + '</span>' +
                                                 '</span>' +
@@ -206,8 +221,10 @@ function reloadMarkers(latLongArray){
                                         
                                     } else {
                                         var dateori = new Date(detailreport.statuses[i].createdAt);
+                                        var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
                                         var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
+                                        var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+        
                                         bodyel2 += '<span class="timeline-label">' +
                                             '<span class="label label-primary">' + dateString + '</span>' +
                                             '</span>' +
@@ -221,30 +238,33 @@ function reloadMarkers(latLongArray){
                                             '</div>' +
                                             '<div class="timeline-body">' +
                                             '<p>' + steps[i].description + '</p>' +
+                                            imagepanel +
+                                            '<p>&nbsp;</p>'+
+                                            remarktext +
                                             '</div>' +
                                             '<div class="timeline-footer">' +
-                                            '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                            '<p class="text-right">finished on ' + dateString2 + '</p>' +
                                             '</div>' +
                                             '</div>' +
                                             '</div>';
                                     }
                                 } else {
-                                    bodyel2 += '<div class="timeline-item">'+
-                                                    '<div class="timeline-point timeline-point-danger">'+
-                                                        '<i class="fa fa-times"></i>'+
-                                                    '</div>'+
-                                                    '<div class="timeline-event">'+
-                                                        '<div class="timeline-heading">'+
-                                                            '<h4>'+steps[i].name+'</h4>'+
-                                                        '</div>'+
-                                                        '<div class="timeline-body">'+
-                                                            '<p>'+steps[i].description+'</p>'+
-                                                        '</div>'+
-                                                        '<div class="timeline-footer">'+
-                                                            '<p class="text-right">estimate: '+steps[i].duration+' hour(s)</p>'+
-                                                        '</div>'+
-                                                    '</div>'+
-                                                '</div>';
+                                    bodyel2 += '<div class="timeline-item">' +
+                                        '<div class="timeline-point timeline-point-danger">' +
+                                        '<i class="fa fa-times"></i>' +
+                                        '</div>' +
+                                        '<div class="timeline-event">' +
+                                        '<div class="timeline-heading">' +
+                                        '<h4>' + steps[i].name + '</h4>' +
+                                        '</div>' +
+                                        '<div class="timeline-body">' +
+                                        '<p>' + steps[i].description + '</p>' +
+                                        '</div>' +
+                                        '<div class="timeline-footer">' +
+                                        '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
                                 }
                             }    
                             
@@ -279,7 +299,17 @@ function reloadMarkers(latLongArray){
     }
 }
 
-function initMonthlyBarChart(_data){
+function initMonthlyBarChart(_data, offset){
+    var tickData = [[0, "Jan"], [1, "Feb"], [2, "Mar"], [3, "Apr"], [4, "May"], [5, "Jun"], [6, "Jul"], [7, "Aug"], [8, "Sep"], [9, "Oct"], [10, "Nov"], [11, "Des"]];
+    var offsetTickData = [];
+    for(var i = 0; i<12; i++){
+        if(i+offset > 11){
+            offsetTickData.push([i, tickData[i+offset-12][1]]);    
+        } else {
+            offsetTickData.push([i, tickData[i+offset][1]]);
+        }
+    }
+    
     // bar chart, flot library
     var barOptions = {
         series: {
@@ -302,7 +332,7 @@ function initMonthlyBarChart(_data){
             axisLabelFontSizePixels: 12,
             axisLabelFontFamily: 'Verdana, Arial',
             axisLabelPadding: 10,
-            ticks: [[0, "Jan"], [1, "Feb"], [2, "Mar"], [3, "Apr"],[4, "May"], [5, "Jun"], [6, "Jul"], [7, "Aug"], [8, "Sep"], [9, "Oct"], [10, "Nov"], [11, "Des"]]
+            ticks: offsetTickData
         },
         yaxis: {
             axisLabel: "Report count",
@@ -338,7 +368,7 @@ function initMonthlyBarChart(_data){
     };
     $.plot($("#flot-bar-chart"), [barData], barOptions);
 
-    setBarChartClickEvent();
+    setBarChartClickEvent(offset);
 }
 
 function loadDashboardData(){
@@ -384,7 +414,7 @@ function loadDashboardData(){
                 for(i=0; i<12; i++){
                     barchartdata.push([i, dashboardData.monthlyreports[i].sum]);
                 }
-                initMonthlyBarChart(barchartdata);
+                initMonthlyBarChart(barchartdata, dashboardData.monthlyreportoffset);
 
             } else {
                 var r = confirm("Failed to load dashboard data. reload page?");
@@ -461,19 +491,24 @@ function setDetailButtonEvent(){
     });
 }
 
-function setBarChartClickEvent(){
+function setBarChartClickEvent(_offset){
     $("#flot-bar-chart").bind("plotclick", function (event, pos, item) {
         console.log(item);
-
+        var idx = item.dataIndex+_offset;
+        var yr = new Date().getFullYear()-1;
+        if(idx > 11){
+            idx = idx-12;
+            yr = yr+1;
+        }
         modal.setTitle("Monthly Report Detail");
 
-        if(item.datapoint[1] === 0){
-            modal.setBody('<div>No report found in '+monthNameList[item.dataIndex]+'.</div>').show(); 
-            modal.$buttons.OK.off("click");
-            modal.$buttons.OK.on("click", function () {    
-            });   
+        if (item.datapoint[1] === 0) {
+            modal2.setBody('<div>No report found in ' + monthNameList[idx] + ' ' + yr.toString() + '.</div>').show();
+            modal2.$buttons.OK.off("click");
+            modal2.$buttons.OK.on("click", function () {
+            });
         } else {
-            var modalBody = '<h2>List all reports in '+monthNameList[item.dataIndex]+'</h2>'+
+            var modalBody = '<h2>List all reports in ' + monthNameList[idx] + ' ' + yr.toString() + '</h2>' +
                                 '<table id="monthly-list-report" class="table-responsive table table-striped table-bordered table-hover">'+
                                     '<thead>'+
                                         '<tr>'+
@@ -492,7 +527,7 @@ function setBarChartClickEvent(){
             modal.setBody(modalBody).show();
             // get report list in specific month
             $.ajax({
-                url:'/admin/!/monthlyreports?m=' + item.dataIndex,
+                url:'/admin/!/monthlyreports?m=' + idx,
                 success: function(data, status, xhr){
                     console.log(data);
 
@@ -565,34 +600,26 @@ function setBarChartClickEvent(){
                                                 $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html('');
                                                 var medias = '';
                                                 for(i=0; i<detailreport.media._ids.length; i++){
-                                                    if(i==0){
-                                                        if(detailreport.media._ids[i].type === "video/mp4"){
-                                                            medias += '<div class="item active">'+
-                                                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
-                                                                          '<source src="/img/post/'+detailreport.media._ids[i].directory+'" type="video/mp4">'+
-                                                                          'Your browser does not support HTML5 video.'+
-                                                                        '</video>'+
-                                                                    '</div>';
-                                                        } else {
-                                                            medias += '<div class="item active">'+
-                                                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+detailreport.media._ids[i].directory+'">'+
-                                                                    '</div>';  
-                                                        }
-                                                        
+                                                    var activeToggle = '';
+                                                    if (i == 0) {
+                                                        activeToggle = ' active';
+                                                    }
+                                                    
+                                                    if (detailreport.media._ids[i].type === "video/mp4") {
+                                                        medias += '<div class="item'+activeToggle+'">' +
+                                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
+                                                            '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
+                                                            'Your browser does not support HTML5 video.' +
+                                                            '</video>' +
+                                                            '</div>';
                                                     } else {
-                                                        if(detailreport.media._ids[i].type === "video/mp4"){
-                                                            medias += '<div class="item">'+
-                                                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>'+
-                                                                          '<source src="/img/post/'+detailreport.media._ids[i].directory+'" type="video/mp4">'+
-                                                                          'Your browser does not support HTML5 video.'+
-                                                                        '</video>'+
-                                                                    '</div>';
-                                                        } else {
-                                                            medias += '<div class="item">'+
-                                                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/'+detailreport.media._ids[i].directory+'">'+
-                                                                    '</div>';
-                                                        }
-                                                        
+                                                        medias += '<div class="item'+activeToggle+' img-preview">' +
+                                                            '<a href="/img/post/' + detailreport.media._ids[i].directory + '" title="">'+
+                                                                '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + detailreport.media._ids[i].directory + '">' +
+                                                            '</a>'+
+                                                            
+                                                            '</div>';
+                                                            
                                                     }
                                                 }
                                                 $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html(medias);
@@ -622,12 +649,31 @@ function setBarChartClickEvent(){
                                                             '<h2>SOP : '+steps[0].procedures._id.name+'</h2>'+
                                                             '<div class="timeline timeline-line-dotted">';
                                             for(i=0; i<steps.length; i++){
-                                                if(detailreport.statuses[i] !== undefined){
+                                                if (detailreport.statuses[i] !== undefined) {
+                                                    var imagepanel = '';
+                                                    var remarktext = '';
+                                                    
+                                                    if(detailreport.statuses[i].hasOwnProperty("media")){
+                                                        imagepanel = '<div class="panel img-preview">'+
+                                                                '<a href="/img/post/' + detailreport.statuses[i].media._id.directory + '" title="">'+
+                                                                    '<img src="/img/post/' + detailreport.statuses[i].media._id.directory + '" alt="">'+
+                                                                '</a>'+
+                                                            '</div>';
+                                                    }
+                                                    if(detailreport.statuses[i].hasOwnProperty("remark")){
+                                                        remarktext = '<div class="well well-sm">'+
+                                                        '<h3>Remark :</h3>'+
+                                                        detailreport.statuses[i].remark +
+                                                    '</div>';
+                                                    }
+                                                    
                                                     if (i == detailreport.statuses.length - 1) {
                                                         if(detailreport.finished){
                                                             var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                            var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
                                                             var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-            
+                                                            var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+                        
                                                             bodyel2 += '<span class="timeline-label">' +
                                                                 '<span class="label label-primary">' + dateString + '</span>' +
                                                                 '</span>' +
@@ -641,16 +687,20 @@ function setBarChartClickEvent(){
                                                                 '</div>' +
                                                                 '<div class="timeline-body">' +
                                                                 '<p>' + steps[i].description + '</p>' +
+                                                                imagepanel +
+                                                                '<p>&nbsp;</p>'+
+                                                                remarktext +
                                                                 '</div>' +
+                                                                
                                                                 '<div class="timeline-footer">' +
-                                                                '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                                                '<p class="text-right">finished on ' + dateString2 + '</p>' +
                                                                 '</div>' +
                                                                 '</div>' +
                                                                 '</div>';
                                                         } else {
                                                             var dateori = new Date(detailreport.statuses[i].createdAt);
                                                             var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-            
+                        
                                                             bodyel2 += '<span class="timeline-label">' +
                                                                 '<span class="label label-primary">' + dateString + '</span>' +
                                                                 '</span>' +
@@ -674,8 +724,10 @@ function setBarChartClickEvent(){
                                                         
                                                     } else {
                                                         var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                        var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
                                                         var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-        
+                                                        var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+                        
                                                         bodyel2 += '<span class="timeline-label">' +
                                                             '<span class="label label-primary">' + dateString + '</span>' +
                                                             '</span>' +
@@ -689,30 +741,33 @@ function setBarChartClickEvent(){
                                                             '</div>' +
                                                             '<div class="timeline-body">' +
                                                             '<p>' + steps[i].description + '</p>' +
+                                                            imagepanel +
+                                                            '<p>&nbsp;</p>'+
+                                                            remarktext +
                                                             '</div>' +
                                                             '<div class="timeline-footer">' +
-                                                            '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                                            '<p class="text-right">finished on ' + dateString2 + '</p>' +
                                                             '</div>' +
                                                             '</div>' +
                                                             '</div>';
                                                     }
                                                 } else {
-                                                    bodyel2 += '<div class="timeline-item">'+
-                                                                    '<div class="timeline-point timeline-point-danger">'+
-                                                                        '<i class="fa fa-times"></i>'+
-                                                                    '</div>'+
-                                                                    '<div class="timeline-event">'+
-                                                                        '<div class="timeline-heading">'+
-                                                                            '<h4>'+steps[i].name+'</h4>'+
-                                                                        '</div>'+
-                                                                        '<div class="timeline-body">'+
-                                                                            '<p>'+steps[i].description+'</p>'+
-                                                                        '</div>'+
-                                                                        '<div class="timeline-footer">'+
-                                                                            '<p class="text-right">estimate: '+steps[i].duration+' hour(s)</p>'+
-                                                                        '</div>'+
-                                                                    '</div>'+
-                                                                '</div>';
+                                                    bodyel2 += '<div class="timeline-item">' +
+                                                        '<div class="timeline-point timeline-point-danger">' +
+                                                        '<i class="fa fa-times"></i>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-event">' +
+                                                        '<div class="timeline-heading">' +
+                                                        '<h4>' + steps[i].name + '</h4>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-body">' +
+                                                        '<p>' + steps[i].description + '</p>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-footer">' +
+                                                        '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
+                                                        '</div>' +
+                                                        '</div>' +
+                                                        '</div>';
                                                 }
                                             }    
                                             
@@ -776,4 +831,13 @@ $(document).ready(function(){
     loadDashboardData();
 
     setDetailButtonEvent();
+    
+    $('body').on('click', '.img-preview', function(event){
+        event = event || window.event;
+        var target = event.target || event.srcElement,
+            link = target.src ? target.parentNode : target,
+            options = {index: link, event: event},
+            links = this.getElementsByTagName('a');
+        blueimp.Gallery(links, options);
+    })
 });

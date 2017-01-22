@@ -6,7 +6,11 @@ var bcrypt = require('bcrypt');
 var multer = require("multer");
 var path = require('path');
 var NodeGeocoder = require('node-geocoder');
+var Curl = require( 'node-libcurl' ).Curl;
 //var path = require('path');
+
+// some api does not require token
+var excludedApis = ["user/create", "login", "logout", "register", "login/facebook", "login/googleplus"];
 
 var options = {
     provider: 'google',
@@ -80,9 +84,6 @@ module.exports = function (args, app) {
     };
     // token checking section
     api.use(function (req, res, next) {
-        // some api does not require token
-        var excludedApis = ["user/create", "login", "logout", "register"];
-
         if (excludedApis.indexOf(req.header("Class")) === -1) {
             if (req.header("Token")) {
                 var token = req.header("Token");
@@ -157,6 +158,8 @@ module.exports = function (args, app) {
                             res.status(200).send(body);
                         } else {
                             var newUser = new User({
+                                fbid : req.body.fbid || null,
+                                gplusid : req.body.gplusid || null,
                                 username: req.body.username,
                                 name: {
                                     first: req.body.first_name,
@@ -1004,7 +1007,227 @@ module.exports = function (args, app) {
                     }
                 });
                 break;
-
+                
+            case 'login/facebook':
+                var curl = new Curl();
+                var accessToken = req.body.accesstoken;
+                curl.setOpt( 'URL', 'https://graph.facebook.com/me?fields=email&access_token='+accessToken );
+                 
+                curl.on( 'end', function( statusCode, body, headers ) {
+                
+                    var data = JSON.parse(body);
+                    
+                    if(data.hasOwnProperty('error')){
+                        console.info("invalid token");
+                    } else {
+                        console.info("facebook login successful");
+                        var User = Collection['users'];
+                        User.findOne({
+                            $or: [
+                                { fbid: data.id },
+                                { "email.value": data.email },
+                            ],
+                            active: true
+                            
+                        })
+                        .populate({path: 'groups._id', select: 'name'})
+                        .populate({path: 'media._id', select: 'directory'})
+                        .then(function (doc) {
+                            console.log("finished checking username");
+                            if (doc !== null) {
+                                console.log("user found!");
+                                var factory = 7;
+                                // generate a salt
+                                bcrypt.genSalt(factory, function (error, salt) {
+                                    if (error) {
+                                        console.log("error at generating salt");
+                                        var body = {
+                                            "status": 0,
+                                            "message": error
+                                        };
+                                        res.status(200).send(body);
+                                    } else {
+                                        console.log("success generating salt");
+                                        var tokenString = req.body.username + Math.random().toString(36).substr(2, 5);
+                                        console.log(tokenString);
+                                        // hash the token using our new salt
+                                        bcrypt.hash(tokenString, salt, function (errorhash, hash) {
+                                            if (!errorhash) {
+                                                console.log("success creating hash");
+                                                doc.token = hash;
+                                                doc.save().then(function (doc) {
+                                                    console.log("success saving the hash");
+                                                    var userObject = doc.toObject();
+                                                    var mediaDir = '/img/post/default.jpg';
+                                                    if (userObject.hasOwnProperty('media')) {
+                                                        mediaDir = '/img/post/' + userObject.media._id.directory
+                                                    }
+                                                    var body = {
+                                                        status: 1,
+                                                        registered: true,
+                                                        token: hash,
+                                                        userid: userObject._id,
+                                                        group: userObject.groups._id.name,
+                                                        media: mediaDir
+                                                    }
+                                                    console.log(userObject.hasOwnProperty('media'));
+                                                    console.log(userObject);
+                                                    res.status(200).send(body);
+                                                }).catch(function (e) {
+                                                    console.log("error at saving the hash");
+                                                    var body = {
+                                                        "status": 0,
+                                                        "message": e
+                                                    };
+                                                    res.status(200).send(body);
+                                                });
+                                            } else {
+                                                console.log("error at creating hash");
+                                                console.log(errorhash);
+                                                console.log(hash);
+                                                var body = {
+                                                    "status": 0,
+                                                    "message": errorhash
+                                                };
+                                                res.status(200).send(body);
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                var body = {
+                                    status: 1,
+                                    registered: false
+                                }
+                                res.status(200).send(body);
+                            }
+                        }).catch(function (e) {
+                            var body = {
+                                status: 0,
+                                message: e
+                            }
+                            res.status(200).send(body);
+                        });
+                    }
+                    
+                    console.info( data );
+                 
+                    this.close();
+                });
+                 
+                curl.on( 'error', curl.close.bind( curl ) );
+                curl.perform();
+                break;
+                
+            case 'login/googleplus':
+                var curl = new Curl();
+                var accessToken = req.body.accesstoken;
+                curl.setOpt( 'URL', 'https://www.googleapis.com/oauth2/v1/tokeninfo?fields=email,user_id&access_token='+accessToken );
+                 
+                curl.on( 'end', function( statusCode, body, headers ) {
+                
+                    var data = JSON.parse(body);
+                    
+                    if(data.hasOwnProperty('error')){
+                        console.info("invalid token");
+                    } else {
+                        console.info("google plus login successful");
+                        var User = Collection['users'];
+                        User.findOne({
+                            $or: [
+                                { gplusid: data.user_id },
+                                { "email.value": data.email }
+                            ],
+                            active: true
+                        })
+                        .populate({path: 'groups._id', select: 'name'})
+                        .populate({path: 'media._id', select: 'directory'})
+                        .then(function (doc) {
+                            console.log("finished checking username");
+                            if (doc !== null) {
+                                console.log("user found!");
+                                var factory = 7;
+                                // generate a salt
+                                bcrypt.genSalt(factory, function (error, salt) {
+                                    if (error) {
+                                        console.log("error at generating salt");
+                                        var body = {
+                                            "status": 0,
+                                            "message": error
+                                        };
+                                        res.status(200).send(body);
+                                    } else {
+                                        console.log("success generating salt");
+                                        var tokenString = req.body.username + Math.random().toString(36).substr(2, 5);
+                                        console.log(tokenString);
+                                        // hash the token using our new salt
+                                        bcrypt.hash(tokenString, salt, function (errorhash, hash) {
+                                            if (!errorhash) {
+                                                console.log("success creating hash");
+                                                doc.token = hash;
+                                                doc.save().then(function (doc) {
+                                                    console.log("success saving the hash");
+                                                    var userObject = doc.toObject();
+                                                    var mediaDir = '/img/post/default.jpg';
+                                                    if (userObject.hasOwnProperty('media')) {
+                                                        mediaDir = '/img/post/' + userObject.media._id.directory
+                                                    }
+                                                    var body = {
+                                                        status: 1,
+                                                        registered: true,
+                                                        token: hash,
+                                                        userid: userObject._id,
+                                                        group: userObject.groups._id.name,
+                                                        media: mediaDir
+                                                    }
+                                                    console.log(userObject.hasOwnProperty('media'));
+                                                    console.log(userObject);
+                                                    res.status(200).send(body);
+                                                }).catch(function (e) {
+                                                    console.log("error at saving the hash");
+                                                    var body = {
+                                                        "status": 0,
+                                                        "message": e
+                                                    };
+                                                    res.status(200).send(body);
+                                                });
+                                            } else {
+                                                console.log("error at creating hash");
+                                                console.log(errorhash);
+                                                console.log(hash);
+                                                var body = {
+                                                    "status": 0,
+                                                    "message": errorhash
+                                                };
+                                                res.status(200).send(body);
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                var body = {
+                                    status: 1,
+                                    registered: false
+                                }
+                                res.status(200).send(body);
+                            }
+                        }).catch(function (e) {
+                            var body = {
+                                status: 0,
+                                message: e
+                            }
+                            res.status(200).send(body);
+                        });
+                    }
+                    
+                    console.info( data );
+                 
+                    this.close();
+                });
+                 
+                curl.on( 'error', curl.close.bind( curl ) );
+                curl.perform();
+                break;
             //// from this point on, for testing purposes only ////
             case 'category/create':
                 var nextToken = api.refreshToken(req.header('Token'), function (errortoken, newToken) {

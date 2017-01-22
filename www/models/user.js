@@ -7,6 +7,14 @@ module.exports = function (mongoose, opts) {
     //
     var Schema = mongoose.Schema;
     var userSchema = new Schema({
+        fbid : {
+            type: String,
+            required: false
+        },
+        gplusid : {
+            type: String,
+            required: false
+        },
         username: {
             type: String,
             required: true,

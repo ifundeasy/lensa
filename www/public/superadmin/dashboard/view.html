@@ -1,43 +1,18 @@
 <div class="row">
-    <div class="col-lg-15 col-md-4 col-sm-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <!--<span class="label label-success pull-right">Monthly</span>-->
-                <h5>Total Reports</h5>
+                <h5>Incoming</h5>
             </div>
             <div class="ibox-content">
-                <h1 class="no-margins" id="total-count">loading data..</h1>
-                <small>Total posting</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-15 col-md-4 col-sm-6">
-        <div class="ibox float-e-margins">
-            <div class="ibox-title">
-                <!--<span class="label label-success pull-right">Monthly</span>-->
-                <h5>Done</h5>
-            </div>
-            <div class="ibox-content">
-                <h1 class="no-margins" id="done-count">loading data..</h1>
+                <h1 class="no-margins" id="incoming-count">loading data..</h1>
                 <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
                 <small>Total posting</small>
             </div>
         </div>
     </div>
-    <div class="col-lg-15 col-md-4 col-sm-6">
-        <div class="ibox float-e-margins">
-            <div class="ibox-title">
-                <!--<span class="label label-success pull-right">Monthly</span>-->
-                <h5>Progress</h5>
-            </div>
-            <div class="ibox-content">
-                <h1 class="no-margins" id="progress-count">loading data..</h1>
-                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
-                <small>Total posting</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-15 col-md-4 col-sm-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <!--<span class="label label-success pull-right">Monthly</span>-->
@@ -50,7 +25,33 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-15 col-md-4 col-sm-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <!--<span class="label label-success pull-right">Monthly</span>-->
+                <h5>On Progress</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins" id="progress-count">loading data..</h1>
+                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
+                <small>Total posting</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <!--<span class="label label-success pull-right">Monthly</span>-->
+                <h5>Finished</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins" id="done-count">loading data..</h1>
+                <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
+                <small>Total posting</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <!--<span class="label label-success pull-right">Monthly</span>-->
@@ -60,6 +61,18 @@
                 <h1 class="no-margins" id="rejected-count">loading data..</h1>
                 <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
                 <small>Total posting</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <!--<span class="label label-success pull-right">Monthly</span>-->
+                <h5>Total Reports</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins" id="total-count">loading data..</h1>
+                <small>&nbsp;</small>
             </div>
         </div>
     </div>
@@ -73,9 +86,10 @@
                     <span>Filter by status </span>
                     <select id="dashboard-maps-filter">
                         <option>All reports</option>
-                        <option>Done</option>
-                        <option>Progress</option>
+                        <option>Incoming</option>
                         <option>Accepted</option>
+                        <option>On Progress</option>
+                        <option>Finished</option>
                         <option>Rejected</option>
                     </select>
                     <a class="collapse-link">
@@ -162,6 +176,7 @@
         </div>
     </div>-->
 </div>
+
 <!-- JQuery Flot -->
 <script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.js"></script>
 <script type="application/javascript" src="/.inspinia/js/plugins/flot/jquery.flot.categories.js"></script>

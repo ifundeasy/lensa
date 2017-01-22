@@ -1,68 +1,69 @@
 {
-    "name": "Lensa",
-    "description": "Lensa - Bussiness Process Management",
-    "version": "0.0.2",
-    "private": true,
-    "port": 6200,
-    "sessionAge": 900000,
-    "timeOut": 300000,
-    "worker": 4,
-    "broker": 1,
-    "autoreboot": false,
-    "author": "Afa Rappresent",
-    "contributors": [
-        {
-            "name": "Afa Rappresent",
-            "email": "mail.vudin@gmail.com"
-        },
-        {
-            "name": "Falih Mulyana",
-            "email": "falihmulyana@gmail.com"
-        }
-    ],
-    "scripts": {
-        "start": "p=`pwd` && pm2 start master.js --no-pmx --name 'Lensa' -o $p/log/pm2.out -e $p/log/pm2.err",
-        "stop": "pm2 stop Lensa",
-        "test": "node-dev master.js"
+  "name": "Lensa",
+  "description": "Lensa - Bussiness Process Management",
+  "version": "0.0.2",
+  "private": true,
+  "port": 6200,
+  "sessionAge": 900000,
+  "timeOut": 300000,
+  "worker": 4,
+  "broker": 1,
+  "autoreboot": false,
+  "author": "Afa Rappresent",
+  "contributors": [
+    {
+      "name": "Afa Rappresent",
+      "email": "mail.vudin@gmail.com"
     },
-    "main": "master.js",
-    "dependencies": {
-        "assert": "",
-        "bcrypt": "",
-        "bluebird": "",
-        "body-parser": "",
-        "connect": "",
-        "connect-mongo": "",
-        "cookie-parser": "",
-        "cors": "",
-        "dateformat": "",
-        "debug": "",
-        "ejs": "",
-        "express": "",
-        "express-session": "",
-        "file-stream-rotator": "",
-        "multer": "",
-        "minimist": "",
-        "mongoose": "",
-        "morgan": "",
-        "node-dev": "",
-        "node-geocoder": "",
-        "nodemailer": "",
-        "pm2": "",
-        "q": "",
-        "rand-token": "",
-        "request": "",
-        "serve-static": "",
-        "socketcluster": "",
-        "socketcluster-client": ""
-    },
-    "devDependencies": {},
-    "keywords": [
-        "websocket",
-        "server",
-        "realtime",
-        "cluster",
-        "scalable"
-    ],
-    "readmeFilename": "README.md"
+    {
+      "name": "Falih Mulyana",
+      "email": "falihmulyana@gmail.com"
+    }
+  ],
+  "scripts": {
+    "start": "p=`pwd` && pm2 start master.js --no-pmx --name 'Lensa' -o $p/log/pm2.out -e $p/log/pm2.err",
+    "stop": "pm2 stop Lensa",
+    "test": "node-dev master.js"
+  },
+  "main": "master.js",
+  "dependencies": {
+    "assert": "",
+    "bcrypt": "",
+    "bluebird": "",
+    "body-parser": "",
+    "connect": "",
+    "connect-mongo": "",
+    "cookie-parser": "",
+    "cors": "",
+    "dateformat": "",
+    "debug": "",
+    "ejs": "",
+    "express": "",
+    "express-session": "",
+    "file-stream-rotator": "",
+    "minimist": "",
+    "mongoose": "",
+    "morgan": "",
+    "multer": "",
+    "node-dev": "",
+    "node-geocoder": "",
+    "node-libcurl": "^1.0.0",
+    "nodemailer": "",
+    "pm2": "",
+    "q": "",
+    "rand-token": "",
+    "request": "",
+    "serve-static": "",
+    "socketcluster": "",
+    "socketcluster-client": ""
+  },
+  "devDependencies": {},
+  "keywords": [
+    "websocket",
+    "server",
+    "realtime",
+    "cluster",
+    "scalable"
+  ],
+  "readmeFilename": "README.md"
 }

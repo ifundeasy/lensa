@@ -175,7 +175,8 @@ module.exports = function (args, app) {
                     // all incoming reports
                     Post.find({
                         "organizations._id": req.logged.user.organizations._id,
-                        active: true
+                        active: true,
+                        $or: [{"static": false}, {"static": {$exists: false}}],
                     }, 'text lat long')
                     .then(function (docs) {
                         data.allreportltlng = docs;
@@ -184,6 +185,7 @@ module.exports = function (args, app) {
                         return Post.find({
                             "organizations._id": req.logged.user.organizations._id,
                             active: true,
+                            $or: [{"static": false}, {"static": {$exists: false}}],
                             finished: true
                         }, 'text lat long').then(function (docs2) {
                             data.finishedreportltlng = docs2;
@@ -193,6 +195,7 @@ module.exports = function (args, app) {
                                 "organizations._id": req.logged.user.organizations._id,
                                 active: true,
                                 finished: false,
+                                $or: [{"static": false}, {"static": {$exists: false}}],
                                 "assignTo": {$exists: true},
                                 "assignTo.implementor": {$exists: true},
                                 rejected: {$exists: false}
@@ -205,6 +208,7 @@ module.exports = function (args, app) {
                                     "organizations._id": req.logged.user.organizations._id,
                                     active: true,
                                     finished: false,
+                                    $or: [{"static": false}, {"static": {$exists: false}}],
                                     "assignTo": {$exists: true},
                                     "assignTo.implementor": {$exists: false},
                                     rejected: {$exists: false}
@@ -216,40 +220,23 @@ module.exports = function (args, app) {
                                         "organizations._id": req.logged.user.organizations._id,
                                         active: true,
                                         finished: false,
+                                        $or: [{"static": false}, {"static": {$exists: false}}],
                                         rejected: {$exists: true}
                                     }, 'text lat long').then(function (docs5) {
                                         data.rejectedreportltlng = docs5;
-                                        var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
-                                        // aggregate by category
-                                        return Post.aggregate([
-                                            {
-                                                $match: {
-                                                    $and: [
-                                                        {active: true},
-                                                        {"organizations._id": orgid}
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                $group: {
-                                                    _id: '$categories._id',
-                                                    sum: {$sum: 1}
-                                                }
-                                            },
-                                            {
-                                                $lookup: {
-                                                    "from": "categories",
-                                                    "localField": "_id",
-                                                    "foreignField": "_id",
-                                                    "as": "category"
-                                                }
-                                            },
-                                        ]).then(function (docs6) {
-                                            data.categoryagg = docs6;
-
-                                            // aggregate by month
-                                            var currentYear = new Date();
-
+                                        
+                                        // incoming reports
+                                        return Post.find({
+                                            "organizations._id": req.logged.user.organizations._id,
+                                            active: true,
+                                            finished: false,
+                                            $or: [{"static": false}, {"static": {$exists: false}}],
+                                            "assignTo": {$exists: false},
+                                            rejected: {$exists: false}
+                                        }, 'text lat long').then(function (docs6) {
+                                            data.incomingreportltlng = docs6;
+                                            var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
+                                            // aggregate by category
                                             return Post.aggregate([
                                                 {
                                                     $match: {
@@ -261,45 +248,94 @@ module.exports = function (args, app) {
                                                 },
                                                 {
                                                     $group: {
-                                                        _id: {year: {$year: currentYear}, month: {$month: "$createdAt"}},
+                                                        _id: '$categories._id',
                                                         sum: {$sum: 1}
                                                     }
-                                                }
-                                            ])
-                                            .then(function (doc5) {
-                                                var aggData = [];
-                                                // before injecting the data, set other month values with 0
-
-                                                // loop through months
-                                                for (m = 1; m <= 12; m++) {
-                                                    var monthExist = doc5.filter(function (obj) {
-                                                        return obj._id.month == m;
-                                                    });
-                                                    if (monthExist.length === 0) {
-                                                        aggData.push({
-                                                            _id: {
-                                                                month: m,
-                                                                year: currentYear.getFullYear()
-                                                            },
-                                                            sum: 0
-                                                        });
-                                                    } else {
-                                                        aggData.push(monthExist[0]);
+                                                },
+                                                {
+                                                    $lookup: {
+                                                        "from": "categories",
+                                                        "localField": "_id",
+                                                        "foreignField": "_id",
+                                                        "as": "category"
                                                     }
-                                                }
-                                                data.monthlyreports = aggData;
-
-                                                return finalfunc(res, data);
-
+                                                },
+                                            ]).then(function (docs7) {
+                                                data.categoryagg = docs7;
+    
+                                                // aggregate by month
+                                                var currentYear = new Date();
+                                                var lowerLimit = new Date(currentYear.getFullYear()-1, currentYear.getMonth()+1, 0, 23, 59, 59);
+                                                return Post.aggregate([
+                                                    {
+                                                        $match: {
+                                                            $and: [
+                                                                {createdAt: { $lt: currentYear, $gt: lowerLimit }}, // Get results from start of current month to current time.
+                                                                {active: true},
+                                                                {"organizations._id": orgid}
+                                                            ]
+                                                        }
+                                                    },
+                                                    {
+                                                        $group: {
+                                                            _id: {year: {$year: "$createdAt"}, month: {$month: "$createdAt"}},
+                                                            sum: {$sum: 1}
+                                                        }
+                                                    }
+                                                ])
+                                                .then(function (doc8) {
+                                                    var aggData = [];
+                                                    // before injecting the data, set other month values with 0
+    
+                                                    // loop through months
+                                                    for (m = 1; m <= 12; m++) {
+                                                        var realM;    
+                                                        var realYear;
+                                                        
+                                                        if((m+currentYear.getMonth()+1) > 12){
+                                                            // so if the month offset is bigger than 12, set back to current month year; 
+                                                            realM = currentYear.getMonth()+1;
+                                                            realYear = currentYear.getFullYear();
+                                                        } else {
+                                                            // if not, then set month + offset and set in previous year
+                                                            realM = m+currentYear.getMonth()+1;
+                                                            realYear = currentYear.getFullYear()-1;
+                                                        }
+                                                        var monthExist = doc8.filter(function (obj) {
+                                                            return obj._id.month == realM;
+                                                        });
+                                                        if (monthExist.length === 0) {
+                                                            aggData.push({
+                                                                _id: {
+                                                                    month: realM,
+                                                                    year: realYear
+                                                                },
+                                                                sum: 0
+                                                            });
+                                                        } else {
+                                                            aggData.push(monthExist[0]);
+                                                        }
+                                                    }
+                                                    data.monthlyreports = aggData;
+                                                    var monthOffset = currentYear.getMonth()+1 > 11 ? 0 : currentYear.getMonth()+1;  
+                                                    data.monthlyreportoffset = monthOffset;
+                                                    return finalfunc(res, data);
+    
+                                                }).catch(function (e) { 
+                                                    console.log('error at query 8');
+                                                    return errfunc(res, e);
+                                                });
+    
                                             }).catch(function (e) {
                                                 console.log('error at query 7');
-                                                return errfunc(res, e);
+                                                errfunc(res, e);
                                             });
-
-                                        }).catch(function (e) {
+                                        })
+                                        .catch(function(e){
                                             console.log('error at query 6');
                                             errfunc(res, e);
                                         });
+                                        
                                     }).catch(function (e) {
                                         console.log('error at query 5');
                                         errfunc(res, e);
@@ -423,8 +459,13 @@ module.exports = function (args, app) {
                     break;
 
                 case "monthlyreports":
-                    var currentYear = new Date().getFullYear();
+                    var currentDate = new Date();
+                    var currentYear = currentDate.getFullYear();
                     var m = parseInt(req.param('m'));
+                    if(m > currentDate.getMonth()){
+                        // this means the client has requested month ahead of current month, which means it's in the previous year
+                        currentYear = currentYear-1; 
+                    }
                     var Post = Collection['posts'];
                     var query = {
                         "organizations._id": req.logged.user.organizations._id,
@@ -462,11 +503,13 @@ module.exports = function (args, app) {
                     })
                     .populate({path: 'users._id', select: 'name'}).populate({path: 'media._ids', select: 'directory type'})
                     .populate({path: 'statuses.steps._id', select: 'procedures._id name'})
+                    .populate({path: 'statuses.media._id', select: 'directory'})
                     .then(function (doc) {
                         if (doc.statuses.length > 0) {
                             var Step = Collection['steps'];
                             Step.find({
-                                "procedures._id": doc.statuses[0].steps._id.procedures._id
+                                "procedures._id": doc.statuses[0].steps._id.procedures._id,
+                                active: true
                             })
                             .populate({path: 'procedures._id', select: 'name'})
                             .sort({stepNumber: 1})

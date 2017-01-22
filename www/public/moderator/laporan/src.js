@@ -71,35 +71,30 @@ function getNextReport() {
                         $('#carousel-laporan .carousel-inner').html('');
                         var medias = '';
                         for (i = 0; i < nextreport.media._ids.length; i++) {
+                            
+                            var activeToggle = '';
                             if (i == 0) {
-                                if (nextreport.media._ids[i].type === "video/mp4") {
-                                    medias += '<div class="item active">' +
-                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                        '<source src="/img/post/' + nextreport.media._ids[i].directory + '" type="video/mp4">' +
-                                        'Your browser does not support HTML5 video.' +
-                                        '</video>' +
-                                        '</div>';
-                                } else {
-                                    medias += '<div class="item active">' +
-                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + nextreport.media._ids[i].directory + '">' +
-                                        '</div>';
-                                }
-
-                            } else {
-                                if (nextreport.media._ids[i].type === "video/mp4") {
-                                    medias += '<div class="item">' +
-                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                        '<source src="/img/post/' + nextreport.media._ids[i].directory + '" type="video/mp4">' +
-                                        'Your browser does not support HTML5 video.' +
-                                        '</video>' +
-                                        '</div>';
-                                } else {
-                                    medias += '<div class="item">' +
-                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + nextreport.media._ids[i].directory + '">' +
-                                        '</div>';
-                                }
-
+                                activeToggle = ' active';
                             }
+                            
+                            if (nextreport.media._ids[i].type === "video/mp4") {
+                                medias += '<div class="item'+activeToggle+'">' +
+                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
+                                        '<source src="/img/post/' + nextreport.media._ids[i].directory + '" type="video/mp4">' +
+                                        'Your browser does not support HTML5 video.' +
+                                        '</video>' +
+                                        '</div>';
+                            } else {
+                                medias += '<div class="item'+activeToggle+' img-preview">' +
+                                    '<a href="/img/post/' + nextreport.media._ids[i].directory + '" title="">'+
+                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + nextreport.media._ids[i].directory + '">' +
+                                    '</a>'+
+                                    
+                                    '</div>';
+                                    
+                            }
+                            
+                            
                         }
                         $('#carousel-laporan .carousel-inner').html(medias);
                     }
@@ -414,34 +409,26 @@ function getAllreports() {
                                         $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html('');
                                         var medias = '';
                                         for (i = 0; i < detailreport.media._ids.length; i++) {
+                                            var activeToggle = '';
                                             if (i == 0) {
-                                                if (detailreport.media._ids[i].type === "video/mp4") {
-                                                    medias += '<div class="item active">' +
-                                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                                        '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
-                                                        'Your browser does not support HTML5 video.' +
-                                                        '</video>' +
-                                                        '</div>';
-                                                } else {
-                                                    medias += '<div class="item active">' +
-                                                        '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + detailreport.media._ids[i].directory + '">' +
-                                                        '</div>';
-                                                }
-
+                                                activeToggle = ' active';
+                                            }
+                                            
+                                            if (detailreport.media._ids[i].type === "video/mp4") {
+                                                medias += '<div class="item'+activeToggle+'">' +
+                                                    '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
+                                                    '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
+                                                    'Your browser does not support HTML5 video.' +
+                                                    '</video>' +
+                                                    '</div>';
                                             } else {
-                                                if (detailreport.media._ids[i].type === "video/mp4") {
-                                                    medias += '<div class="item">' +
-                                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                                        '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
-                                                        'Your browser does not support HTML5 video.' +
-                                                        '</video>' +
-                                                        '</div>';
-                                                } else {
-                                                    medias += '<div class="item">' +
+                                                medias += '<div class="item'+activeToggle+' img-preview">' +
+                                                    '<a href="/img/post/' + detailreport.media._ids[i].directory + '" title="">'+
                                                         '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + detailreport.media._ids[i].directory + '">' +
-                                                        '</div>';
-                                                }
-
+                                                    '</a>'+
+                                                    
+                                                    '</div>';
+                                                    
                                             }
                                         }
                                         $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html(medias);
@@ -476,11 +463,30 @@ function getAllreports() {
                                         '<div class="timeline timeline-line-dotted">';
                                     for (var i = 0; i < steps.length; i++) {
                                         if (detailreport.statuses[i] !== undefined) {
+                                            var imagepanel = '';
+                                            var remarktext = '';
+                                            
+                                            if(detailreport.statuses[i].hasOwnProperty("media")){
+                                                imagepanel = '<div class="panel img-preview">'+
+                                                        '<a href="/img/post/' + detailreport.statuses[i].media._id.directory + '" title="">'+
+                                                            '<img src="/img/post/' + detailreport.statuses[i].media._id.directory + '" alt="">'+
+                                                        '</a>'+
+                                                    '</div>';
+                                            }
+                                            if(detailreport.statuses[i].hasOwnProperty("remark")){
+                                                remarktext = '<div class="well well-sm">'+
+                                                '<h3>Remark :</h3>'+
+                                                detailreport.statuses[i].remark +
+                                            '</div>';
+                                            }
+                                            
                                             if (i == detailreport.statuses.length - 1) {
                                                 if(detailreport.finished){
                                                     var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                    var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
                                                     var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-    
+                                                    var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+                
                                                     bodyel2 += '<span class="timeline-label">' +
                                                         '<span class="label label-primary">' + dateString + '</span>' +
                                                         '</span>' +
@@ -494,16 +500,20 @@ function getAllreports() {
                                                         '</div>' +
                                                         '<div class="timeline-body">' +
                                                         '<p>' + steps[i].description + '</p>' +
+                                                        imagepanel +
+                                                        '<p>&nbsp;</p>'+
+                                                        remarktext +
                                                         '</div>' +
+                                                        
                                                         '<div class="timeline-footer">' +
-                                                        '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                                        '<p class="text-right">finished on ' + dateString2 + '</p>' +
                                                         '</div>' +
                                                         '</div>' +
                                                         '</div>';
                                                 } else {
                                                     var dateori = new Date(detailreport.statuses[i].createdAt);
                                                     var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-    
+                
                                                     bodyel2 += '<span class="timeline-label">' +
                                                         '<span class="label label-primary">' + dateString + '</span>' +
                                                         '</span>' +
@@ -527,8 +537,10 @@ function getAllreports() {
                                                 
                                             } else {
                                                 var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
                                                 var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
+                                                var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+                
                                                 bodyel2 += '<span class="timeline-label">' +
                                                     '<span class="label label-primary">' + dateString + '</span>' +
                                                     '</span>' +
@@ -542,9 +554,12 @@ function getAllreports() {
                                                     '</div>' +
                                                     '<div class="timeline-body">' +
                                                     '<p>' + steps[i].description + '</p>' +
+                                                    imagepanel +
+                                                    '<p>&nbsp;</p>'+
+                                                    remarktext +
                                                     '</div>' +
                                                     '<div class="timeline-footer">' +
-                                                    '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
+                                                    '<p class="text-right">finished on ' + dateString2 + '</p>' +
                                                     '</div>' +
                                                     '</div>' +
                                                     '</div>';
@@ -688,4 +703,12 @@ $(document).ready(function () {
     // get all report data
     getAllreports();
 
+    $('body').on('click', '.img-preview', function(event){
+        event = event || window.event;
+        var target = event.target || event.srcElement,
+            link = target.src ? target.parentNode : target,
+            options = {index: link, event: event},
+            links = this.getElementsByTagName('a');
+        blueimp.Gallery(links, options);
+    })
 });

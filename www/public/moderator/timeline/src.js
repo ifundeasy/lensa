@@ -45,9 +45,12 @@ function loadTimeline() {
         success: function (data, status, xhr) {
             var reportData = data.data;
             console.log(reportData);
-            for (q = 0; q < reportData.length; q++) {
+            for (var q = 0; q < reportData.length; q++) {
                 var timeline_el = '';
-                var author = reportData[q].users._id.name.last === null ? reportData[q].users._id.name.first : reportData[q].users._id.name.first + ' ' + reportData[q].users._id.name.last;
+                
+                ///// this piece of code is used by old template /////
+                
+                /*var author = reportData[q].users._id.name.last === null ? reportData[q].users._id.name.first : reportData[q].users._id.name.first + ' ' + reportData[q].users._id.name.last;
                 var reportStatus = '';
                 if (reportData[q].hasOwnProperty('assignTo')) {
                     if (reportData[q].assignTo.hasOwnProperty('users')) {
@@ -68,46 +71,35 @@ function loadTimeline() {
                         // pending
                         reportStatus = '<span class="badge badge-info">Pending</span>';
                     }
-                }
+                }*/
+                
                 var title = '';
                 if (reportData[q].hasOwnProperty('title') && reportData[q].title !== '') {
                     title = '<strong>' + reportData[q].title + '</strong>';
                 } else {
-                    title = '';
+                    title = 'Untitled';
                 }
                 var medias = '';
                 if (reportData[q].media._ids.length > 0) {
                     medias = '<div class="carousel slide" id="carousel-' + reportData[q]._id + '">' +
                         '<div class="carousel-inner">';
-                    for (lol = 0; lol < reportData[q].media._ids.length; lol++) {
+                    for (var lol = 0; lol < reportData[q].media._ids.length; lol++) {
+                        var activeToggle = '';
                         if (lol == 0) {
-                            if (reportData[q].media._ids[lol].type === "video/mp4") {
-                                medias += '<div class="item active">' +
-                                    '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                    '<source src="/img/post/' + reportData[q].media._ids[lol].directory + '" type="video/mp4">' +
-                                    'Your browser does not support HTML5 video.' +
-                                    '</video>' +
-                                    '</div>';
-                            } else {
-                                medias += '<div class="item active">' +
-                                    '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + reportData[q].media._ids[lol].directory + '">' +
-                                    '</div>';
-                            }
-
+                            activeToggle = ' active';
+                        }
+                        
+                        if (reportData[q].media._ids[lol].type === "video/mp4") {
+                            medias += '<div class="item'+activeToggle+'">' +
+                                '<video class="video-report" style="height: 200px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 20px; padding-right: 20px;" controls>' +
+                                '<source src="/img/post/' + reportData[q].media._ids[lol].directory + '" type="video/mp4">' +
+                                'Your browser does not support HTML5 video.' +
+                                '</video>' +
+                                '</div>';
                         } else {
-                            if (reportData[q].media._ids[lol].type === "video/mp4") {
-                                medias += '<div class="item">' +
-                                    '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                    '<source src="/img/post/' + reportData[q].media._ids[lol].directory + '" type="video/mp4">' +
-                                    'Your browser does not support HTML5 video.' +
-                                    '</video>' +
-                                    '</div>';
-                            } else {
-                                medias += '<div class="item">' +
-                                    '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + reportData[q].media._ids[lol].directory + '">' +
-                                    '</div>';
-                            }
-
+                            medias += '<div class="item'+activeToggle+'">' +
+                                '<img alt="image" style="height: 200px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + reportData[q].media._ids[lol].directory + '">' +
+                                '</div>';
                         }
                     }
 
@@ -120,7 +112,25 @@ function loadTimeline() {
                         '</a>' +
                         '</div>';
                 }
-                timeline_el += '<div class="social-feed-box">' +
+                timeline_el += '<div class="vertical-timeline-block">'+
+                        '<div class="vertical-timeline-icon navy-bg">'+
+                            '<i class="fa"></i>'+
+                        '</div>'+
+                        '<div class="vertical-timeline-content">'+
+                            '<h2>'+title+'</h2>'+
+                            '<p>'+reportData[q].text.substr(0,140)+'..'+
+                            '</p>'+
+                            medias +
+                            '<div style="margin-top: 20px;"><a reportid="' + reportData[q]._id + '" class="timeline-detail-btn btn btn-sm btn-primary">Detail</a></div>'+
+                            '<span class="vertical-date">'+
+                                reportData[q].createdAt.substr(0, reportData[q].createdAt.indexOf('T')) +' <br>'+
+                                '<small>'+ reportData[q].createdAt.substr(reportData[q].createdAt.indexOf('T') + 1, 8) +'</small>'+
+                            '</span>'+
+                        '</div>'+
+                    '</div>';
+                    
+                    ///// this piece of code is used by old template /////
+                    /*var timeline_el = '<div class="social-feed-box">' +
 
                     '<div class="pull-right social-action dropdown">' +
                     '<button data-toggle="dropdown" class="dropdown-toggle btn-white">' +
@@ -175,13 +185,16 @@ function loadTimeline() {
                     '</div>' +
                     '</div>' +
                     '</div>' +
-                    '</div>';
+                    '</div>';*/
 
-                if ($('#left-row').children().length > $('#right-row').children().length) {
+                $('#vertical-timeline').append(timeline_el);
+                
+                ///// this piece of code is used by old template where there are two columns ///// 
+                /*if ($('#left-row').children().length > $('#right-row').children().length) {
                     $('#right-row').append(timeline_el);
                 } else {
                     $('#left-row').append(timeline_el);
-                }
+                }*/
 
             }
             if (reportData.length === 0) {
@@ -202,13 +215,7 @@ $(document).ready(function () {
 
     loadTimeline();
 
-    $('#btn-loadmore').off('click');
-    $('#btn-loadmore').on('click', function () {
-        $(this).toggleClass('disabled');
-        loadTimeline();
-    });
-
-    $('#left-row, #right-row').on('click', '.timeline-detail-btn', function () {
+    $('#vertical-timeline').on('click', '.timeline-detail-btn', function () {
         var me = $(this);
         var reportid = me.attr('reportid');
 
@@ -246,34 +253,26 @@ $(document).ready(function () {
                             $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html('');
                             var medias = '';
                             for (i = 0; i < detailreport.media._ids.length; i++) {
+                                var activeToggle = '';
                                 if (i == 0) {
-                                    if (detailreport.media._ids[i].type === "video/mp4") {
-                                        medias += '<div class="item active">' +
-                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                            '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
-                                            'Your browser does not support HTML5 video.' +
-                                            '</video>' +
-                                            '</div>';
-                                    } else {
-                                        medias += '<div class="item active">' +
-                                            '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + detailreport.media._ids[i].directory + '">' +
-                                            '</div>';
-                                    }
-
+                                    activeToggle = ' active';
+                                }
+                                
+                                if (detailreport.media._ids[i].type === "video/mp4") {
+                                    medias += '<div class="item'+activeToggle+'">' +
+                                        '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
+                                        '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
+                                        'Your browser does not support HTML5 video.' +
+                                        '</video>' +
+                                        '</div>';
                                 } else {
-                                    if (detailreport.media._ids[i].type === "video/mp4") {
-                                        medias += '<div class="item">' +
-                                            '<video style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; padding-left: 100px; padding-right: 100px;" controls>' +
-                                            '<source src="/img/post/' + detailreport.media._ids[i].directory + '" type="video/mp4">' +
-                                            'Your browser does not support HTML5 video.' +
-                                            '</video>' +
-                                            '</div>';
-                                    } else {
-                                        medias += '<div class="item">' +
+                                    medias += '<div class="item'+activeToggle+' img-preview">' +
+                                        '<a href="/img/post/' + detailreport.media._ids[i].directory + '" title="">'+
                                             '<img alt="image" style="height: 300px; width: auto; display: block; margin-left: auto; margin-right: auto; margin-bottom: 0px !important;" class="img-responsive" src="/img/post/' + detailreport.media._ids[i].directory + '">' +
-                                            '</div>';
-                                    }
-
+                                        '</a>'+
+                                        
+                                        '</div>';
+                                        
                                 }
                             }
                             $(modalselector2 + ' #carousel-detail-modal .carousel-inner').html(medias);
@@ -424,4 +423,13 @@ $(document).ready(function () {
             }
         });
     });
+    
+    $('body').on('click', '.img-preview', function(event){
+        event = event || window.event;
+        var target = event.target || event.srcElement,
+            link = target.src ? target.parentNode : target,
+            options = {index: link, event: event},
+            links = this.getElementsByTagName('a');
+        blueimp.Gallery(links, options);
+    })
 });

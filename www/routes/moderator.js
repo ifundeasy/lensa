@@ -101,12 +101,15 @@ module.exports = function (args, app) {
                         }, 'text lat long').then(function (doc4) {
                             data.rejectedreportltlng = doc4;
                             var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
-                            var currentYear = new Date();
 
-                            Post.aggregate([
+                            // aggregate by month
+                            var currentYear = new Date();
+                            var lowerLimit = new Date(currentYear.getFullYear()-1, currentYear.getMonth()+1, 0, 23, 59, 59);
+                            return Post.aggregate([
                                 {
                                     $match: {
                                         $and: [
+                                            {createdAt: { $lt: currentYear, $gt: lowerLimit }}, // Get results from start of current month to current time.
                                             {active: true},
                                             {"organizations._id": orgid}
                                         ]
@@ -114,7 +117,7 @@ module.exports = function (args, app) {
                                 },
                                 {
                                     $group: {
-                                        _id: {year: {$year: currentYear}, month: {$month: "$createdAt"}},
+                                        _id: {year: {$year: "$createdAt"}, month: {$month: "$createdAt"}},
                                         sum: {$sum: 1}
                                     }
                                 }
@@ -125,14 +128,26 @@ module.exports = function (args, app) {
 
                                 // loop through months
                                 for (m = 1; m <= 12; m++) {
+                                    var realM;    
+                                    var realYear;
+                                    
+                                    if((m+currentYear.getMonth()+1) > 12){
+                                        // so if the month offset is bigger than 12, set back to current month year; 
+                                        realM = currentYear.getMonth()+1;
+                                        realYear = currentYear.getFullYear();
+                                    } else {
+                                        // if not, then set month + offset and set in previous year
+                                        realM = m+currentYear.getMonth()+1;
+                                        realYear = currentYear.getFullYear()-1;
+                                    }
                                     var monthExist = doc5.filter(function (obj) {
-                                        return obj._id.month == m;
+                                        return obj._id.month == realM;
                                     });
                                     if (monthExist.length === 0) {
                                         aggData.push({
                                             _id: {
-                                                month: m,
-                                                year: currentYear.getFullYear()
+                                                month: realM,
+                                                year: realYear
                                             },
                                             sum: 0
                                         });
@@ -141,8 +156,9 @@ module.exports = function (args, app) {
                                     }
                                 }
                                 data.monthlyreports = aggData;
-
-                                finalfunc();
+                                var monthOffset = currentYear.getMonth()+1 > 11 ? 0 : currentYear.getMonth()+1;  
+                                data.monthlyreportoffset = monthOffset;
+                                return finalfunc(res, data);
 
                             }).catch(function (e) {
                                 errfunc(e);
@@ -287,6 +303,7 @@ module.exports = function (args, app) {
         })
         .populate({path: 'users._id', select: 'name'}).populate({path: 'media._ids', select: 'directory type'})
         .populate({path: 'statuses.steps._id', select: 'procedures._id name'})
+        .populate({path: 'statuses.media._id', select: 'directory'})
         .then(function (doc) {
             if (doc.statuses.length > 0) {
                 var Step = Collection['steps'];
@@ -332,8 +349,13 @@ module.exports = function (args, app) {
     });
 
     api.get('/monthlyreports', function (req, res, next) {
-        var currentYear = new Date().getFullYear();
+        var currentDate = new Date();
+        var currentYear = currentDate.getFullYear();
         var m = parseInt(req.param('m'));
+        if(m > currentDate.getMonth()){
+            // this means the client has requested month ahead of current month, which means it's in the previous year
+            currentYear = currentYear-1; 
+        }
         var Post = Collection['posts'];
         var query = {
             "organizations._id": req.logged.user.organizations._id,
