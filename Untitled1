@@ -15,9 +15,9 @@ dan ubah organisation_id untuk laporan2 yang bersangkutan dgn organisasi baru ts
 - Di modul organization (group superadmin): country, lat, long tidak bisa di-update. [DONE]
 - Timeline pake design kayak SOP (path style) [DONE]
 - Timeline progress dikasih gambar dan remark di tampilannya. [DONE]
-- Timestamp di modal Timeline Progress masih gak enak dibaca.
+- Timestamp di modal Timeline Progress masih gak enak dibaca. [DONE]
 - Detail report, tambahin info ttg kapan di-reject, kapan di-assign, dll
-- Susunan total laporan di dashboard admin: Incoming Reports, Assigned Reports, Returned, Finished, Total Reports
+- Susunan total laporan di dashboard admin: Incoming Reports, Assigned Reports, Returned, Finished, Total Reports [DONE]
 - Laporan return, statusnya masih "assigned to admin" di halaman laporan detail [DONE]
 - Di laporan detail, kalau statusnya rejcted, tampilin alasan, user dan timestamp-nya.
 - Edit Profile

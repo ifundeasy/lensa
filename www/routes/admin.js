@@ -81,68 +81,102 @@ module.exports = function (args, app) {
                     var orgid = mongoose.Types.ObjectId(req.logged.user.organizations._id);
                     var rolesid = mongoose.Types.ObjectId(req.logged.user.roles._id);
                     
-                    // aggregate by month
-                    var currentYear = new Date();
-                    var lowerLimit = new Date(currentYear.getFullYear()-1, currentYear.getMonth()+1, 0, 23, 59, 59);
-                    Post.aggregate([
-                        {
-                            $match: {
-                                $and: [
-                                    {createdAt: { $lt: currentYear, $gt: lowerLimit }},
-                                    {active: true},
-                                    {"organizations._id": orgid},
-                                    {"assignTo.roles._id": rolesid},
-                                ]
-                            }
-                        },
-                        {
-                            $group: {
-                                _id: {year: {$year: "$createdAt"}, month: {$month: "$createdAt"}},
-                                sum: {$sum: 1}
-                            }
-                        }
-                    ])
-                    .then(function (doc5) {
-                        var aggData = [];
-                        // before injecting the data, set other month values with 0
-
-                        // loop through months
-                        for (m = 1; m <= 12; m++) {
-                            var realM;    
-                            var realYear;
+                    // all incoming reports that yet to be reviewed
+                    Post.find({
+                        $and: [
+                            {"organizations._id": req.logged.user.organizations._id},
+                            {active: true},
+                            {"assignTo.roles._id": req.logged.user.roles._id},
+                            {"assignTo.implementor": {$exists: false}},
+                            {returned: {$exists: false}},
+                            {finished: false}
+                        ]
+                    }, 'text lat long').then(function(doc5){
+                        data.incomingreportltlng = doc5;
+                        
+                        // all incoming reports that has been assigned
+                        Post.find({
+                            $and: [
+                                {"organizations._id": req.logged.user.organizations._id},
+                                {active: true},
+                                {"assignTo.roles._id": req.logged.user.roles._id},
+                                {"assignTo.implementor": {$exists: true}},
+                                {returned: {$exists: false}},
+                                {finished: false}
+                            ]
+                        }, 'text lat long').then(function(doc6){
+                            data.assignedreportltlng = doc6;
                             
-                            if((m+currentYear.getMonth()+1) > 12){
-                                // so if the month offset is bigger than 12, set back to current month year; 
-                                realM = currentYear.getMonth()+1;
-                                realYear = currentYear.getFullYear();
-                            } else {
-                                // if not, then set month + offset and set in previous year
-                                realM = m+currentYear.getMonth()+1;
-                                realYear = currentYear.getFullYear()-1;
-                            }
-                            var monthExist = doc5.filter(function (obj) {
-                                return obj._id.month == realM;
+                            // aggregate by month
+                            var currentYear = new Date();
+                            var lowerLimit = new Date(currentYear.getFullYear()-1, currentYear.getMonth()+1, 0, 23, 59, 59);
+                            Post.aggregate([
+                                {
+                                    $match: {
+                                        $and: [
+                                            {createdAt: { $lt: currentYear, $gt: lowerLimit }},
+                                            {active: true},
+                                            {"organizations._id": orgid},
+                                            {"assignTo.roles._id": rolesid},
+                                        ]
+                                    }
+                                },
+                                {
+                                    $group: {
+                                        _id: {year: {$year: "$createdAt"}, month: {$month: "$createdAt"}},
+                                        sum: {$sum: 1}
+                                    }
+                                }
+                            ])
+                            .then(function (doc7) {
+                                var aggData = [];
+                                // before injecting the data, set other month values with 0
+        
+                                // loop through months
+                                for (var m = 1; m <= 12; m++) {
+                                    var realM;    
+                                    var realYear;
+                                    
+                                    if((m+currentYear.getMonth()+1) > 12){
+                                        // so if the month offset is bigger than 12, set back to current month year; 
+                                        realM = currentYear.getMonth()+1;
+                                        realYear = currentYear.getFullYear();
+                                    } else {
+                                        // if not, then set month + offset and set in previous year
+                                        realM = m+currentYear.getMonth()+1;
+                                        realYear = currentYear.getFullYear()-1;
+                                    }
+                                    var monthExist = doc7.filter(function (obj) {
+                                        return obj._id.month == realM;
+                                    });
+                                    if (monthExist.length === 0) {
+                                        aggData.push({
+                                            _id: {
+                                                month: realM,
+                                                year: realYear
+                                            },
+                                            sum: 0
+                                        });
+                                    } else {
+                                        aggData.push(monthExist[0]);
+                                    }
+                                }
+                                data.monthlyreports = aggData;
+                                var monthOffset = currentYear.getMonth()+1 > 11 ? 0 : currentYear.getMonth()+1;  
+                                data.monthlyreportoffset = monthOffset;
+                                return finalfunc(res, data);
+        
+                            }).catch(function (e) {
+                                errfunc(e);
                             });
-                            if (monthExist.length === 0) {
-                                aggData.push({
-                                    _id: {
-                                        month: realM,
-                                        year: realYear
-                                    },
-                                    sum: 0
-                                });
-                            } else {
-                                aggData.push(monthExist[0]);
-                            }
-                        }
-                        data.monthlyreports = aggData;
-                        var monthOffset = currentYear.getMonth()+1 > 11 ? 0 : currentYear.getMonth()+1;  
-                        data.monthlyreportoffset = monthOffset;
-                        return finalfunc(res, data);
-
+                            
+                        }).catch(function (e) {
+                            errfunc(e);
+                        });
                     }).catch(function (e) {
                         errfunc(e);
                     });
+                    
 
                 }).catch(function (e) {
                     errfunc(e);

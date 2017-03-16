@@ -382,6 +382,8 @@ function loadDashboardData(){
                 $('#totalcount').html(dashboardData.allreportltlng.length);
                 $('#returnedcount').html(dashboardData.returnedreportltlng.length);
                 $('#finishedcount').html(dashboardData.finishedreportltlng.length);
+                $('#incomingcount').html(dashboardData.incomingreportltlng.length);
+                $('#assignedcount').html(dashboardData.assignedreportltlng.length);
                 orglat = dashboardData.orglocationlat;
                 orglong = dashboardData.orglocationlong;
                 

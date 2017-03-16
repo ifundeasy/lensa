@@ -299,117 +299,145 @@ $(document).ready(function () {
                     $(modalselector2 + ' .pr-timeline-btn').off('click');
                     $(modalselector2 + ' .pr-timeline-btn').on('click', function (e) {
                         var bodyel2 = '<div class="row">' +
-                            '<h2>SOP : ' + steps[0].procedures._id.name + '</h2>' +
-                            '<div class="timeline timeline-line-dotted">';
-                        for (i = 0; i < steps.length; i++) {
-                            if (detailreport.statuses[i] !== undefined) {
-                                if (i == detailreport.statuses.length - 1) {
-                                    if(detailreport.finished){
-                                        var dateori = new Date(detailreport.statuses[i].createdAt);
-                                        var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
-                                        bodyel2 += '<span class="timeline-label">' +
-                                            '<span class="label label-primary">' + dateString + '</span>' +
-                                            '</span>' +
-                                            '<div class="timeline-item">' +
-                                            '<div class="timeline-point timeline-point-success">' +
-                                            '<i class="fa fa-check"></i>' +
-                                            '</div>' +
-                                            '<div class="timeline-event">' +
-                                            '<div class="timeline-heading">' +
-                                            '<h4>' + steps[i].name + '</h4>' +
-                                            '</div>' +
-                                            '<div class="timeline-body">' +
-                                            '<p>' + steps[i].description + '</p>' +
-                                            '</div>' +
-                                            '<div class="timeline-footer">' +
-                                            '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
-                                            '</div>' +
-                                            '</div>' +
+                                        '<h2>SOP : ' + steps[0].procedures._id.name + '</h2>' +
+                                        '<div class="timeline timeline-line-dotted">';
+                                    for (var i = 0; i < steps.length; i++) {
+                                        if (detailreport.statuses[i] !== undefined) {
+                                            var imagepanel = '';
+                                            var remarktext = '';
+                                            
+                                            if(detailreport.statuses[i].hasOwnProperty("media")){
+                                                imagepanel = '<div class="panel img-preview">'+
+                                                        '<a href="/img/post/' + detailreport.statuses[i].media._id.directory + '" title="">'+
+                                                            '<img src="/img/post/' + detailreport.statuses[i].media._id.directory + '" alt="">'+
+                                                        '</a>'+
+                                                    '</div>';
+                                            }
+                                            if(detailreport.statuses[i].hasOwnProperty("remark")){
+                                                remarktext = '<div class="well well-sm">'+
+                                                '<h3>Remark :</h3>'+
+                                                detailreport.statuses[i].remark +
                                             '</div>';
-                                    } else {
-                                        var dateori = new Date(detailreport.statuses[i].createdAt);
-                                        var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
-
-                                        bodyel2 += '<span class="timeline-label">' +
-                                            '<span class="label label-primary">' + dateString + '</span>' +
-                                            '</span>' +
-                                            '<div class="timeline-item">' +
-                                            '<div class="timeline-point timeline-point-warning">' +
-                                            '<i class="fa fa-clock-o"></i>' +
-                                            '</div>' +
-                                            '<div class="timeline-event">' +
-                                            '<div class="timeline-heading">' +
-                                            '<h4>' + steps[i].name + '</h4>' +
-                                            '</div>' +
-                                            '<div class="timeline-body">' +
-                                            '<p>' + steps[i].description + '</p>' +
-                                            '</div>' +
-                                            '<div class="timeline-footer">' +
-                                            '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
-                                            '</div>' +
-                                            '</div>' +
-                                            '</div>';
+                                            }
+                                            
+                                            if (i == detailreport.statuses.length - 1) {
+                                                if(detailreport.finished){
+                                                    var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                    var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
+                                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+                                                    var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+                
+                                                    bodyel2 += '<span class="timeline-label">' +
+                                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                                        '</span>' +
+                                                        '<div class="timeline-item">' +
+                                                        '<div class="timeline-point timeline-point-success">' +
+                                                        '<i class="fa fa-check"></i>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-event">' +
+                                                        '<div class="timeline-heading">' +
+                                                        '<h4>' + steps[i].name + '</h4>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-body">' +
+                                                        '<p>' + steps[i].description + '</p>' +
+                                                        imagepanel +
+                                                        '<p>&nbsp;</p>'+
+                                                        remarktext +
+                                                        '</div>' +
+                                                        
+                                                        '<div class="timeline-footer">' +
+                                                        '<p class="text-right">finished on ' + dateString2 + '</p>' +
+                                                        '</div>' +
+                                                        '</div>' +
+                                                        '</div>';
+                                                } else {
+                                                    var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+                
+                                                    bodyel2 += '<span class="timeline-label">' +
+                                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                                        '</span>' +
+                                                        '<div class="timeline-item">' +
+                                                        '<div class="timeline-point timeline-point-warning">' +
+                                                        '<i class="fa fa-clock-o"></i>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-event">' +
+                                                        '<div class="timeline-heading">' +
+                                                        '<h4>' + steps[i].name + '</h4>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-body">' +
+                                                        '<p>' + steps[i].description + '</p>' +
+                                                        '</div>' +
+                                                        '<div class="timeline-footer">' +
+                                                        '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
+                                                        '</div>' +
+                                                        '</div>' +
+                                                        '</div>';
+                                                }
+                                                
+                                            } else {
+                                                var dateori = new Date(detailreport.statuses[i].createdAt);
+                                                var dateori2 = new Date(detailreport.statuses[i].finishedAt); 
+                                                var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
+                                                var dateString2 = (dateori2.getDate() < 9 ? "0" + dateori2.getDate() : dateori2.getDate()) + '-' + ((dateori2.getMonth() + 1) < 9 ? "0" + (dateori2.getMonth() + 1) : (dateori2.getMonth() + 1)) + '-' + dateori2.getFullYear() + ' ' + (dateori2.getHours() < 9 ? "0" + dateori2.getHours() : dateori2.getHours()) + ':' + (dateori2.getMinutes() < 9 ? "0" + dateori2.getMinutes() : dateori2.getMinutes()) + ':' + (dateori2.getSeconds() < 9 ? "0" + dateori2.getSeconds() : dateori2.getSeconds());
+                
+                                                bodyel2 += '<span class="timeline-label">' +
+                                                    '<span class="label label-primary">' + dateString + '</span>' +
+                                                    '</span>' +
+                                                    '<div class="timeline-item">' +
+                                                    '<div class="timeline-point timeline-point-success">' +
+                                                    '<i class="fa fa-check"></i>' +
+                                                    '</div>' +
+                                                    '<div class="timeline-event">' +
+                                                    '<div class="timeline-heading">' +
+                                                    '<h4>' + steps[i].name + '</h4>' +
+                                                    '</div>' +
+                                                    '<div class="timeline-body">' +
+                                                    '<p>' + steps[i].description + '</p>' +
+                                                    imagepanel +
+                                                    '<p>&nbsp;</p>'+
+                                                    remarktext +
+                                                    '</div>' +
+                                                    '<div class="timeline-footer">' +
+                                                    '<p class="text-right">finished on ' + dateString2 + '</p>' +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '</div>';
+                                            }
+                                        } else {
+                                            bodyel2 += '<div class="timeline-item">' +
+                                                '<div class="timeline-point timeline-point-danger">' +
+                                                '<i class="fa fa-times"></i>' +
+                                                '</div>' +
+                                                '<div class="timeline-event">' +
+                                                '<div class="timeline-heading">' +
+                                                '<h4>' + steps[i].name + '</h4>' +
+                                                '</div>' +
+                                                '<div class="timeline-body">' +
+                                                '<p>' + steps[i].description + '</p>' +
+                                                '</div>' +
+                                                '<div class="timeline-footer">' +
+                                                '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
+                                                '</div>' +
+                                                '</div>' +
+                                                '</div>';
+                                        }
                                     }
-                                    
-                                } else {
-                                    var dateori = new Date(detailreport.statuses[i].createdAt);
-                                    var dateString = (dateori.getDate() < 9 ? "0" + dateori.getDate() : dateori.getDate()) + '-' + ((dateori.getMonth() + 1) < 9 ? "0" + (dateori.getMonth() + 1) : (dateori.getMonth() + 1)) + '-' + dateori.getFullYear() + ' ' + (dateori.getHours() < 9 ? "0" + dateori.getHours() : dateori.getHours()) + ':' + (dateori.getMinutes() < 9 ? "0" + dateori.getMinutes() : dateori.getMinutes()) + ':' + (dateori.getSeconds() < 9 ? "0" + dateori.getSeconds() : dateori.getSeconds());
 
                                     bodyel2 += '<span class="timeline-label">' +
-                                        '<span class="label label-primary">' + dateString + '</span>' +
+                                        '<a class="btn btn-default" title="END">' +
+                                        '<i class="fa fa-fw fa-certificate"></i>' +
+                                        '</a>' +
                                         '</span>' +
-                                        '<div class="timeline-item">' +
-                                        '<div class="timeline-point timeline-point-success">' +
-                                        '<i class="fa fa-check"></i>' +
-                                        '</div>' +
-                                        '<div class="timeline-event">' +
-                                        '<div class="timeline-heading">' +
-                                        '<h4>' + steps[i].name + '</h4>' +
-                                        '</div>' +
-                                        '<div class="timeline-body">' +
-                                        '<p>' + steps[i].description + '</p>' +
-                                        '</div>' +
-                                        '<div class="timeline-footer">' +
-                                        '<p class="text-right">finished on ' + detailreport.statuses[i].finishedAt + '</p>' +
-                                        '</div>' +
                                         '</div>' +
                                         '</div>';
-                                }
-                            } else {
-                                bodyel2 += '<div class="timeline-item">' +
-                                    '<div class="timeline-point timeline-point-danger">' +
-                                    '<i class="fa fa-times"></i>' +
-                                    '</div>' +
-                                    '<div class="timeline-event">' +
-                                    '<div class="timeline-heading">' +
-                                    '<h4>' + steps[i].name + '</h4>' +
-                                    '</div>' +
-                                    '<div class="timeline-body">' +
-                                    '<p>' + steps[i].description + '</p>' +
-                                    '</div>' +
-                                    '<div class="timeline-footer">' +
-                                    '<p class="text-right">estimate: ' + steps[i].duration + ' hour(s)</p>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>';
-                            }
-                        }
 
-                        bodyel2 += '<span class="timeline-label">' +
-                            '<a class="btn btn-default" title="END">' +
-                            '<i class="fa fa-fw fa-certificate"></i>' +
-                            '</a>' +
-                            '</span>' +
-                            '</div>' +
-                            '</div>';
-
-                        modal3.setTitle('Progress Timeline');
-                        modal3.setBody(bodyel2).show();
-                        modal3.$buttons.OK.off("click");
-                        modal3.$buttons.OK.on("click", function () {
-                            modal3.hide();
-                        });
+                                    modal3.setTitle('Progress Timeline');
+                                    modal3.setBody(bodyel2).show();
+                                    modal3.$buttons.OK.off("click");
+                                    modal3.$buttons.OK.on("click", function () {
+                                        modal3.hide();
+                                    });
                     });
                 } else {
                     //TODO
